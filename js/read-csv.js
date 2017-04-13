@@ -43,7 +43,9 @@ function errorHandler(evt) {
 function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
-	var table = document.createElement("div");
+	var table = document.createElement("table");
+	var tableRows = [ document.createElement("td") , document.createElement("td") , document.createElement("td") , document.createElement("td") ];
+	var widths = [ 200 , 200 , 200 , 200 ];
 	var myMonth;
 	var myDay;
 	var myYear;
@@ -55,8 +57,9 @@ function drawOutput(lines){
 	var col_color;
 
 	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="ID") col_ID = j;
+		if (lines[0][j]=="id") col_ID = j;
 		if (lines[0][j]=="Task") col_task = j;
+		if (lines[0][j]=="Row") col_row = j;
 		if (lines[0][j]=="Due-Month") col_duemonth = j;
 		if (lines[0][j]=="Due-Day") col_dueday = j;
 		if (lines[0][j]=="Due-Year") col_dueyear = j;
@@ -157,8 +160,26 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);
 			}
 		}
-
-		table.appendChild(taskBlock);
+		var row = lines[i][col_row];
+		if (row<1) { row=0; }
+		tableRows[row].append(taskBlock);
+		widths[row]=widths[row]+300;
 	}
-	document.getElementById("output").appendChild(table);
+	for (k = 1 ; k<tableRows.length ; k++) {
+		var thisRow = document.createElement('tr');
+		tableRows[k].style.border = "thick solid #000000";
+		tableRows[k].style.minWidth = widths[row];
+		thisRow.append(tableRows[k]);
+		table.appendChild(thisRow);	
+	}
+	
+	var outerTable = document.createElement("table");
+	var oneRow = document.createElement("tr");
+	var leftCell = document.createElement("td");
+	leftCell.append(table)
+	oneRow.append(leftCell);	
+	tableRows[0].style.border = "thick solid #000000";
+	oneRow.append(tableRows[0]);	
+	outerTable.append(oneRow);
+	document.getElementById("output").append(outerTable);
 }
