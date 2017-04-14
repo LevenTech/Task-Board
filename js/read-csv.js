@@ -44,7 +44,7 @@ function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
-	var tableRows = [ [] , [] , [] , [] ];
+	var tableRows = [ [] ];
 	var rowNames = [ "MISC" ];
 	var myMonth;
 	var myDay;
@@ -78,7 +78,9 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
-		taskBlock.style.backgroundColor = lines[i][col_color];
+		var colorName = lines[i][col_color];
+		if (colorName=="") colorName = "LemonChiffon";
+		taskBlock.style.backgroundColor = colorName;
 
 		var name = document.createElement("b");
 		name.innerHTML = lines[i][col_task];
@@ -184,7 +186,10 @@ function drawOutput(lines){
 		}
 		var row = lines[i][col_row].toUpperCase();
 		if (row == "") row = "MISC";
-		if (rowNames.indexOf(row)==-1) rowNames.push(row);
+		if (rowNames.indexOf(row)==-1) {
+			rowNames.push(row);
+			tableRows.push([]);
+		}
 		row = rowNames.indexOf(row);
 		if (days_until_due<0 || days_until_due == "") {days_until_due = 999;}
 		var tableRowMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
