@@ -36,16 +36,15 @@ function processData(csv) {
 
 function errorHandler(evt) {
 	if(evt.target.error.name == "NotReadableError") {
-		alert("Canno't read file !");
+		alert("Cannot read file !");
 	}
 }
 
 function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
-	var table = document.createElement("table");
-	var tableRows = [ document.createElement("td") , document.createElement("td") , document.createElement("td") , document.createElement("td") ];
-	var widths = [ 200 , 200 , 200 , 200 ];
+	var table = document.createElement("div");
+	var tableRows = [ [] , [] , [] , []];
 	var myMonth;
 	var myDay;
 	var myYear;
@@ -57,7 +56,7 @@ function drawOutput(lines){
 	var col_color;
 
 	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="id") col_ID = j;
+		if (lines[0][j]=="TaskNum") col_ID = j;
 		if (lines[0][j]=="Task") col_task = j;
 		if (lines[0][j]=="Row") col_row = j;
 		if (lines[0][j]=="Due-Month") col_duemonth = j;
@@ -77,13 +76,7 @@ function drawOutput(lines){
 		
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
-		taskBlock.style.width = 250;
-		taskBlock.style.maxWidth = 250;
-		taskBlock.style.height = 150;
-		taskBlock.style.float = "left";
-		taskBlock.style.textAlign = "center";
-		taskBlock.style.padding = 10;
-		taskBlock.style.margin = 10;
+		taskBlock.className = "task-block"
 		taskBlock.style.backgroundColor = lines[i][col_color];
 
 		var name = document.createElement("b");
@@ -96,6 +89,9 @@ function drawOutput(lines){
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
+		
+		var days_until_start = "";
+		var days_until_due = "";
 
 		if (startDay>0) {
 			var startMonth=lines[i][col_startmonth]-1;
@@ -106,31 +102,42 @@ function drawOutput(lines){
 			var date1_ms = today.getTime();
 			var date2_ms = startDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
-			var difference_days = Math.ceil(difference_ms/one_day);
+			var days_until_start = Math.ceil(difference_ms/one_day);
 
-			if (difference_days==0) {
+
+			if (days_until_start==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Starts TODAY"));
 				taskBlock.appendChild(taskRow);
+				taskBlock.className += " now-task";
 			}
-			else if (startDate>today && dueDay >0) {
+			else if (startDate>today) {
 				taskBlock.appendChild(document.createTextNode("Start: "));
 				taskBlock.appendChild(document.createTextNode(startDate.toDateString()));
 				taskBlock.appendChild(document.createTextNode(" (wait "));
-				taskBlock.appendChild(document.createTextNode(difference_days));
-				taskBlock.appendChild(document.createTextNode(" days)"));
+				taskBlock.appendChild(document.createTextNode(days_until_start));
+				taskBlock.appendChild(document.createTextNode(")"));
+				taskBlock.className += " later-task";
 			}
 			else if (startDate<today && dueDay<1) {
 				taskBlock.appendChild(document.createTextNode("Start: "));
 				taskBlock.appendChild(document.createTextNode(startDate.toDateString()));
 				taskBlock.appendChild(document.createTextNode(" ("));
-				taskBlock.appendChild(document.createTextNode(0-difference_days));
+				taskBlock.appendChild(document.createTextNode(0-days_until_start));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
+				taskBlock.className += " now-task";
+			}
+			else {
+				taskBlock.className += " now-task";
 			}
 		}
+		else {
+			taskBlock.className += " now-task";
+		}
+		
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);		
-
+		
 		if (dueDay > 0) {
 			var dueMonth=lines[i][col_duemonth]-1;
 			var dueYear=lines[i][col_dueyear];
@@ -140,12 +147,28 @@ function drawOutput(lines){
 			var date1_ms = today.getTime();
 			var date2_ms = dueDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
-			var difference_days = Math.ceil(difference_ms/one_day);
+			var days_until_due = Math.ceil(difference_ms/one_day);
 
 
-			if (difference_days==0) {
+
+			if (days_until_due==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
+				taskBlock.appendChild(taskRow);
+			}
+			if (days_until_due<0) {
+				taskBlock.appendChild(document.createTextNode("Due: "));
+				taskBlock.appendChild(document.createTextNode(dueDate.toDateString()));
+				taskBlock.appendChild(document.createTextNode(" ("));
+				taskBlock.appendChild(document.createTextNode(-days_until_due));
+				taskBlock.appendChild(document.createTextNode(" passed)"));
+
+				taskRow = document.createElement("b");
+				taskRow.appendChild(document.createTextNode("!!! OVERDUE !!!"));
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
 				taskBlock.appendChild(taskRow);
 			}
 			else {
@@ -153,33 +176,65 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(dueDate.toDateString()));
 				if (startDay<1 || startDate<=today) {
 					taskBlock.appendChild(document.createTextNode(" ("));
-					taskBlock.appendChild(document.createTextNode(difference_days));
+					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
 				}
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 			}
 		}
 		var row = lines[i][col_row];
 		if (row<1) { row=0; }
-		tableRows[row].append(taskBlock);
-		widths[row]=widths[row]+300;
-	}
-	for (k = 1 ; k<tableRows.length ; k++) {
-		var thisRow = document.createElement('tr');
-		tableRows[k].style.border = "thick solid #000000";
-		tableRows[k].style.minWidth = widths[row];
-		thisRow.append(tableRows[k]);
-		table.appendChild(thisRow);	
+		if (days_until_due<0 || days_until_due == "") {days_until_due = 999;}
+		var tableRowMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
+		tableRows[row].push(tableRowMeta);
 	}
 	
-	var outerTable = document.createElement("table");
-	var oneRow = document.createElement("tr");
-	var leftCell = document.createElement("td");
-	leftCell.append(table)
-	oneRow.append(leftCell);	
-	tableRows[0].style.border = "thick solid #000000";
-	oneRow.append(tableRows[0]);	
-	outerTable.append(oneRow);
-	document.getElementById("output").append(outerTable);
+	for (row = 1 ; row<tableRows.length ; row++) {
+		
+		tableRows[row].sort(mySortFunction);
+		
+		var tableRow = document.createElement("div");
+		tableRow.className = "task-row";
+		for (n = 0 ; n<tableRows[row].length ; n++) {
+			tableRow.append(tableRows[row][n][3]);
+		}
+		table.append(tableRow);
+	}
+	
+	table.className = "left-side";
+
+	tableRows[0].sort(mySortFunction);
+	var miscTasks = document.createElement("div");
+	for (n = 0 ; n<tableRows[0].length ; n++) {
+		miscTasks.append(tableRows[0][n][3]);
+	}	
+	miscTasks.className = "misc-block";
+
+	document.getElementById("output").append(table);
+	document.getElementById("output").append(miscTasks);
+}
+
+function mySortFunction(a,b) {	
+	var debug = 0;
+	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
+	if (a[1] == b[1])
+	{
+		if (a[0] == b[0]) 
+		{
+			var returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0
+			if (debug) { alert(compareString + " = " + returnVal); }
+			return returnVal;
+		}
+		else
+		{
+			var returnVal = (a[0] < b[0]) ? -1 : 1;
+			if (debug) { alert(compareString + " = " + returnVal); }
+			return returnVal;
+		}
+	}
+	else
+	{
+		var returnVal = (a[1] < b[1]) ? -1 : 1;
+		if (debug) { alert(compareString + " = " + returnVal); }
+		return returnVal;
+	}
 }

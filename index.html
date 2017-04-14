@@ -1,35 +1,86 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>HTML5 File API</title>
+    <title>Task Board by LevenTech</title>
+
     <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/read-csv.js"></script>
     <script>
-    $( document ).ready(function() {
+		$( document ).ready(function() {
 		//$('#csvFileInput').trigger('click');
     });
     </script>
+	<style type="text/css">
+	body {
+		font-family: arial;
+		background: darkgrey;
+		}
+	.task-block {
+		display:inline-block;
+		text-align: center;
+		padding: 10px;
+		margin: 10px;
+        font-family: arial;
+        font-size: 15px;
+        width: 250px;
+        height: 150px;
+		float:left;
+		}
+	.now-task {
+		box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+        }
+	.later-task {
+		opacity: 0.5;
+        }		
+	.task-row:after {
+		clear:both;
+		content:" ";
+		display:table;
+	}
+	.left-side{
+		float:left;
+		}
+	.task-row {
+		background: #F0F0F0;
+		margin: 10px;
+		padding: 25px;
+ 		border-radius: 10px;
+		border: 2px solid #000000;
+        }
+	.misc-block {
+		background: #F0F0F0;
+		margin:10px;
+		float: left;
+		width: 25%;
+		min-width: 600;
+		text-align: center;
+		padding: 25px;
+ 		border-radius: 10px;
+		border: 2px solid #000000;
+        }		
+	.app-header {
+		color: #fff;
+	   text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;  
+	-webkit-font-smoothing: antialiased;
+		}	
+	</style>
 </head>
 <body>
-
   <div>
-    <form class="form-horizontal well">
-      <legend>
-        <h3>
-          <div id="title">HTML5 File API</div>
-        </h3>
-      </legend>
-      <fieldset>
-          <label for="csvFileInput"> <strong>CSV File:</strong>
-          </label>
-          <input type="file" id="csvFileInput" onchange="handleFiles(this.files)"
-          accept=".csv">
-        </div>
+    <form class="form-horizontal well" style="width:50%;min-width:300px;max-width:600px;">
+      <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
+      <fieldset style="background:#F0F0F0;margin-left:15px;">
+          <label for="csvFileInput"> <strong>Choose a Task File (*.csv):</strong></label>
+		  <br/><br/>
+          <input type="file" id="csvFileInput" onchange="handleFiles(this.files)" accept=".csv">
       </fieldset>
     </form>
-    <div id="output">
-    </div>
   </div>
+  <div id="output"></div>
 </body>
 </html>
