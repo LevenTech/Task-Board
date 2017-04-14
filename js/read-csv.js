@@ -44,7 +44,8 @@ function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
-	var tableRows = [ [] , [] , [] , []];
+	var tableRows = [ [] , [] , [] , [] ];
+	var rowNames = [ "MISC" ];
 	var myMonth;
 	var myDay;
 	var myYear;
@@ -181,8 +182,10 @@ function drawOutput(lines){
 				}
 			}
 		}
-		var row = lines[i][col_row];
-		if (row<1) { row=0; }
+		var row = lines[i][col_row].toUpperCase();
+		if (row == "") row = "MISC";
+		if (rowNames.indexOf(row)==-1) rowNames.push(row);
+		row = rowNames.indexOf(row);
 		if (days_until_due<0 || days_until_due == "") {days_until_due = 999;}
 		var tableRowMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
 		tableRows[row].push(tableRowMeta);
@@ -193,9 +196,12 @@ function drawOutput(lines){
 	for (row = 1 ; row<tableRows.length ; row++) {
 		
 		tableRows[row].sort(mySortFunction);
-		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row";
+		var thisRowName = document.createElement("div");
+		thisRowName.innerHTML = rowNames[row];
+		thisRowName.className = "vertical-text";
+		tableRow.append(thisRowName);
 		for (n = 0 ; n<tableRows[row].length ; n++) {
 			tableRow.append(tableRows[row][n][3]);
 		}
