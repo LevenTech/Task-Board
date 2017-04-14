@@ -188,6 +188,8 @@ function drawOutput(lines){
 		tableRows[row].push(tableRowMeta);
 	}
 	
+	var maxLength = 0;
+	
 	for (row = 1 ; row<tableRows.length ; row++) {
 		
 		tableRows[row].sort(mySortFunction);
@@ -197,11 +199,16 @@ function drawOutput(lines){
 		for (n = 0 ; n<tableRows[row].length ; n++) {
 			tableRow.append(tableRows[row][n][3]);
 		}
+
+		if (tableRows[row].length>maxLength) { maxLength=tableRows[row].length; }
+	
 		table.append(tableRow);
 	}
 	
 	table.className = "left-side";
 
+	table.style.flexBasis = 300*maxLength+100+"px";
+	
 	tableRows[0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
 	for (n = 0 ; n<tableRows[0].length ; n++) {

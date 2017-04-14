@@ -40,6 +40,8 @@
 	}
 	.left-side{
 		float:left;
+		flex-grow: 0;
+		flex-shrink: 1;
 		}
 	.task-row {
 		background: #F0F0F0;
@@ -52,13 +54,18 @@
 		background: #F0F0F0;
 		margin:10px;
 		float: left;
-		width: 25%;
-		min-width: 600;
-		text-align: center;
 		padding: 25px;
  		border-radius: 10px;
 		border: 2px solid #000000;
-        }		
+		flex-grow: 1;
+		flex-shrink: 99;
+		flex-basis: auto;
+        }
+	.misc-block:after {
+		clear:both;
+		content:" ";
+		display:table;
+	}		
 	.app-header {
 		color: #fff;
 	   text-shadow:
@@ -81,6 +88,6 @@
       </fieldset>
     </form>
   </div>
-  <div id="output"></div>
+  <div id="output" style="display:flex;flex-direction:row;"></div>
 </body>
 </html>
