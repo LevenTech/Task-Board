@@ -258,7 +258,6 @@ function drawOutput(lines){
 	var table = document.createElement("div");
 	var rowWithMeta = [[],"MISC"]
 	var tableRows = [rowWithMeta];
-	var rowNames = [ "MISC" ];
 	var myMonth;
 	var myDay;
 	var myYear;
@@ -407,16 +406,24 @@ function drawOutput(lines){
 				}
 			}
 		}
-		var row = lines[i][col_row];
+		var rowName = lines[i][col_row];
 		//alert(row);
-		if (row == "") row = "MISC";
-		else (row = row.toUpperCase());
-		if (rowNames.indexOf(row)==-1) {
-			rowNames.push(row);
-			var rowWithMeta = [[],row];
+		if (rowName == "") rowName = "MISC";
+		else (rowName = rowName.toUpperCase());
+
+		var rowExists = 0;
+		for (var rowNum=0;rowNum<tableRows.length;rowNum++) {
+			if (tableRows[rowNum][1]==rowName) {
+				rowExists = 1;
+				break;
+			}
+		}
+		
+		if (rowExists!==1) {
+			var rowWithMeta = [[],rowName];
 			tableRows.push(rowWithMeta);
 		}
-		rowNum = rowNames.indexOf(row);
+
 		if (days_until_due<0 || dueDay == 0) { days_until_due = 999; }
 		
 		var taskBlockID = "taskBlock"+taskID;
@@ -440,22 +447,13 @@ function drawOutput(lines){
 		tableRow.className = "task-row";
 		var thisRowName = document.createElement("div");
 		var justTheName = document.createElement("div");
-		//var vertTextInside = document.createElement("div");
-		//vertTextInside.className = "vertical-text-inside"
-		//vertTextInside.innerHTML = rowNames[row];
-		justTheName.innerHTML = rowNames[row];
+		justTheName.innerHTML = tableRows[row][1];
 		justTheName.className = "vertical-text";
-		//var topPadding = document.createElement("div");
-		//topPadding.className = "top-padding";
-		//var bottomPadding = document.createElement("div");
-		//bottomPadding.className = "bottom-padding";
 
-		//thisRowName.append(bottomPadding);
 		thisRowName.append(justTheName);
-		//thisRowName.append(topPadding);
 		thisRowName.className = "row-name";
 		tableRow.append(thisRowName);
-		tableRow.setAttribute("data-rowname",rowNames[row])
+		tableRow.setAttribute("data-rowname",tableRows[row][1])
 		for (n = 0 ; n<tableRows[row][0].length ; n++) {
 			tableRow.append(tableRows[row][0][n][3]);
 		}
