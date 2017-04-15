@@ -429,7 +429,7 @@ function drawOutput(lines){
 	var maxLength = 0;
 
 	for (row = 1 ; row<tableRows.length ; row++) {
-		tableRows[row].sort(mySortFunction);
+		tableRows[row][0].sort(mySortFunction);
 	}
 
 	tableRows.sort(myRowSortFunction);
@@ -469,7 +469,7 @@ function drawOutput(lines){
 
 	table.style.flexBasis = 300*maxLength+100+"px";
 	
-	tableRows[0].sort(mySortFunction);
+	tableRows[0][0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
 	for (n = 0 ; n<tableRows[0][0].length ; n++) {
 		miscTasks.append(tableRows[0][0][n][3]);
