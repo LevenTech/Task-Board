@@ -93,7 +93,7 @@ function editTask(target) {
         autoOpen: false,
         modal: true,
         width: 265,
-        height:400,
+        height:450,
         title: 'Edit Task',
 		position: {my: "left top", at: "left top", of: taskBlockID},
 		buttons: { 
@@ -427,8 +427,21 @@ function drawOutput(lines){
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row";
 		var thisRowName = document.createElement("div");
-		thisRowName.innerHTML = rowNames[row];
-		thisRowName.className = "vertical-text";
+		var justTheName = document.createElement("div");
+		//var vertTextInside = document.createElement("div");
+		//vertTextInside.className = "vertical-text-inside"
+		//vertTextInside.innerHTML = rowNames[row];
+		justTheName.innerHTML = rowNames[row];
+		justTheName.className = "vertical-text";
+		//var topPadding = document.createElement("div");
+		//topPadding.className = "top-padding";
+		//var bottomPadding = document.createElement("div");
+		//bottomPadding.className = "bottom-padding";
+
+		//thisRowName.append(bottomPadding);
+		thisRowName.append(justTheName);
+		//thisRowName.append(topPadding);
+		thisRowName.className = "row-name";
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",rowNames[row])
 		for (n = 0 ; n<tableRows[row].length ; n++) {
