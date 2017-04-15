@@ -4,19 +4,12 @@ var lastTaskID = 0;
 var currentTask = 0;
 
 $(document).ready(function() {
-	var opt = {
-        autoOpen: false,
-        modal: true,
-        width: 500,
-        height:400,
-        title: 'Edit Task',
-	}
+	var opt = { autoOpen: false	};
 	$("#divDialog").dialog(opt).dialog("close");
 	$("#taskDetailsInput").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask(currenTask);
-			drawOutput(lines);
+			updateTask(currentTask);
 			$("#divDialog").dialog("close");
 			return false;
 		}
@@ -25,7 +18,7 @@ $(document).ready(function() {
 
 
 function updateTask() {
-	var newString = $("#taskDetailsInput").val();
+	var newString = currentTask + "\n" + $("#taskDetailsInput").val();
 	var newStringParts = newString.split(/\r?\n/);
 	for (var k = 0; k< newStringParts.length; k++) {
 		if (newStringParts[k]=="[Start-Month]") newStringParts[k]="";
@@ -35,11 +28,11 @@ function updateTask() {
 		if (newStringParts[k]=="[Due-Day]") newStringParts[k]="";
 		if (newStringParts[k]=="[Due-Year]") newStringParts[k]="";
 		if (newStringParts[k]=="[Color]") newStringParts[k]="";
-		if (newStringParts[k]=="[Row]") newStringParts[k]="";
+		if (newStringParts[k]=="[Category]") newStringParts[k]="";
 		if (newStringParts[k]=="[Complete?]") newStringParts[k]="";
-		alert("updating task "+currentTask);
-		//lines[currentTask][k] = newStringParts[k];
 	}
+	lines[currentTask] = newStringParts;
+	drawOutput(lines);
 }
 
 
@@ -51,6 +44,13 @@ function handleFiles(files) {
 	} else {
 		alert('FileReader are not supported in this browser.');
 	}
+}
+
+function completeTask(taskID) {
+	if (confirm("Complete Task "+taskID+"?")) {
+		lines[currentTask][10]="Yes";
+	}
+	drawOutput(lines);
 }
 
 function editTask(target) {
@@ -70,22 +70,29 @@ function editTask(target) {
 	if (toDisplay[6]=="") toDisplay[6]="[Due-Day]";
 	if (toDisplay[7]=="") toDisplay[7]="[Due-Year]";
 	if (toDisplay[8]=="") toDisplay[8]="[Color]";
-	if (toDisplay[9]=="") toDisplay[9]="[Row]";
+	if (toDisplay[9]=="") toDisplay[9]="[Category]";
 	if (toDisplay[10]=="") toDisplay[10]="[Complete?]";
+
+	toDisplay.shift();
 	var string = toDisplay.join("\r\n");
 
 	$("#taskDetailsInput").val(string);
 	
+	var taskBlockID = "#taskBlock"+taskID;
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 500,
+        width: 265,
         height:400,
         title: 'Edit Task',
+		position: {my: "left top", at: "left top", of: taskBlockID},
 		buttons: { 
-			Ok: function() {
+			Complete: function() {
+				completeTask(currentTask);
+				$("#divDialog").dialog("close");
+			},
+			Save: function() {
 				updateTask(currentTask);
-				drawOutput(lines);
 				$("#divDialog").dialog("close");
 			},
 			Cancel: function () {
@@ -96,7 +103,6 @@ function editTask(target) {
     }		
 	};
 	$("#divDialog").dialog(opt).dialog("open");
-
 }
 
 function getAsText(fileToRead) {
@@ -113,9 +119,9 @@ function loadHandler(event) {
 	processData(csv);             
 }
 
-function newTask() {
+function newTask(rowName) {
 	lastTaskID = lastTaskID+1;
-	var newTask = [ lastTaskID , "New Task" ,"","","","","","","","",""];
+	var newTask = [ lastTaskID , "New Task" ,"","","","","","","",rowName,""];
 
 	for (var j = 0; j < lines[0].length; j++) {
 		//if (j==0) newTask[j] = lastTaskID;
@@ -304,7 +310,7 @@ function drawOutput(lines){
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
 				taskBlock.appendChild(taskRow);
 			}
-			if (days_until_due<0) {
+			else if (days_until_due<0) {
 				taskBlock.appendChild(document.createTextNode("Due: "));
 				taskBlock.appendChild(document.createTextNode(dueDate.toDateString()));
 				taskBlock.appendChild(document.createTextNode(" ("));
@@ -338,7 +344,11 @@ function drawOutput(lines){
 			tableRows.push([]);
 		}
 		row = rowNames.indexOf(row);
-		if (days_until_due<0 || days_until_due == "") {days_until_due = 999;}
+		if (days_until_due<0 || dueDay == 0) { days_until_due = 999; }
+		
+		var taskBlockID = "taskBlock"+taskID;
+		taskBlock.id = taskBlockID;
+		
 		var tableRowMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
 		tableRows[row].push(tableRowMeta);
 	}
@@ -354,6 +364,7 @@ function drawOutput(lines){
 		thisRowName.innerHTML = rowNames[row];
 		thisRowName.className = "vertical-text";
 		tableRow.append(thisRowName);
+		tableRow.setAttribute("data-rowname",rowNames[row])
 		for (n = 0 ; n<tableRows[row].length ; n++) {
 			tableRow.append(tableRows[row][n][3]);
 		}
@@ -374,9 +385,19 @@ function drawOutput(lines){
 	}	
 	miscTasks.className = "misc-block";
 	miscTasks.id = "misc-block";
+	miscTasks.setAttribute("data-rowname","")
 
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
+	
+	$(".task-row").dblclick( function (){
+		var rowName = this.getAttribute("data-rowname");
+		newTask(rowName);
+	});
+	$(".misc-block").dblclick( function (){
+		var rowName = this.getAttribute("data-rowname");
+		newTask(rowName);
+	});
 }
 
 $("#dialog").dialog({
