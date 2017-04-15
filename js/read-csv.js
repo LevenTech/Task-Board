@@ -2,6 +2,11 @@
 var lines = [];
 var lastTaskID = 0;
 var currentTask = 0;
+var isSaved = 1;
+
+window.onbeforeunload = function() {
+	if (!isSaved) { return "Did you save your stuff?" }
+}
 
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
@@ -30,9 +35,11 @@ function updateTask() {
 		if (newStringParts[k]=="[Color]") newStringParts[k]="";
 		if (newStringParts[k]=="[Category]") newStringParts[k]="";
 		if (newStringParts[k]=="[Complete?]") newStringParts[k]="";
+		if (newStringParts[k]=="[Increment]") newStringParts[k]="";
 	}
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
+	isSaved = 0;
 }
 
 
@@ -49,8 +56,10 @@ function handleFiles(files) {
 function completeTask(taskID) {
 	if (confirm("Complete Task "+taskID+"?")) {
 		lines[currentTask][10]="Yes";
+		if (lines[currentTask][11]>0) newTaskCopy();
 	}
 	drawOutput(lines);
+	isSaved = 0;
 }
 
 function editTask(target) {
@@ -72,6 +81,7 @@ function editTask(target) {
 	if (toDisplay[8]=="") toDisplay[8]="[Color]";
 	if (toDisplay[9]=="") toDisplay[9]="[Category]";
 	if (toDisplay[10]=="") toDisplay[10]="[Complete?]";
+	if (toDisplay[11]=="") toDisplay[11]="[Increment]";
 
 	toDisplay.shift();
 	var string = toDisplay.join("\r\n");
@@ -119,28 +129,85 @@ function loadHandler(event) {
 	processData(csv);             
 }
 
-function newTask(rowName) {
-	lastTaskID = lastTaskID+1;
-	var newTask = [ lastTaskID , "New Task" ,"","","","","","","",rowName,""];
-
+function newTaskCopy() {
 	for (var j = 0; j < lines[0].length; j++) {
-		//if (j==0) newTask[j] = lastTaskID;
-		//if (j==1) newTask[j] = "New Task";
-		//else newTask[j] = "";
-		//if (lines[0][j]=="Row") col_row = j;
-		//if (lines[0][j]=="Due-Month") col_duemonth = j;
-		//if (lines[0][j]=="Due-Day") col_dueday = j;
-		//if (lines[0][j]=="Due-Year") col_dueyear = j;
-		//if (lines[0][j]=="Start-Month") col_startmonth = j;
-		//if (lines[0][j]=="Start-Day") col_startday = j;
-		//if (lines[0][j]=="Start-Year") col_startyear = j;
-		//if (lines[0][j]=="Color") col_color = j;
-		//if (lines[0][j]=="Complete?") col_complete = j;
+		if (lines[0][j]=="TaskNum") var col_ID = j;
+		if (lines[0][j]=="Task") var col_task = j;
+		if (lines[0][j]=="Row") var col_row = j;
+		if (lines[0][j]=="Due-Month") var col_duemonth = j;
+		if (lines[0][j]=="Due-Day") var col_dueday = j;
+		if (lines[0][j]=="Due-Year") var col_dueyear = j;
+		if (lines[0][j]=="Start-Month") var col_startmonth = j;
+		if (lines[0][j]=="Start-Day") var col_startday = j;
+		if (lines[0][j]=="Start-Year") var col_startyear = j;
+		if (lines[0][j]=="Color") var col_color = j;
+		if (lines[0][j]=="Complete?") var col_complete = j;
+		if (lines[0][j]=="Increment") var col_increment = j;
 	}
-	//alert(newTask[0]);
+	var newTask = lines[currentTask].slice();
+	lastTaskID = lastTaskID+1;
+	newTask[col_ID] = lastTaskID;
+	newTask[col_complete] = "";
+
+	var today = new Date();
+	var one_day=1000*60*60*24;
+	
+	var dueYear=lines[currentTask][col_dueyear];
+	if (dueYear.length==2) dueYear = "20"+dueYear;
+	if (dueYear.length==0) dueYear = today.getYear()+1900;
+	var dueMonth = lines[currentTask][col_duemonth]-1;
+	var dueDay = lines[currentTask][col_dueday];
+	var dueDate = new Date(dueYear,dueMonth,dueDay);			
+	
+	var startDay = lines[currentTask][col_startday];
+	if (startDay>0) {
+		var startYear=lines[currentTask][col_startyear];
+		if (startYear.length==2) startYear = "20"+startYear;
+		if (startYear.length==0) startYear = today.getYear()+1900;
+		var startMonth=lines[currentTask][col_startmonth]-1;
+		var startDate = new Date(startYear,startMonth,startDay);
+		var start_offset = dueDate.getTime() - startDate.getTime();
+	}
+	var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
+	newTask[col_duemonth] = new_duedate.getMonth()+1;
+	newTask[col_dueday] = new_duedate.getDate();
+	newTask[col_dueyear] = new_duedate.getYear()+1900;
+
+	if (startDay>0) {
+		var new_startdate = new Date(new_duedate.getTime() - start_offset);
+		newTask[col_startmonth] = new_startdate.getMonth()+1;
+		newTask[col_startday] = new_startdate.getDate();
+		newTask[col_startyear] = new_startdate.getYear()+1900;
+	}
+	
 	lines.push(newTask);
-	//alert(lines[lines.length-1][0]);
 	drawOutput(lines);
+	isSaved = 0;
+}
+
+function newTask(rowName) {
+	for (var j = 0; j < lines[0].length; j++) {
+		if (lines[0][j]=="TaskNum") var col_ID = j;
+		if (lines[0][j]=="Task") var col_task = j;
+		if (lines[0][j]=="Row") var col_row = j;
+		if (lines[0][j]=="Due-Month") var col_duemonth = j;
+		if (lines[0][j]=="Due-Day") var col_dueday = j;
+		if (lines[0][j]=="Due-Year") var col_dueyear = j;
+		if (lines[0][j]=="Start-Month") var col_startmonth = j;
+		if (lines[0][j]=="Start-Day") var col_startday = j;
+		if (lines[0][j]=="Start-Year") var col_startyear = j;
+		if (lines[0][j]=="Color") var col_color = j;
+		if (lines[0][j]=="Complete?") var col_complete = j;
+		if (lines[0][j]=="Increment") var col_increment = j;
+	}
+	var newTask = [ "" , "" ,"","","","","","","","","",""];
+	lastTaskID = lastTaskID+1;
+	newTask[col_ID] = lastTaskID;
+	newTask[col_task] = "New Task";
+	newTask[col_row] = rowName;
+	lines.push(newTask);
+	drawOutput(lines);
+	isSaved = 0;
 }
 
 function saveFile() {
@@ -164,8 +231,8 @@ function saveFile() {
 	link.setAttribute("href", url);
 	link.setAttribute("download", fileName);
 	document.body.appendChild(link); // Required for FF
-
 	link.click();
+	isSaved = 1;
 }
 
 function processData(csv) {
@@ -194,25 +261,22 @@ function drawOutput(lines){
 	var myMonth;
 	var myDay;
 	var myYear;
-	var col_ID;
-	var col_task;
-	var col_duemonth;
-	var col_dueday;
-	var col_dueyear;
-	var col_color;
+
+	var today = new Date();
 
 	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="TaskNum") col_ID = j;
-		if (lines[0][j]=="Task") col_task = j;
-		if (lines[0][j]=="Row") col_row = j;
-		if (lines[0][j]=="Due-Month") col_duemonth = j;
-		if (lines[0][j]=="Due-Day") col_dueday = j;
-		if (lines[0][j]=="Due-Year") col_dueyear = j;
-		if (lines[0][j]=="Start-Month") col_startmonth = j;
-		if (lines[0][j]=="Start-Day") col_startday = j;
-		if (lines[0][j]=="Start-Year") col_startyear = j;
-		if (lines[0][j]=="Color") col_color = j;
-		if (lines[0][j]=="Complete?") col_complete = j;
+		if (lines[0][j]=="TaskNum") var col_ID = j;
+		if (lines[0][j]=="Task") var col_task = j;
+		if (lines[0][j]=="Row") var col_row = j;
+		if (lines[0][j]=="Due-Month") var col_duemonth = j;
+		if (lines[0][j]=="Due-Day") var col_dueday = j;
+		if (lines[0][j]=="Due-Year") var col_dueyear = j;
+		if (lines[0][j]=="Start-Month") var col_startmonth = j;
+		if (lines[0][j]=="Start-Day") var col_startday = j;
+		if (lines[0][j]=="Start-Year") var col_startyear = j;
+		if (lines[0][j]=="Color") var col_color = j;
+		if (lines[0][j]=="Complete?") var col_complete = j;
+		if (lines[0][j]=="Increment") var col_increment = j;
 	}
 
 	//alert(lines.length);
@@ -250,10 +314,11 @@ function drawOutput(lines){
 		var days_until_due = "";
 
 		if (startDay>0) {
-			var startMonth=lines[i][col_startmonth]-1;
 			var startYear=lines[i][col_startyear];
+			if (startYear.length==2) startYear = "20"+startYear;
+			if (startYear.length==0) startYear = today.getYear()+1900;
+			var startMonth=lines[i][col_startmonth]-1;
 			var startDate = new Date(startYear,startMonth,startDay);
-			var today = new Date();
 			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = startDate.getTime();
@@ -297,9 +362,10 @@ function drawOutput(lines){
 		if (dueDay > 0) {
 			var dueMonth=lines[i][col_duemonth]-1;
 			var dueYear=lines[i][col_dueyear];
+			if (dueYear.length==2) dueYear = "20"+dueYear;
+			if (dueYear.length==0) dueYear = today.getYear()+1900;
 			var dueDate = new Date(dueYear,dueMonth,dueDay);
 			var one_day=1000*60*60*24;
-			var today = new Date();
 			var date1_ms = today.getTime();
 			var date2_ms = dueDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
@@ -399,19 +465,6 @@ function drawOutput(lines){
 		newTask(rowName);
 	});
 }
-
-$("#dialog").dialog({
-    autoOpen: false,
-    buttons: { 
-        Ok: function() {
-            $("#nameentered").text($("#name").val());
-            $(this).dialog("close");
-        },
-        Cancel: function () {
-            $(this).dialog("close");
-        }
-    }
-});
 
 
 function mySortFunction(a,b) {	
