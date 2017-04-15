@@ -1,4 +1,47 @@
 
+var lines = [];
+var lastTaskID = 0;
+var currentTask = 0;
+
+$(document).ready(function() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 500,
+        height:400,
+        title: 'Edit Task',
+	}
+	$("#divDialog").dialog(opt).dialog("close");
+	$("#taskDetailsInput").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			updateTask(currenTask);
+			drawOutput(lines);
+			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+});
+
+
+function updateTask() {
+	var newString = $("#taskDetailsInput").val();
+	var newStringParts = newString.split(/\r?\n/);
+	for (var k = 0; k< newStringParts.length; k++) {
+		if (newStringParts[k]=="[Start-Month]") newStringParts[k]="";
+		if (newStringParts[k]=="[Start-Day]") newStringParts[k]="";
+		if (newStringParts[k]=="[Start-Year]") newStringParts[k]="";
+		if (newStringParts[k]=="[Due-Month]") newStringParts[k]="";
+		if (newStringParts[k]=="[Due-Day]") newStringParts[k]="";
+		if (newStringParts[k]=="[Due-Year]") newStringParts[k]="";
+		if (newStringParts[k]=="[Color]") newStringParts[k]="";
+		if (newStringParts[k]=="[Row]") newStringParts[k]="";
+		if (newStringParts[k]=="[Complete?]") newStringParts[k]="";
+		alert("updating task "+currentTask);
+		//lines[currentTask][k] = newStringParts[k];
+	}
+}
+
 
 function handleFiles(files) {
 	// Check for the various File API support.
@@ -8,6 +51,52 @@ function handleFiles(files) {
 	} else {
 		alert('FileReader are not supported in this browser.');
 	}
+}
+
+function editTask(target) {
+	var taskID = target.getAttribute("data-taskid");
+	
+	for(var i = 0; i < lines.length; i++) {
+		if(parseInt(lines[i][0]) == taskID) {
+			currentTask = i;
+			break;
+		}
+	}
+	var toDisplay = lines[i].slice();
+	if (toDisplay[2]=="") toDisplay[2]="[Start-Month]";
+	if (toDisplay[3]=="") toDisplay[3]="[Start-Day]";
+	if (toDisplay[4]=="") toDisplay[4]="[Start-Year]";
+	if (toDisplay[5]=="") toDisplay[5]="[Due-Month]";
+	if (toDisplay[6]=="") toDisplay[6]="[Due-Day]";
+	if (toDisplay[7]=="") toDisplay[7]="[Due-Year]";
+	if (toDisplay[8]=="") toDisplay[8]="[Color]";
+	if (toDisplay[9]=="") toDisplay[9]="[Row]";
+	if (toDisplay[10]=="") toDisplay[10]="[Complete?]";
+	var string = toDisplay.join("\r\n");
+
+	$("#taskDetailsInput").val(string);
+	
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 500,
+        height:400,
+        title: 'Edit Task',
+		buttons: { 
+			Ok: function() {
+				updateTask(currentTask);
+				drawOutput(lines);
+				$("#divDialog").dialog("close");
+			},
+			Cancel: function () {
+				$("#taskDetailsInput").val("");
+				currentTask = 0;
+				$("#divDialog").dialog("close");
+			}
+    }		
+	};
+	$("#divDialog").dialog(opt).dialog("open");
+
 }
 
 function getAsText(fileToRead) {
@@ -24,9 +113,58 @@ function loadHandler(event) {
 	processData(csv);             
 }
 
+function newTask() {
+	lastTaskID = lastTaskID+1;
+	var newTask = [ lastTaskID , "New Task" ,"","","","","","","","",""];
+
+	for (var j = 0; j < lines[0].length; j++) {
+		//if (j==0) newTask[j] = lastTaskID;
+		//if (j==1) newTask[j] = "New Task";
+		//else newTask[j] = "";
+		//if (lines[0][j]=="Row") col_row = j;
+		//if (lines[0][j]=="Due-Month") col_duemonth = j;
+		//if (lines[0][j]=="Due-Day") col_dueday = j;
+		//if (lines[0][j]=="Due-Year") col_dueyear = j;
+		//if (lines[0][j]=="Start-Month") col_startmonth = j;
+		//if (lines[0][j]=="Start-Day") col_startday = j;
+		//if (lines[0][j]=="Start-Year") col_startyear = j;
+		//if (lines[0][j]=="Color") col_color = j;
+		//if (lines[0][j]=="Complete?") col_complete = j;
+	}
+	//alert(newTask[0]);
+	lines.push(newTask);
+	//alert(lines[lines.length-1][0]);
+	drawOutput(lines);
+}
+
+function saveFile() {
+	var csvContent = "";
+	lines.forEach(function(infoArray, index){
+		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+			dataString = infoArray.join(",");
+			csvContent += index < lines.length ? dataString+ "\n" : dataString;
+		}
+	}); 
+
+	var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+	var fileName = document.getElementById("csvFileInput").value;
+	fileName = fileName.split("\\");
+	fileName = fileName[fileName.length-1];
+	
+	var encodedUri = encodeURI(csvContent);
+	var url = URL.createObjectURL(blob);
+	var link = document.createElement("a");
+	link.setAttribute("href", url);
+	link.setAttribute("download", fileName);
+	document.body.appendChild(link); // Required for FF
+
+	link.click();
+}
+
 function processData(csv) {
     var allTextLines = csv.split(/\r\n|\n/);
-    var lines = [];
+	lines = [];
     while (allTextLines.length) {
         lines.push(allTextLines.shift().split(','));
     }
@@ -41,6 +179,7 @@ function errorHandler(evt) {
 }
 
 function drawOutput(lines){
+	$(".toolbar-button").show();
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
@@ -70,14 +209,22 @@ function drawOutput(lines){
 		if (lines[0][j]=="Complete?") col_complete = j;
 	}
 
+	//alert(lines.length);
 	for (var i = 1; i < lines.length; i++) {
-		
-		if (lines[i][col_ID]<1) { continue; }
+		var taskID = parseInt(lines[i][col_ID]);
+		//alert(lines[i][col_ID]);
+		//alert(taskID);
+		if (isNaN(taskID)) { continue; }
 		if (lines[i][col_complete]=="Yes") { continue; }
+		
+		//alert(taskID);
+		if (taskID>lastTaskID) { lastTaskID = taskID; }
 		
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
+		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
+		taskBlock.setAttribute("onclick","editTask(this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
@@ -152,8 +299,6 @@ function drawOutput(lines){
 			var difference_ms = date2_ms - date1_ms;
 			var days_until_due = Math.ceil(difference_ms/one_day);
 
-
-
 			if (days_until_due==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
@@ -184,8 +329,10 @@ function drawOutput(lines){
 				}
 			}
 		}
-		var row = lines[i][col_row].toUpperCase();
+		var row = lines[i][col_row];
+		//alert(row);
 		if (row == "") row = "MISC";
+		else (row = row.toUpperCase());
 		if (rowNames.indexOf(row)==-1) {
 			rowNames.push(row);
 			tableRows.push([]);
@@ -226,10 +373,25 @@ function drawOutput(lines){
 		miscTasks.append(tableRows[0][n][3]);
 	}	
 	miscTasks.className = "misc-block";
+	miscTasks.id = "misc-block";
 
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
 }
+
+$("#dialog").dialog({
+    autoOpen: false,
+    buttons: { 
+        Ok: function() {
+            $("#nameentered").text($("#name").val());
+            $(this).dialog("close");
+        },
+        Cancel: function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
 
 function mySortFunction(a,b) {	
 	var debug = 0;

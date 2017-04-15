@@ -3,14 +3,12 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Task Board by LevenTech</title>
 
-    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/read-csv.js"></script>
-    <script>
-		$( document ).ready(function() {
-		//$('#csvFileInput').trigger('click');
-    });
-    </script>
 	<style type="text/css">
 	body {
 		font-family: arial;
@@ -83,19 +81,28 @@
 		top:120px;
 		width:30px;
 		}
+	.toolbar-button {
+		float: left;
+		margin: 5px;
+		display:none;
+	}
 	</style>
 </head>
 <body>
-  <div>
-    <form class="form-horizontal well" style="width:50%;min-width:300px;max-width:600px;">
-      <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
-      <fieldset style="background:#F0F0F0;margin-left:15px;">
+    <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
+    <div class="form-horizontal well" style="width:50%;min-width:300px;max-width:600px;">
+      <fieldset style="float:left;min-width:300px;background:#F0F0F0;margin-left:15px;">
           <label for="csvFileInput"> <strong>Choose a Task File (*.csv):</strong></label>
 		  <br/><br/>
           <input type="file" id="csvFileInput" onchange="handleFiles(this.files)" accept=".csv">
-      </fieldset>
-    </form>
-  </div>
-  <div id="output" style="display:flex;flex-direction:row;"></div>
+	  </fieldset>
+	  <button class="toolbar-button" onclick="saveFile()">Save File</button>
+	  <button class="toolbar-button" onclick="newTask()">New Task</button>
+    </div>
+	<br/>
+	<div id="divDialog" title="Basic dialog">
+		<textarea cols="40" rows="12" id="taskDetailsInput" ></textarea>
+	</div>
+  <div id="output" style="width:100%;display:flex;flex-direction:row;"></div>
 </body>
 </html>
