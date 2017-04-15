@@ -11,6 +11,7 @@ window.onbeforeunload = function() {
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
 	$("#divDialog").dialog(opt).dialog("close");
+	$("#completeDialog").dialog(opt).dialog("close");
 	$("#taskDetailsInput").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
@@ -53,13 +54,34 @@ function handleFiles(files) {
 	}
 }
 
-function completeTask(taskID) {
-	if (confirm("Complete Task "+taskID+"?")) {
-		lines[currentTask][10]="Yes";
-		if (lines[currentTask][11]>0) newTaskCopy();
-	}
-	drawOutput(lines);
-	isSaved = 0;
+function completeTask() {
+	
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Complete Task?',
+		position: {my: "center center", at: "center center", of: "body"},
+		buttons: { 
+			Yes: function() {
+				lines[currentTask][10]="Yes";
+				if (lines[currentTask][11]>0) newTaskCopy();
+				$("#completeDialog").dialog("close");
+				isSaved = 0;
+				drawOutput(lines);
+			},
+			No: function () {
+				$("#completeDialog").dialog("close");
+				$("#divDialog").dialog("open");
+			}
+		}
+    };
+	var taskName = lines[currentTask][1];
+	$("#completeTaskName").text(taskName);
+	
+	$("#divDialog").dialog("close");
+	$("#completeDialog").dialog(opt).dialog("open");
 }
 
 function editTask(target) {
@@ -110,7 +132,7 @@ function editTask(target) {
 				currentTask = 0;
 				$("#divDialog").dialog("close");
 			}
-    }		
+		}		
 	};
 	$("#divDialog").dialog(opt).dialog("open");
 }
