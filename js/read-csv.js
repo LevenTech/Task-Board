@@ -241,7 +241,7 @@ function processData(csv) {
     while (allTextLines.length) {
         lines.push(allTextLines.shift().split(','));
     }
-	console.log(lines);
+	//console.log(lines);
 	drawOutput(lines);
 }
 
@@ -256,7 +256,8 @@ function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
-	var tableRows = [ [] ];
+	var rowWithMeta = [[],"MISC"]
+	var tableRows = [rowWithMeta];
 	var rowNames = [ "MISC" ];
 	var myMonth;
 	var myDay;
@@ -319,6 +320,8 @@ function drawOutput(lines){
 			if (startYear.length==0) startYear = today.getYear()+1900;
 			var startMonth=lines[i][col_startmonth]-1;
 			var startDate = new Date(startYear,startMonth,startDay);
+			var startDateStr = startDate.toDateString();
+			startDateStr = startDateStr.substring(0,startDateStr.length-4);
 			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = startDate.getTime();
@@ -334,7 +337,8 @@ function drawOutput(lines){
 			}
 			else if (startDate>today) {
 				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDate.toDateString()));
+				taskBlock.appendChild(document.createTextNode(startDateStr));
+				//new Date().toString('MM/dd HH:mm')
 				taskBlock.appendChild(document.createTextNode(" (wait "));
 				taskBlock.appendChild(document.createTextNode(days_until_start));
 				taskBlock.appendChild(document.createTextNode(")"));
@@ -342,7 +346,7 @@ function drawOutput(lines){
 			}
 			else if (startDate<today && dueDay<1) {
 				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDate.toDateString()));
+				taskBlock.appendChild(document.createTextNode(startDateStr));
 				taskBlock.appendChild(document.createTextNode(" ("));
 				taskBlock.appendChild(document.createTextNode(0-days_until_start));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
@@ -365,6 +369,8 @@ function drawOutput(lines){
 			if (dueYear.length==2) dueYear = "20"+dueYear;
 			if (dueYear.length==0) dueYear = today.getYear()+1900;
 			var dueDate = new Date(dueYear,dueMonth,dueDay);
+			var dueDateStr = dueDate.toDateString();
+			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
 			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = dueDate.getTime();
@@ -378,7 +384,7 @@ function drawOutput(lines){
 			}
 			else if (days_until_due<0) {
 				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDate.toDateString()));
+				taskBlock.appendChild(document.createTextNode(dueDateStr));
 				taskBlock.appendChild(document.createTextNode(" ("));
 				taskBlock.appendChild(document.createTextNode(-days_until_due));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
@@ -393,7 +399,7 @@ function drawOutput(lines){
 			}
 			else {
 				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDate.toDateString()));
+				taskBlock.appendChild(document.createTextNode(dueDateStr));
 				if (startDay<1 || startDate<=today) {
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
@@ -407,23 +413,29 @@ function drawOutput(lines){
 		else (row = row.toUpperCase());
 		if (rowNames.indexOf(row)==-1) {
 			rowNames.push(row);
-			tableRows.push([]);
+			var rowWithMeta = [[],row];
+			tableRows.push(rowWithMeta);
 		}
-		row = rowNames.indexOf(row);
+		rowNum = rowNames.indexOf(row);
 		if (days_until_due<0 || dueDay == 0) { days_until_due = 999; }
 		
 		var taskBlockID = "taskBlock"+taskID;
 		taskBlock.id = taskBlockID;
 		
-		var tableRowMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
-		tableRows[row].push(tableRowMeta);
+		var taskWithMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
+		tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
 	var maxLength = 0;
+
+	for (row = 1 ; row<tableRows.length ; row++) {
+		tableRows[row].sort(mySortFunction);
+	}
+
+	tableRows.sort(myRowSortFunction);
 	
 	for (row = 1 ; row<tableRows.length ; row++) {
 		
-		tableRows[row].sort(mySortFunction);
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row";
 		var thisRowName = document.createElement("div");
@@ -444,23 +456,23 @@ function drawOutput(lines){
 		thisRowName.className = "row-name";
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",rowNames[row])
-		for (n = 0 ; n<tableRows[row].length ; n++) {
-			tableRow.append(tableRows[row][n][3]);
+		for (n = 0 ; n<tableRows[row][0].length ; n++) {
+			tableRow.append(tableRows[row][0][n][3]);
 		}
 
-		if (tableRows[row].length>maxLength) { maxLength=tableRows[row].length; }
+		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 	
 		table.append(tableRow);
 	}
-	
+		
 	table.className = "left-side";
 
 	table.style.flexBasis = 300*maxLength+100+"px";
 	
 	tableRows[0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
-	for (n = 0 ; n<tableRows[0].length ; n++) {
-		miscTasks.append(tableRows[0][n][3]);
+	for (n = 0 ; n<tableRows[0][0].length ; n++) {
+		miscTasks.append(tableRows[0][0][n][3]);
 	}	
 	miscTasks.className = "misc-block";
 	miscTasks.id = "misc-block";
@@ -479,6 +491,13 @@ function drawOutput(lines){
 	});
 }
 
+
+function myRowSortFunction(a,b) {	
+	var compareString = a[1]+" vs "+b[1];
+	if (a[1]=="MISC") return -1;
+	if (b[1]=="MISC") return 1;
+	return mySortFunction(a[0][0],b[0][0]);
+}
 
 function mySortFunction(a,b) {	
 	var debug = 0;
