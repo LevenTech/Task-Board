@@ -273,6 +273,32 @@ function errorHandler(evt) {
 	}
 }
 
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+	var taskID = ev.target.getAttribute("data-taskid");
+	
+	for(var i = 0; i < lines.length; i++) {
+		if(parseInt(lines[i][0]) == taskID) {
+			currentTask = i;
+			break;
+		}
+	}
+
+    ev.dataTransfer.setData("text", currentTask);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var taskID = ev.dataTransfer.getData("text");
+    var rowName = ev.target.getAttribute("data-rowname");
+	lines[taskID][9]=rowName;
+	isSaved = 0;
+	drawOutput(lines);
+}
+
 function drawOutput(lines){
 	$(".toolbar-button").show();
 	//Clear previous data
@@ -315,7 +341,10 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
+		taskBlock.setAttribute("draggable","true");
+		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
+		taskBlock.setAttribute("data-rowname",lines[i][col_row])
 		taskBlock.setAttribute("onclick","editTask(this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
@@ -429,7 +458,6 @@ function drawOutput(lines){
 			}
 		}
 		var rowName = lines[i][col_row];
-		//alert(row);
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
 
@@ -467,6 +495,9 @@ function drawOutput(lines){
 		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row";
+		tableRow.setAttribute("ondrop","drop(event)");
+		tableRow.setAttribute("ondragover","allowDrop(event)");
+		
 		var thisRowName = document.createElement("div");
 		var justTheName = document.createElement("div");
 		justTheName.innerHTML = tableRows[row][1];
@@ -497,6 +528,9 @@ function drawOutput(lines){
 	miscTasks.className = "misc-block";
 	miscTasks.id = "misc-block";
 	miscTasks.setAttribute("data-rowname","")
+	miscTasks.setAttribute("ondrop","drop(event)");
+	miscTasks.setAttribute("ondragover","allowDrop(event)");
+	
 
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
