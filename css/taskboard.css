@@ -42,6 +42,7 @@
 	flex-grow: 1;
 	flex-shrink: 99;
 	flex-basis: auto;
+	min-height:225px;
 	}
 .misc-block:after {
 	clear:both;
