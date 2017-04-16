@@ -185,13 +185,11 @@ function getAsText(fileToRead) {
 	reader.onerror = errorHandler;
 	// Read file into memory as UTF-8      
 	reader.readAsText(fileToRead);
-	var fileName = fileToRead.split("\\");
-	currentFileName = fileName[fileName.length-1];
 }
 
 function loadHandler(event) {
 	var csv = event.target.result;
-	processData(csv);             
+	processData(csv);
 }
 
 function newTaskCopy() {
@@ -304,6 +302,11 @@ function processData(csv) {
     }
 	//console.log(lines);
 	drawOutput(lines);
+	var fullPath = document.getElementById('csvFileInput').value;
+	var fileName = fullPath.split("\\");
+	currentFileName = fileName[fileName.length-1];
+	isSaved = 1;
+	$("#savefile-button").removeAttr('disabled');
 }
 
 function errorHandler(evt) {
@@ -376,6 +379,9 @@ function newFile() {
 	newTask("MISC");
 	drawOutput(lines);
 	currentFileName = "newTaskFile.csv";
+	$(".fileinput-filename").html("newTaskFile.csv");
+	$("span.fileinput-new").hide();
+	$("#savefile-button").removeAttr('disabled');
 	isSaved = 0;
 }
 
