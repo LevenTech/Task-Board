@@ -32,7 +32,7 @@
 </head>
 <body ondrop="dropBody(event)" ondragover="allowDrop(event)">
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
-    <div style="margin:10px;padding:10px;width:350px;float:left;min-width:350px;background:#F0F0F0;margin-left:15px;">
+    <div style="height:100px;margin:10px;padding:10px;width:350px;float:left;min-width:350px;background:#F0F0F0;margin-left:15px;">
 		<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput">
 			<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="float:left;margin:10px;">
 				<i class="fa fa-file-code-o" aria-hidden="true" style="margin-right:10px;"></i>New File
@@ -54,10 +54,15 @@
 		</div>
 		<span id="result"></span>
 	</div>
-	<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" style="margin:30px;" disabled>
-		<div style="float:left;"><i class="fa fa-floppy-o" aria-hidden="true" style="font-size:300%;margin-right:10px;"></i></div>
-		<div style="float:left;text-align:left;">Save<br/>File</div>
-	</button>
+	<div style="float:left;">
+		<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" style="margin:30px;" disabled>
+			<div style="float:left;"><i class="fa fa-floppy-o" aria-hidden="true" style="font-size:300%;margin-right:10px;"></i></div>
+			<div style="float:left;text-align:left;">Save<br/>File</div>
+		</button>
+	</div>
+	<div id="finish-area" ondrop="dropFinish(event)" ondragover="allowDrop(event)" style="display:none;height:100px;margin:10px;padding:10px;width:200px;float:right;background:#000000;margin-right:15px;text-align:center;color:#FFFFFF;">
+			<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:10px;"></i> Finished
+	</div>
 	<br/>
 	<div id="divDialog">
 		<textarea cols="20" rows="12" id="taskDetailsInput" ></textarea>

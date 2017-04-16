@@ -298,6 +298,7 @@ function processData(csv) {
 	currentFileName = fileName[fileName.length-1];
 	isSaved = 1;
 	$("#savefile-button").removeAttr('disabled');
+	$("#finish-area").show();
 }
 
 function errorHandler(evt) {
@@ -333,6 +334,14 @@ function drop(ev) {
 	drawOutput(lines);
 }
 
+function dropFinish(ev) {
+    ev.preventDefault();
+    var taskID = ev.dataTransfer.getData("text");
+	currentTask = taskID;
+	completeTask();
+	ev.stopPropagation();
+}
+	
 function dropBody(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
@@ -367,13 +376,14 @@ function newFile() {
 	}
 	var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
 	lines = [line];
-	newTask("MISC","New Misc Task");
+	newTask("","New Misc Task");
 	newTask("ROW","New Grouped Task");
 	drawOutput(lines);
 	currentFileName = "newTaskFile.csv";
 	$(".fileinput-filename").html("newTaskFile.csv");
 	$("span.fileinput-new").hide();
 	$("#savefile-button").removeAttr('disabled');
+	$("#finish-area").show();
 	isSaved = 0;
 }
 
