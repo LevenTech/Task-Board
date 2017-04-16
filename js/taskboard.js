@@ -248,7 +248,7 @@ function newTaskCopy() {
 	isSaved = 0;
 }
 
-function newTask(rowName) {
+function newTask(rowName,taskName) {
 	for (var j = 0; j < lines[0].length; j++) {
 		if (lines[0][j]=="TaskNum") var col_ID = j;
 		if (lines[0][j]=="Task") var col_task = j;
@@ -266,7 +266,8 @@ function newTask(rowName) {
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	newTask[col_ID] = lastTaskID;
-	newTask[col_task] = "New Task";
+	if (!taskName) taskName = "New Task";
+	newTask[col_task] = taskName;
 	newTask[col_row] = rowName;
 	lines.push(newTask);
 	drawOutput(lines);
@@ -376,7 +377,8 @@ function newFile() {
 	}
 	var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
 	lines = [line];
-	newTask("MISC");
+	newTask("MISC","New Misc Task");
+	newTask("ROW","New Grouped Task");
 	drawOutput(lines);
 	currentFileName = "newTaskFile.csv";
 	$(".fileinput-filename").html("newTaskFile.csv");
