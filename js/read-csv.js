@@ -3,6 +3,7 @@ var lines = [];
 var lastTaskID = 0;
 var currentTask = 0;
 var isSaved = 1;
+var currentName = "newTaskFile.csv";
 
 window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
@@ -12,11 +13,24 @@ $(document).ready(function() {
 	var opt = { autoOpen: false	};
 	$("#divDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
+	$("#newRowDialog").dialog(opt).dialog("close");
+	$("#saveDialog").dialog(opt).dialog("close");
 	$("#taskDetailsInput").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask(currentTask);
 			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+	$("#newRowName").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			var rowName = $("#newRowName").val();
+			lines[currentTask][9]=rowName;
+			drawOutput(lines);
+			$("#newRowDialog").dialog("close");
+			currentTask = "";
 			return false;
 		}
 	});
@@ -43,15 +57,42 @@ function updateTask() {
 	isSaved = 0;
 }
 
+function showSaveDialog(fileToOpen) {
+		var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Save File?',
+		position: {my: "center center", at: "center center", of: "body"},
+		buttons: { 
+			Yes: function() {
+				saveFile();
+				$("#saveDialog").dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+			},
+			No: function () {
+				$("#saveDialog").dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+			}
+		}
+    };
+	$("#saveDialog").dialog(opt).dialog("open");
+}
 
 function handleFiles(files) {
-	// Check for the various File API support.
-	if (window.FileReader) {
-		// FileReader are supported.
-		getAsText(files[0]);
-	} else {
-		alert('FileReader are not supported in this browser.');
+
+	if (isSaved!==1) {
+		showSaveDialog(files[0]);
 	}
+	else 
+		// Check for the various File API support.
+		if (window.FileReader) {
+			// FileReader are supported.
+			getAsText(files[0]);
+		} else {
+			alert('FileReader are not supported in this browser.');
+		}
 }
 
 function completeTask() {
@@ -144,6 +185,8 @@ function getAsText(fileToRead) {
 	reader.onerror = errorHandler;
 	// Read file into memory as UTF-8      
 	reader.readAsText(fileToRead);
+	var fileName = fileToRead.split("\\");
+	currentFileName = fileName[fileName.length-1];
 }
 
 function loadHandler(event) {
@@ -243,15 +286,11 @@ function saveFile() {
 
 	var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 
-	var fileName = document.getElementById("csvFileInput").value;
-	fileName = fileName.split("\\");
-	fileName = fileName[fileName.length-1];
-	
 	var encodedUri = encodeURI(csvContent);
 	var url = URL.createObjectURL(blob);
 	var link = document.createElement("a");
 	link.setAttribute("href", url);
-	link.setAttribute("download", fileName);
+	link.setAttribute("download", currentFileName);
 	document.body.appendChild(link); // Required for FF
 	link.click();
 	isSaved = 1;
@@ -292,6 +331,7 @@ function drag(ev) {
 
 function drop(ev) {
     ev.preventDefault();
+	ev.stopPropagation();
     var taskID = ev.dataTransfer.getData("text");
     var rowName = ev.target.getAttribute("data-rowname");
 	lines[taskID][9]=rowName;
@@ -299,8 +339,48 @@ function drop(ev) {
 	drawOutput(lines);
 }
 
+function dropBody(ev) {
+    ev.preventDefault();
+    var taskID = ev.dataTransfer.getData("text");
+	currentTask = taskID;
+	$("#newRowName").val("");
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Complete Task?',
+		position: {my: "center center", at: "center center", of: "body"},
+		buttons: { 
+			OK: function() {
+				var rowName = $("newRowName").val();
+				lines[taskID][9]=rowName;
+				isSaved = 0;
+				drawOutput(lines);
+				$("#newRowDialog").dialog("close");
+			},
+			Cancel: function () {
+				$("#newRowDialog").dialog("close");
+			}
+		}
+    };
+	$("#newRowDialog").dialog(opt).dialog("open");	
+}
+
+function newFile() {
+	if (isSaved!==1) {
+		showSaveDialog();
+	}
+	var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
+	lines = [line];
+	newTask("MISC");
+	drawOutput(lines);
+	currentFileName = "newTaskFile.csv";
+	isSaved = 0;
+}
+
 function drawOutput(lines){
-	$(".toolbar-button").show();
+	$(".savefile-button").show();
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
