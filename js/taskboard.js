@@ -18,7 +18,7 @@ $(document).ready(function() {
 	$("#taskDetailsInput").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask(currentTask);
+			updateTask();
 			$("#divDialog").dialog("close");
 			return false;
 		}
@@ -38,19 +38,10 @@ $(document).ready(function() {
 
 
 function updateTask() {
-	var newString = currentTask + "\n" + $("#taskDetailsInput").val();
+	var newString = lines[currentTask][0] + "\n" + $("#taskDetailsInput").val();
 	var newStringParts = newString.split(/\r?\n/);
 	for (var k = 0; k< newStringParts.length; k++) {
-		if (newStringParts[k]=="[Start-Month]") newStringParts[k]="";
-		if (newStringParts[k]=="[Start-Day]") newStringParts[k]="";
-		if (newStringParts[k]=="[Start-Year]") newStringParts[k]="";
-		if (newStringParts[k]=="[Due-Month]") newStringParts[k]="";
-		if (newStringParts[k]=="[Due-Day]") newStringParts[k]="";
-		if (newStringParts[k]=="[Due-Year]") newStringParts[k]="";
-		if (newStringParts[k]=="[Color]") newStringParts[k]="";
-		if (newStringParts[k]=="[Category]") newStringParts[k]="";
-		if (newStringParts[k]=="[Complete?]") newStringParts[k]="";
-		if (newStringParts[k]=="[Increment]") newStringParts[k]="";
+		if (newStringParts[k][0]=="[" && newStringParts[k][newStringParts[k].length-1]=="]") newStringParts[k]=""
 	}
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
@@ -127,7 +118,6 @@ function completeTask() {
 
 function editTask(target) {
 	var taskID = target.getAttribute("data-taskid");
-	
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
@@ -418,6 +408,7 @@ function drawOutput(lines){
 	//alert(lines.length);
 	for (var i = 1; i < lines.length; i++) {
 		var taskID = parseInt(lines[i][col_ID]);
+		//var taskID = i;
 		//alert(lines[i][col_ID]);
 		//alert(taskID);
 		if (isNaN(taskID)) { continue; }
