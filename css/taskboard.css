@@ -1,0 +1,78 @@
+.task-block {
+	display:inline-block;
+	text-align: center;
+	padding: 10px;
+	margin: 10px;
+	font-family: arial;
+	font-size: 15px;
+	width: 250px;
+	height: 150px;
+	float:left;
+	}
+.now-task {
+	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
+	}
+.later-task {
+	opacity: 0.5;
+	}		
+.task-row:after {
+	clear:both;
+	content:" ";
+	display:table;
+}
+.left-side{
+	float:left;
+	flex-grow: 0;
+	flex-shrink: 1;
+	}
+.task-row {
+	background: #F0F0F0;
+	margin: 10px;
+	padding: 25px;
+	border-radius: 10px;
+	border: 2px solid #000000;
+	}
+.misc-block {
+	background: #F0F0F0;
+	margin:10px;
+	float: left;
+	padding: 25px;
+	border-radius: 10px;
+	border: 2px solid #000000;
+	flex-grow: 1;
+	flex-shrink: 99;
+	flex-basis: auto;
+	}
+.misc-block:after {
+	clear:both;
+	content:" ";
+	display:table;
+}		
+.app-header {
+	color: #fff;
+	text-shadow: -1px -1px 0 #000,1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;  
+	-webkit-font-smoothing: antialiased;
+	}
+.row-name {
+	float:left;
+	height:160px;
+	width:30px;
+	position:relative;
+	display:inline-block;
+	}
+.vertical-text {
+	transform: translate(-50%) rotate(-90deg);
+	transform-origin: center center 0;
+	text-align:center;
+	position:absolute;
+	top:50%;
+	left:10px;
+	}
+.toolbar-button {
+	margin:15px;
+	margin-left: 30px;
+}
+.ui-button {
+	font-size: 8px;
+	padding: 2px 2px 2px 2px; /* Or whatever makes it small enough. */
+}
