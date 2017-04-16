@@ -13,105 +13,39 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="js/read-csv.js"></script>
+    <script type="text/javascript" src="js/taskboard.js"></script>
+    <script type="text/javascript" src="js/googleapi.js"></script>
+    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+ 
+	<link rel="stylesheet" href="css/taskboard.css"></style>
+	<link rel="stylesheet" href="css/googleapi.css"></style>
 	<style type="text/css">
-	body {
-		font-family: arial;
-		background: darkgrey;
+		body {
+			font-family: arial;
+			background: darkgrey;
 		}
-	.task-block {
-		display:inline-block;
-		text-align: center;
-		padding: 10px;
-		margin: 10px;
-        font-family: arial;
-        font-size: 15px;
-        width: 250px;
-        height: 150px;
-		float:left;
-		}
-	.now-task {
-		box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-        }
-	.later-task {
-		opacity: 0.5;
-        }		
-	.task-row:after {
-		clear:both;
-		content:" ";
-		display:table;
-	}
-	.left-side{
-		float:left;
-		flex-grow: 0;
-		flex-shrink: 1;
-		}
-	.task-row {
-		background: #F0F0F0;
-		margin: 10px;
-		padding: 25px;
- 		border-radius: 10px;
-		border: 2px solid #000000;
-        }
-	.misc-block {
-		background: #F0F0F0;
-		margin:10px;
-		float: left;
-		padding: 25px;
- 		border-radius: 10px;
-		border: 2px solid #000000;
-		flex-grow: 1;
-		flex-shrink: 99;
-		flex-basis: auto;
-        }
-	.misc-block:after {
-		clear:both;
-		content:" ";
-		display:table;
-	}		
-	.app-header {
-		color: #fff;
-		text-shadow: -1px -1px 0 #000,1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;  
-		-webkit-font-smoothing: antialiased;
-		}
-	.row-name {
-		float:left;
-		height:160px;
-		width:30px;
-		position:relative;
-		display:inline-block;
-		}
-	.vertical-text {
-		transform: translate(-50%) rotate(-90deg);
-		transform-origin: center center 0;
-		text-align:center;
-		position:absolute;
-		top:50%;
-		left:10px;
-		}
-	.toolbar-button {
-		margin:15px;
-		margin-left: 30px;
-	}
-	.ui-button {
-		font-size: 8px;
-		padding: 2px 2px 2px 2px; /* Or whatever makes it small enough. */
-	}
 	</style>
 </head>
 <body ondrop="dropBody(event)" ondragover="allowDrop(event)">
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
     <div style="margin:10px;padding:10px;width:300px;float:left;min-width:300px;background:#F0F0F0;margin-left:15px;">
-          <label for="csvFileInput"> <strong>Select a Task File (*.csv):</strong></label>
-		  <br/><br/>
-		<div class="fileinput fileinput-new" data-provides="fileinput">
+		<label for="csvFileInput"> <strong>Select a Task File (*.csv):</strong></label>
+		<br/><br/>
+		<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput">
 			<span class="btn btn-default btn-file">
 				<i class="fa fa-folder-o" aria-hidden="true" style="margin-right:10px;"></i>
-				<span>Open File</span>
+				<span>Open Local File</span>
 				<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
 			</span>
 			<span class="fileinput-filename"></span><span class="fileinput-new">No file chosen</span>
-		</div>		  
+		</div>
+		<div id="open-drive-file">
+			<button class="btn btn-default btn-file" onclick="createPicker();">
+				<i class="fa fa-folder-o" aria-hidden="true" style="margin-right:10px;"></i>
+				<span>Open Drive File</span>
+			</button>
+		</div>
+		<span id="result"></span>
 	</div>
 	<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()">
 		<i class="fa fa-file-code-o" aria-hidden="true" style="margin-right:10px;"></i>New File
@@ -119,7 +53,6 @@
 	<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" disabled>
 		<i class="fa fa-floppy-o" aria-hidden="true" style="margin-right:10px;"></i>Save File
 	</button>
-    </div>
 	<br/>
 	<div id="divDialog">
 		<textarea cols="20" rows="12" id="taskDetailsInput" ></textarea>
@@ -134,6 +67,6 @@
 		Name your new row:
 		<input id="newRowName" width="50px"></input>
 	</div>
-  <div id="output" style="width:100%;display:flex;flex-direction:row;"></div>
+	<div id="output" style="width:100%;display:flex;flex-direction:row;"></div>
 </body>
 </html>
