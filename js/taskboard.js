@@ -11,10 +11,13 @@ window.onbeforeunload = function() {
 
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
+
 	$("#divDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
+	$(".my-dialog").show();
+	
 	$("#taskDetailsInput").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
@@ -34,6 +37,7 @@ $(document).ready(function() {
 			return false;
 		}
 	});
+	$("#size-slider").slider();	
 });
 
 
@@ -388,6 +392,7 @@ function newFile() {
 }
 
 function drawOutput(lines){
+	if (typeof lines[0] =="undefined") {return;}
 	$(".savefile-button").show();
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
@@ -414,7 +419,9 @@ function drawOutput(lines){
 		if (lines[0][j]=="Complete?") var col_complete = j;
 		if (lines[0][j]=="Increment") var col_increment = j;
 	}
-
+	
+	var myFontSize = $( "#font-size" ).val();
+	
 	//alert(lines.length);
 	for (var i = 1; i < lines.length; i++) {
 		var taskID = parseInt(lines[i][col_ID]);
@@ -430,10 +437,13 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
+		if (myFontSize=="Small") taskBlock.className += " small-block"
+		if (myFontSize=="Medium") taskBlock.className += " medium-block"
+		if (myFontSize=="Large") taskBlock.className += " large-block"
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
-		taskBlock.setAttribute("data-rowname",lines[i][col_row])
+		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.setAttribute("onclick","editTask(this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
@@ -594,6 +604,9 @@ function drawOutput(lines){
 
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
+		if (myFontSize=="Small") thisRowName.className += " row-name-small"
+		if (myFontSize=="Medium") thisRowName.className += " row-name-medium"
+		if (myFontSize=="Large") thisRowName.className += " row-name-large"
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
 		for (n = 0 ; n<tableRows[row][0].length ; n++) {
@@ -607,7 +620,7 @@ function drawOutput(lines){
 		
 	table.className = "left-side";
 
-	table.style.flexBasis = 300*maxLength+100+"px";
+	//table.style.flexBasis = 300*maxLength+100+"px";
 	
 	tableRows[0][0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
@@ -616,10 +629,13 @@ function drawOutput(lines){
 	}	
 	miscTasks.className = "misc-block";
 	miscTasks.id = "misc-block";
+
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
 	miscTasks.setAttribute("ondragover","allowDrop(event)");
-	
+	if (myFontSize=="Small") miscTasks.className += " misc-block-small"
+	if (myFontSize=="Medium") miscTasks.className += " misc-block-medium"
+	if (myFontSize=="Large") miscTasks.className += " misc-block-large"
 
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
@@ -668,3 +684,23 @@ function mySortFunction(a,b) {
 	}
 }
 
+  $( function() {
+    $( "#font-size-slider" ).slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 1,
+      max: 3,
+      value: 2,
+      slide: function( event, ui ) {
+		var sliderValue = ui.value.toString();
+		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
+		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
+		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+		drawOutput(lines);
+      }
+    });
+    var sliderValue = $( "#font-size-slider" ).slider( "value" )
+	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
+	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
+	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+  } );

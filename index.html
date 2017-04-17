@@ -60,20 +60,29 @@
 			<div style="float:left;text-align:left;">Save<br/>File</div>
 		</button>
 	</div>
+
+	<div style="float:left;margin-top:30px;margin-left:15px;">
+		<p style="margin-left:10px;">
+		  <label for="font-size">Size:</label>
+		  <input type="text" id="font-size" readonly style="text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
+		</p>
+		<div id="font-size-slider" style="width:150px;"></div>
+	</div>
+ 
 	<div id="finish-area" ondrop="dropFinish(event)" ondragover="allowDrop(event)" style="display:none;height:100px;margin:10px;padding:10px;width:200px;float:right;background:#000000;margin-right:15px;text-align:center;color:#FFFFFF;">
 			<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:10px;"></i> Finished
 	</div>
 	<br/>
-	<div id="divDialog">
-		<textarea cols="20" rows="12" id="taskDetailsInput" ></textarea>
+	<div class="my-dialog" id="divDialog">
+		<textarea cols="20" rows="12" id="taskDetailsInput"></textarea>
 	</div>
-	<div id="completeDialog">
+	<div class="my-dialog" id="completeDialog">
 		Are you sure you want to complete the task "<span id="completeTaskName" ></span>"?
 	</div>
-	<div id="saveDialog">
+	<div class="my-dialog" id="saveDialog">
 		This file has not been saved, and you're about to lose your changes. Save it now?
 	</div>
-	<div id="newRowDialog">
+	<div class="my-dialog" id="newRowDialog">
 		Name your new row:
 		<input id="newRowName" width="50px"></input>
 	</div>
