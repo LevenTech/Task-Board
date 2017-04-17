@@ -139,7 +139,7 @@ function completeTask() {
         modal: true,
         width: 305,
         height:300,
-        title: 'Complete Task?',
+        title: 'Complete Task',
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
@@ -151,14 +151,11 @@ function completeTask() {
 			},
 			No: function () {
 				$("#completeDialog").dialog("close");
-				$("#editDialog").dialog("open");
 			}
 		}
     };
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
-	
-	$("#editDialog").dialog("close");
 	$("#completeDialog").dialog(opt).dialog("open");
 }
 
@@ -207,10 +204,6 @@ function editTask(target) {
         title: 'Edit Task',
 		position: {my: "center top", at: "center top", of: taskBlockID},
 		buttons: { 
-			Complete: function() {
-				completeTask(currentTask);
-				$("#editDialog").dialog("close");
-			},
 			Save: function() {
 				updateTask(currentTask);
 				$("#editDialog").dialog("close");
@@ -431,7 +424,7 @@ function newRow(ev) {
         modal: true,
         width: 305,
         height:300,
-        title: 'Moving Task to New Row',
+        title: 'Move Task to New Row',
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			OK: function() {
