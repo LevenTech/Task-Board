@@ -192,7 +192,12 @@ function editTask(target) {
 	
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
-	if (myColor[0]=="#") document.getElementById("colorpicker2").value = lines[currentTask][col_color];
+	if (myColor=="") { document.getElementById("colorpicker2").value = colourNameToHex("LemonChiffon") }
+	if (myColor[0]=="#") { document.getElementById("colorpicker2").value = myColor }
+	else { 
+		var hexColor = colourNameToHex(myColor);
+		if (hexColor[0]=="#") { document.getElementById("colorpicker2").value = hexColor }
+	}
 	$("#rowpicker").val(lines[currentTask][col_row]);
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
 	$("#namepicker").val(lines[currentTask][col_task]);
@@ -212,7 +217,7 @@ function editTask(target) {
 			},
 			Cancel: function () {
 				$("#colorpicker").val("");
-				document.getElementById("colorpicker2").value = "";
+				document.getElementById("colorpicker2").value = "#000000";
 				$("#rowpicker").val("");
 				$("#incrementpicker").val("");
 				$("#namepicker").val("");
@@ -266,6 +271,13 @@ function updateTask() {
 
 function colorpicked() {
 	$("#colorpicker").val(document.getElementById("colorpicker2").value);
+}
+
+function colortyped() {
+	var newColor = $("#colorpicker").val();
+	if (newColor=="") newColor = "LemonChiffon";
+	var hexColor = colourNameToHex(newColor);
+	if (hexColor[0]=="#") document.getElementById("colorpicker2").value=hexColor;
 }
 
 function getAsText(fileToRead) {

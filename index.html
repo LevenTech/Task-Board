@@ -17,6 +17,7 @@
 
     <script type="text/javascript" src="js/taskboard.js"></script>
     <script type="text/javascript" src="js/googleapi.js"></script>
+    <script type="text/javascript" src="js/colorconvert.js"></script>
 
     <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
  
@@ -85,8 +86,8 @@
 			<tr style="height:30px;">
 				<td>Color:</td>
 				<td>
-					<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();"/></td>
-					<td><input style="float:left;width:175px;" type="text" id="colorpicker"></td></tr></table>
+					<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();" /></td>
+					<td><input style="float:left;width:175px;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
 				</td>
 			</tr>
 			<tr><td>Interval:</td><td><input type="text" id="incrementpicker"></td></tr>
