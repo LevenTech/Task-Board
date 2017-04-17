@@ -197,9 +197,9 @@ function editTask(target) {
         autoOpen: false,
         modal: true,
         width: 350,
-        height:450,
+        height:350,
         title: 'Edit Task',
-		position: {my: "left top", at: "left top", of: taskBlockID},
+		position: {my: "center top", at: "center top", of: taskBlockID},
 		buttons: { 
 			Complete: function() {
 				completeTask(currentTask);
