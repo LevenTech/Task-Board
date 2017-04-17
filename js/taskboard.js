@@ -95,7 +95,7 @@ function showSaveDialog(fileToOpen) {
         width: 305,
         height:300,
         title: 'Save File?',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: window},
 		buttons: { 
 			Yes: function() {
 				saveFile();
@@ -206,10 +206,10 @@ function editTask(target) {
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 350,
-        height:350,
+        width: 360,
+        height:360,
         title: 'Edit Task',
-		position: {my: "center top", at: "center top", of: taskBlockID},
+		position: {my: "center center", at: "center center", of: taskBlockID},
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
@@ -464,7 +464,7 @@ function newRow(ev) {
         width: 305,
         height:300,
         title: 'Move Task to New Row',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: window},
 		buttons: { 
 			OK: function() {
 				var rowName = $("#newRowName").val();
