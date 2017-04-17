@@ -76,7 +76,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			var rowName = $("#newRowName").val();
-			lines[currentTask][9]=rowName;
+			lines[currentTask][col_row]=rowName;
 			drawOutput(lines);
 			$("#newRowDialog").dialog("close");
 			currentTask = "";
@@ -402,7 +402,7 @@ function drop(ev) {
 	ev.stopPropagation();
     var taskID = ev.dataTransfer.getData("text");
     var rowName = ev.target.getAttribute("data-rowname");
-	lines[taskID][9]=rowName;
+	lines[currentTask][col_row]=rowName;
 	isSaved = 0;
 	drawOutput(lines);
 }
@@ -444,6 +444,18 @@ function dropBody(ev) {
 }
 
 function newFile() {
+	col_ID = 0;
+	col_task = 1;
+	col_row = 2;
+	col_duemonth = 3;
+	col_dueday = 4;
+	col_dueyear = 5;
+	col_startmonth = 6;
+	col_startday = 7;
+	col_startyear = 8;
+	col_color = 9;
+	col_complete = 10;
+	col_increment = 11;
 	if (isSaved!==1) {
 		showSaveDialog();
 	}
