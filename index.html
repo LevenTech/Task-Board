@@ -31,7 +31,7 @@
 	</style>
 
 </head>
-<body ondrop="dropBody(event)" ondragover="allowDrop(event)">
+<body ondrop="newRow(event)" ondragover="allowDrop(event)">
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
     <div style="height:100px;margin:10px;padding:10px;width:350px;float:left;min-width:350px;background:#F0F0F0;margin-left:15px;">
 		<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput">
@@ -74,7 +74,7 @@
 			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished
 	</div>
 	<br/>
-	<div class="my-dialog" id="divDialog">
+	<div class="my-dialog" id="editDialog">
 		<div style="float:left;">
 			<table>
 			<tr><td style="min-width:100px;">Task Name:</td><td><textarea type="text" cols="21" rows="2" id="namepicker"></textarea></td></tr>
