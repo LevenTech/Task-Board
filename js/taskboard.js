@@ -278,34 +278,49 @@ function newTaskCopy() {
 
 	var one_day=1000*60*60*24;
 	
+	var dueDay = lines[currentTask][col_dueday];
 	var dueYear=lines[currentTask][col_dueyear];
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
 	var dueMonth = lines[currentTask][col_duemonth]-1;
-	var dueDay = lines[currentTask][col_dueday];
 	var dueDate = new Date(dueYear,dueMonth,dueDay);			
-	
-	var startDay = lines[currentTask][col_startday];
-	if (startDay>0) {
-		var startYear=lines[currentTask][col_startyear];
-		if (startYear.length==2) startYear = "20"+startYear;
-		if (startYear.length==0) startYear = today.getYear()+1900;
-		var startMonth=lines[currentTask][col_startmonth]-1;
-		var startDate = new Date(startYear,startMonth,startDay);
-		var start_offset = dueDate.getTime() - startDate.getTime();
-	}
-	var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
-	newTask[col_duemonth] = new_duedate.getMonth()+1;
-	newTask[col_dueday] = new_duedate.getDate();
-	newTask[col_dueyear] = new_duedate.getYear()+1900;
 
+	var startDay = lines[currentTask][col_startday];
+	var startYear=lines[currentTask][col_startyear];
+	if (startYear.length==2) startYear = "20"+startYear;
+	if (startYear.length==0) startYear = today.getYear()+1900;
+	var startMonth=lines[currentTask][col_startmonth]-1;
+	var startDate = new Date(startYear,startMonth,startDay);
+	var start_offset = dueDate.getTime() - startDate.getTime();
+		
 	if (startDay>0) {
-		var new_startdate = new Date(new_duedate.getTime() - start_offset);
+
+		var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
 		newTask[col_startmonth] = new_startdate.getMonth()+1;
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
+		
+		if(dueDay>0) {
+			var new_duedate = new Date(new_startdate.getTime() + start_offset);
+			newTask[col_duemonth] = new_duedate.getMonth()+1;
+			newTask[col_dueday] = new_duedate.getDate();
+			newTask[col_dueyear] = new_duedate.getYear()+1900;
+		}
 	}
-	
+	else if (dueDay>0) {
+		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
+		newTask[col_duemonth] = new_duedate.getMonth()+1;
+		newTask[col_dueday] = new_duedate.getDate();
+		newTask[col_dueyear] = new_duedate.getYear()+1900;
+
+		if (startDay>0) {
+			var new_startdate = new Date(new_duedate.getTime() - start_offset);
+			newTask[col_startmonth] = new_startdate.getMonth()+1;
+			newTask[col_startday] = new_startdate.getDate();
+			newTask[col_startyear] = new_startdate.getYear()+1900;
+		}
+	}
+
 	lines.push(newTask);
 	drawOutput(lines);
 	isSaved = 0;
@@ -362,7 +377,7 @@ function processData(csv) {
 		if (lines[0][j]=="Start-Year") col_startyear = j;
 		if (lines[0][j]=="Color") col_color = j;
 		if (lines[0][j]=="Complete?") col_complete = j;
-		if (lines[0][j]=="Increment") col_increment = j;
+		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
 	}
 	drawOutput(lines);
 	var fullPath = document.getElementById('csvFileInput').value;
@@ -447,7 +462,7 @@ function newFile() {
 		showSaveDialog();
 	}
 	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
+		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval"];
 		lines = [line];
 		newTask("","New Misc Task");
 		newTask("ROW","New Grouped Task");
@@ -628,7 +643,8 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		if (days_until_due<0 || dueDay == 0) { days_until_due = 999; }
+		if (days_until_start.length==0) { days_until_start = 999; }  //Make blank sort after everything else
+		if (days_until_due.length==0) { days_until_due = 999; }
 		
 		var taskBlockID = "taskBlock"+taskID;
 		taskBlock.id = taskBlockID;
