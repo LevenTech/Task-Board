@@ -421,7 +421,6 @@ function drop(ev) {
 	ev.stopPropagation();
     var taskID = ev.dataTransfer.getData("text");
     var rowName = ev.target.getAttribute("data-rowname");
-	alert(taskID + " to " + rowName);
 	lines[taskID][col_row]=rowName;
 	isSaved = 0;
 	drawOutput(lines);
