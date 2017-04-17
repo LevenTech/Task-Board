@@ -190,7 +190,9 @@ function editTask(target) {
 	}
 	else $("#datepicker-due").datepicker("setDate","");
 	
-	$("#colorpicker").val(lines[currentTask][col_color]);
+	var myColor = lines[currentTask][col_color];
+	$("#colorpicker").val(myColor);
+	if (myColor[0]=="#") document.getElementById("colorpicker2").value = lines[currentTask][col_color];
 	$("#rowpicker").val(lines[currentTask][col_row]);
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
 	$("#namepicker").val(lines[currentTask][col_task]);
@@ -210,6 +212,7 @@ function editTask(target) {
 			},
 			Cancel: function () {
 				$("#colorpicker").val("");
+				document.getElementById("colorpicker2").value = "";
 				$("#rowpicker").val("");
 				$("#incrementpicker").val("");
 				$("#namepicker").val("");
@@ -259,6 +262,10 @@ function updateTask() {
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
 	isSaved = 0;
+}
+
+function colorpicked() {
+	$("#colorpicker").val(document.getElementById("colorpicker2").value);
 }
 
 function getAsText(fileToRead) {
@@ -789,4 +796,5 @@ function mySortFunction(a,b) {
     $( "#datepicker-start" ).datepicker();
     $( "#datepicker-due" ).datepicker();
   } );
+
   

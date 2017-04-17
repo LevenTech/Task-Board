@@ -82,7 +82,13 @@
 			<tr style="height:30px;"><td>Start Date:</td><td><input type="text" id="datepicker-start"></td></tr>
 			<tr><td>Due Date:</td><td><input type="text" id="datepicker-due"></td></tr>
 			<tr style="height:30px;"></tr>
-			<tr style="height:30px;"><td>Color:</td><td><input type="text" id="colorpicker"></td></tr>
+			<tr style="height:30px;">
+				<td>Color:</td>
+				<td>
+					<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();"/></td>
+					<td><input style="float:left;width:175px;" type="text" id="colorpicker"></td></tr></table>
+				</td>
+			</tr>
 			<tr><td>Interval:</td><td><input type="text" id="incrementpicker"></td></tr>
 			</table>
 		</div>
