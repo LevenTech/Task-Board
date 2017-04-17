@@ -209,7 +209,12 @@ function editTask(target) {
 				$("#editDialog").dialog("close");
 			},
 			Cancel: function () {
-				$("#taskDetailsInput").val("");
+				$("#colorpicker").val("");
+				$("#rowpicker").val("");
+				$("#incrementpicker").val("");
+				$("#namepicker").val("");
+				$("#datepicker-due").datepicker("setDate","");
+				$("#datepicker-start").datepicker("setDate","");
 				currentTask = 0;
 				$("#editDialog").dialog("close");
 			}
@@ -416,7 +421,8 @@ function drop(ev) {
 	ev.stopPropagation();
     var taskID = ev.dataTransfer.getData("text");
     var rowName = ev.target.getAttribute("data-rowname");
-	lines[currentTask][col_row]=rowName;
+	alert(taskID + " to " + rowName);
+	lines[taskID][col_row]=rowName;
 	isSaved = 0;
 	drawOutput(lines);
 }
@@ -521,6 +527,9 @@ function drawOutput(lines){
 
 		var name = document.createElement("b");
 		name.innerHTML = lines[i][col_task];
+		name.setAttribute("ondrop","drop(event)");
+		name.setAttribute("ondragover","allowDrop(event)");
+		name.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.appendChild(name);
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);
