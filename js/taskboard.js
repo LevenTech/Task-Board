@@ -4,7 +4,21 @@ var lastTaskID = 0;
 var currentTask = 0;
 var isSaved = 1;
 var currentName = "newTaskFile.csv";
+var today = new Date();
 
+var col_ID = 0;
+var col_task = 0;
+var col_row = 0;
+var col_duemonth = 0;
+var col_dueday = 0;
+var col_dueyear = 0;
+var col_startmonth = 0;
+var col_startday = 0;
+var col_startyear = 0;
+var col_color = 0;
+var col_complete = 0;
+var col_increment = 0;
+		
 window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
 }
@@ -18,7 +32,39 @@ $(document).ready(function() {
 	$("#saveDialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();
 	
-	$("#taskDetailsInput").keypress( function (e) {
+	$("#datepicker-start").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			updateTask();
+			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+	$("#datepicker-due").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			updateTask();
+			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+	$("#colorpicker").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			updateTask();
+			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+	$("#namepicker").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			updateTask();
+			$("#divDialog").dialog("close");
+			return false;
+		}
+	});
+	$("#incrementpicker").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
@@ -41,16 +87,6 @@ $(document).ready(function() {
 });
 
 
-function updateTask() {
-	var newString = lines[currentTask][0] + "\n" + $("#taskDetailsInput").val();
-	var newStringParts = newString.split(/\r?\n/);
-	for (var k = 0; k< newStringParts.length; k++) {
-		if (newStringParts[k][0]=="[" && newStringParts[k][newStringParts[k].length-1]=="]") newStringParts[k]=""
-	}
-	lines[currentTask] = newStringParts;
-	drawOutput(lines);
-	isSaved = 0;
-}
 
 function showSaveDialog(fileToOpen) {
 		var opt = {
@@ -128,28 +164,39 @@ function editTask(target) {
 			break;
 		}
 	}
-	var toDisplay = lines[i].slice();
-	if (toDisplay[2]=="") toDisplay[2]="[Start-Month]";
-	if (toDisplay[3]=="") toDisplay[3]="[Start-Day]";
-	if (toDisplay[4]=="") toDisplay[4]="[Start-Year]";
-	if (toDisplay[5]=="") toDisplay[5]="[Due-Month]";
-	if (toDisplay[6]=="") toDisplay[6]="[Due-Day]";
-	if (toDisplay[7]=="") toDisplay[7]="[Due-Year]";
-	if (toDisplay[8]=="") toDisplay[8]="[Color]";
-	if (toDisplay[9]=="") toDisplay[9]="[Category]";
-	if (toDisplay[10]=="") toDisplay[10]="[Complete?]";
-	if (toDisplay[11]=="") toDisplay[11]="[Increment]";
 
-	toDisplay.shift();
-	var string = toDisplay.join("\r\n");
+	var startDay = lines[currentTask][col_startday];
+	if (startDay>0) {
+		var startYear=lines[currentTask][col_startyear];
+		if (startYear.length==2) startYear = "20"+startYear;
+		if (startYear.length==0) startYear = today.getYear()+1900;
+		var startMonth=lines[currentTask][col_startmonth]-1;
+		var startDate = new Date(startYear,startMonth,startDay);
+		$("#datepicker-start").datepicker("setDate",startDate);
+	}
+	else $("#datepicker-start").datepicker("setDate","");
 
-	$("#taskDetailsInput").val(string);
+	var dueDay = lines[currentTask][col_dueday];
+	if (dueDay>0) {
+		var dueMonth=lines[i][col_duemonth]-1;
+		var dueYear=lines[i][col_dueyear];
+		if (dueYear.length==2) dueYear = "20"+dueYear;
+		if (dueYear.length==0) dueYear = today.getYear()+1900;
+		var dueDate = new Date(dueYear,dueMonth,dueDay);
+		$("#datepicker-due").datepicker("setDate",dueDate);
+	}
+	else $("#datepicker-due").datepicker("setDate","");
+	
+	$("#colorpicker").val(lines[currentTask][col_color]);
+	$("#rowpicker").val(lines[currentTask][col_row]);
+	$("#incrementpicker").val(lines[currentTask][col_increment]);
+	$("#namepicker").val(lines[currentTask][col_task]);
 	
 	var taskBlockID = "#taskBlock"+taskID;
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 265,
+        width: 350,
         height:450,
         title: 'Edit Task',
 		position: {my: "left top", at: "left top", of: taskBlockID},
@@ -172,6 +219,44 @@ function editTask(target) {
 	$("#divDialog").dialog(opt).dialog("open");
 }
 
+function updateTask() {
+	var newStringParts = lines[currentTask].slice();
+
+	var newStartDate = $("#datepicker-start").datepicker("getDate");
+	if (newStartDate==null) {
+		newStringParts[col_startmonth] = "";
+		newStringParts[col_startday] = "";
+		newStringParts[col_startyear] = "";
+	}
+	else {
+		newStringParts[col_startmonth] = newStartDate.getMonth()+1;
+		newStringParts[col_startday] = newStartDate.getDate();
+		newStringParts[col_startyear] = newStartDate.getYear()+1900;
+		if (newStringParts[col_startyear]==today.getYear+1900) newStringParts[col_startyear]="";
+	}
+
+	var newDueDate = $("#datepicker-due").datepicker("getDate");
+	if (newDueDate==null) {
+		newStringParts[col_duemonth]="";
+		newStringParts[col_dueday] = "";
+		newStringParts[col_dueyear] = "";
+	}
+	else {
+		newStringParts[col_duemonth] = newDueDate.getMonth()+1;
+		newStringParts[col_dueday] = newDueDate.getDate();
+		newStringParts[col_dueyear] = newDueDate.getYear()+1900;
+		if (newStringParts[col_dueyear]==today.getYear+1900) newStringParts[col_dueyear]="";
+	}
+
+	newStringParts[col_color]=$("#colorpicker").val();
+	newStringParts[col_increment]=$("#incrementpicker").val();
+	newStringParts[col_task]=$("#namepicker").val();
+	
+	lines[currentTask] = newStringParts;
+	drawOutput(lines);
+	isSaved = 0;
+}
+
 function getAsText(fileToRead) {
 	var reader = new FileReader();
 	// Handle errors load
@@ -187,26 +272,11 @@ function loadHandler(event) {
 }
 
 function newTaskCopy() {
-	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="TaskNum") var col_ID = j;
-		if (lines[0][j]=="Task") var col_task = j;
-		if (lines[0][j]=="Row") var col_row = j;
-		if (lines[0][j]=="Due-Month") var col_duemonth = j;
-		if (lines[0][j]=="Due-Day") var col_dueday = j;
-		if (lines[0][j]=="Due-Year") var col_dueyear = j;
-		if (lines[0][j]=="Start-Month") var col_startmonth = j;
-		if (lines[0][j]=="Start-Day") var col_startday = j;
-		if (lines[0][j]=="Start-Year") var col_startyear = j;
-		if (lines[0][j]=="Color") var col_color = j;
-		if (lines[0][j]=="Complete?") var col_complete = j;
-		if (lines[0][j]=="Increment") var col_increment = j;
-	}
 	var newTask = lines[currentTask].slice();
 	lastTaskID = lastTaskID+1;
 	newTask[col_ID] = lastTaskID;
 	newTask[col_complete] = "";
 
-	var today = new Date();
 	var one_day=1000*60*60*24;
 	
 	var dueYear=lines[currentTask][col_dueyear];
@@ -243,20 +313,6 @@ function newTaskCopy() {
 }
 
 function newTask(rowName,taskName) {
-	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="TaskNum") var col_ID = j;
-		if (lines[0][j]=="Task") var col_task = j;
-		if (lines[0][j]=="Row") var col_row = j;
-		if (lines[0][j]=="Due-Month") var col_duemonth = j;
-		if (lines[0][j]=="Due-Day") var col_dueday = j;
-		if (lines[0][j]=="Due-Year") var col_dueyear = j;
-		if (lines[0][j]=="Start-Month") var col_startmonth = j;
-		if (lines[0][j]=="Start-Day") var col_startday = j;
-		if (lines[0][j]=="Start-Year") var col_startyear = j;
-		if (lines[0][j]=="Color") var col_color = j;
-		if (lines[0][j]=="Complete?") var col_complete = j;
-		if (lines[0][j]=="Increment") var col_increment = j;
-	}
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	newTask[col_ID] = lastTaskID;
@@ -295,7 +351,20 @@ function processData(csv) {
     while (allTextLines.length) {
         lines.push(allTextLines.shift().split(','));
     }
-	//console.log(lines);
+	for (var j = 0; j < lines[0].length; j++) {
+		if (lines[0][j]=="TaskNum") col_ID = j;
+		if (lines[0][j]=="Task") col_task = j;
+		if (lines[0][j]=="Row") col_row = j;
+		if (lines[0][j]=="Due-Month") col_duemonth = j;
+		if (lines[0][j]=="Due-Day") col_dueday = j;
+		if (lines[0][j]=="Due-Year") col_dueyear = j;
+		if (lines[0][j]=="Start-Month") col_startmonth = j;
+		if (lines[0][j]=="Start-Day") col_startday = j;
+		if (lines[0][j]=="Start-Year") col_startyear = j;
+		if (lines[0][j]=="Color") col_color = j;
+		if (lines[0][j]=="Complete?") col_complete = j;
+		if (lines[0][j]=="Increment") col_increment = j;
+	}
 	drawOutput(lines);
 	var fullPath = document.getElementById('csvFileInput').value;
 	var fileName = fullPath.split("\\");
@@ -403,22 +472,7 @@ function drawOutput(lines){
 	var myDay;
 	var myYear;
 
-	var today = new Date();
 
-	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="TaskNum") var col_ID = j;
-		if (lines[0][j]=="Task") var col_task = j;
-		if (lines[0][j]=="Row") var col_row = j;
-		if (lines[0][j]=="Due-Month") var col_duemonth = j;
-		if (lines[0][j]=="Due-Day") var col_dueday = j;
-		if (lines[0][j]=="Due-Year") var col_dueyear = j;
-		if (lines[0][j]=="Start-Month") var col_startmonth = j;
-		if (lines[0][j]=="Start-Day") var col_startday = j;
-		if (lines[0][j]=="Start-Year") var col_startyear = j;
-		if (lines[0][j]=="Color") var col_color = j;
-		if (lines[0][j]=="Complete?") var col_complete = j;
-		if (lines[0][j]=="Increment") var col_increment = j;
-	}
 	
 	var myFontSize = $( "#font-size" ).val();
 	
@@ -705,3 +759,9 @@ function mySortFunction(a,b) {
 	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
 	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
   } );
+  
+  $( function() {
+    $( "#datepicker-start" ).datepicker();
+    $( "#datepicker-due" ).datepicker();
+  } );
+  

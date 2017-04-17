@@ -75,7 +75,17 @@
 	</div>
 	<br/>
 	<div class="my-dialog" id="divDialog">
-		<textarea cols="20" rows="12" id="taskDetailsInput"></textarea>
+		<div style="float:left;">
+			<table>
+			<tr><td style="min-width:100px;">Task Name:</td><td><textarea type="text" cols="21" rows="2" id="namepicker"></textarea></td></tr>
+			<tr style="height:30px;"></tr>
+			<tr style="height:30px;"><td>Start Date:</td><td><input type="text" id="datepicker-start"></td></tr>
+			<tr><td>Due Date:</td><td><input type="text" id="datepicker-due"></td></tr>
+			<tr style="height:30px;"></tr>
+			<tr style="height:30px;"><td>Color:</td><td><input type="text" id="colorpicker"></td></tr>
+			<tr><td>Increment:</td><td><input type="text" id="incrementpicker"></td></tr>
+			</table>
+		</div>
 	</div>
 	<div class="my-dialog" id="completeDialog">
 		Are you sure you want to complete the task "<span id="completeTaskName" ></span>"?
