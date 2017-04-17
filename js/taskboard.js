@@ -619,8 +619,9 @@ function drawOutput(lines){
 	}
 		
 	table.className = "left-side";
-
-	//table.style.flexBasis = 300*maxLength+100+"px";
+	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+"px";
+	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+"px";
+	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+"px";
 	
 	tableRows[0][0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
