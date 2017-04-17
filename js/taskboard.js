@@ -1,24 +1,26 @@
 
 var lines = [];
-var lastTaskID = 0;
-var currentTask = 0;
-var isSaved = 1;
-var currentName = "newTaskFile.csv";
+
 var today = new Date();
 
-var col_ID = 0;
-var col_task = 0;
-var col_row = 0;
-var col_duemonth = 0;
-var col_dueday = 0;
-var col_dueyear = 0;
-var col_startmonth = 0;
-var col_startday = 0;
-var col_startyear = 0;
-var col_color = 0;
-var col_complete = 0;
-var col_increment = 0;
-		
+var currentName = "newTaskFile.csv";
+var isSaved = 1;
+var currentTask = 0;
+var lastTaskID = 0;
+
+var	col_ID = 0;
+var	col_task = 1;
+var	col_row = 2;
+var	col_duemonth = 3;
+var	col_dueday = 4;
+var	col_dueyear = 5;
+var	col_startmonth = 6;
+var	col_startday = 7;
+var	col_startyear = 8;
+var	col_color = 9;
+var col_complete = 10;
+var	col_increment = 11;
+
 window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
 }
@@ -26,7 +28,7 @@ window.onbeforeunload = function() {
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
 
-	$("#divDialog").dialog(opt).dialog("close");
+	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
@@ -36,7 +38,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
-			$("#divDialog").dialog("close");
+			$("#editDialog").dialog("close");
 			return false;
 		}
 	});
@@ -44,7 +46,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
-			$("#divDialog").dialog("close");
+			$("#editDialog").dialog("close");
 			return false;
 		}
 	});
@@ -52,7 +54,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
-			$("#divDialog").dialog("close");
+			$("#editDialog").dialog("close");
 			return false;
 		}
 	});
@@ -60,7 +62,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
-			$("#divDialog").dialog("close");
+			$("#editDialog").dialog("close");
 			return false;
 		}
 	});
@@ -68,7 +70,7 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			updateTask();
-			$("#divDialog").dialog("close");
+			$("#editDialog").dialog("close");
 			return false;
 		}
 	});
@@ -86,8 +88,6 @@ $(document).ready(function() {
 	$("#size-slider").slider();	
 });
 
-
-
 function showSaveDialog(fileToOpen) {
 		var opt = {
         autoOpen: false,
@@ -99,13 +99,19 @@ function showSaveDialog(fileToOpen) {
 		buttons: { 
 			Yes: function() {
 				saveFile();
-				$("#saveDialog").dialog("close");
+				$("#saveDialog").dialog(opt).dialog("close");
 				if (fileToOpen) { getAsText(fileToOpen); }
+				else { newFile(); }
 			},
 			No: function () {
-				$("#saveDialog").dialog("close");
+				isSaved = 1;
+				$("#saveDialog").dialog(opt).dialog("close");
 				if (fileToOpen) { getAsText(fileToOpen); }
-			}
+				else { newFile(); }
+			},
+			Cancel: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+			}			
 		}
     };
 	$("#saveDialog").dialog(opt).dialog("open");
@@ -145,14 +151,14 @@ function completeTask() {
 			},
 			No: function () {
 				$("#completeDialog").dialog("close");
-				$("#divDialog").dialog("open");
+				$("#editDialog").dialog("open");
 			}
 		}
     };
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
 	
-	$("#divDialog").dialog("close");
+	$("#editDialog").dialog("close");
 	$("#completeDialog").dialog(opt).dialog("open");
 }
 
@@ -203,20 +209,20 @@ function editTask(target) {
 		buttons: { 
 			Complete: function() {
 				completeTask(currentTask);
-				$("#divDialog").dialog("close");
+				$("#editDialog").dialog("close");
 			},
 			Save: function() {
 				updateTask(currentTask);
-				$("#divDialog").dialog("close");
+				$("#editDialog").dialog("close");
 			},
 			Cancel: function () {
 				$("#taskDetailsInput").val("");
 				currentTask = 0;
-				$("#divDialog").dialog("close");
+				$("#editDialog").dialog("close");
 			}
 		}		
 	};
-	$("#divDialog").dialog(opt).dialog("open");
+	$("#editDialog").dialog(opt).dialog("open");
 }
 
 function updateTask() {
@@ -415,7 +421,7 @@ function dropFinish(ev) {
 	ev.stopPropagation();
 }
 	
-function dropBody(ev) {
+function newRow(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
@@ -425,12 +431,12 @@ function dropBody(ev) {
         modal: true,
         width: 305,
         height:300,
-        title: 'Complete Task?',
+        title: 'Moving Task to New Row',
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			OK: function() {
-				var rowName = $("newRowName").val();
-				lines[taskID][9]=rowName;
+				var rowName = $("#newRowName").val();
+				lines[taskID][col_row]=rowName;
 				isSaved = 0;
 				drawOutput(lines);
 				$("#newRowDialog").dialog("close");
@@ -444,32 +450,22 @@ function dropBody(ev) {
 }
 
 function newFile() {
-	col_ID = 0;
-	col_task = 1;
-	col_row = 2;
-	col_duemonth = 3;
-	col_dueday = 4;
-	col_dueyear = 5;
-	col_startmonth = 6;
-	col_startday = 7;
-	col_startyear = 8;
-	col_color = 9;
-	col_complete = 10;
-	col_increment = 11;
 	if (isSaved!==1) {
 		showSaveDialog();
 	}
-	var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
-	lines = [line];
-	newTask("","New Misc Task");
-	newTask("ROW","New Grouped Task");
-	drawOutput(lines);
-	currentFileName = "newTaskFile.csv";
-	$(".fileinput-filename").html("newTaskFile.csv");
-	$("span.fileinput-new").hide();
-	$("#savefile-button").removeAttr('disabled');
-	$("#finish-area").show();
-	isSaved = 0;
+	else {
+		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Increment"];
+		lines = [line];
+		newTask("","New Misc Task");
+		newTask("ROW","New Grouped Task");
+		drawOutput(lines);
+		currentFileName = "newTaskFile.csv";
+		$(".fileinput-filename").html("newTaskFile.csv");
+		$("span.fileinput-new").hide();
+		$("#savefile-button").removeAttr('disabled');
+		$("#finish-area").show();
+		isSaved = 0;
+	}
 }
 
 function drawOutput(lines){
@@ -685,9 +681,9 @@ function drawOutput(lines){
 	}
 		
 	table.className = "left-side";
-	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+"px";
-	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+"px";
-	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+"px";
+	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+50+"px";
+	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+50+"px";
+	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+50+"px";
 	
 	tableRows[0][0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
