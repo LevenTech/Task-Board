@@ -21,6 +21,8 @@ var	col_color = 9;
 var col_complete = 10;
 var	col_increment = 11;
 
+var dragcounter = 0;
+
 window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
 }
@@ -148,9 +150,15 @@ function completeTask() {
 				$("#completeDialog").dialog("close");
 				isSaved = 0;
 				drawOutput(lines);
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").show();
 			},
 			No: function () {
 				$("#completeDialog").dialog("close");
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
 			}
 		}
     };
@@ -418,8 +426,80 @@ function errorHandler(evt) {
 	}
 }
 
+function highlightRow(ev) {
+    ev.preventDefault();
+	dragcounter++;
+	console.log(dragcounter);
+	if (ev.target.className.substr(0,8)=="task-row") {
+		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
+		$(".task-row").removeClass("hover-row")
+		$(".task-row").addClass("normal-row")
+		$(".misc-block").removeClass("hover-row")
+		$(".misc-block").addClass("normal-row")
+		if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
+			ev.target.className = "task-row hover-row";
+		}
+	}
+}
+function unhighlightRow(ev) {
+	dragcounter--;
+	console.log(dragcounter);
+	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
+		if (ev.target.className.substr(0,8)=="task-row") {
+			ev.target.className = "task-row normal-row";
+		}
+	}
+}
+
+function highlightMisc(ev) {
+    ev.preventDefault();
+	dragcounter++;
+	if (ev.target.className.substr(0,10)=="misc-block") {
+		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
+		$(".task-row").removeClass("hover-row")
+		$(".task-row").addClass("normal-row")
+		if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
+			ev.target.className = "misc-block hover-row";
+			var myFontSize = $( "#font-size" ).val();
+			if (myFontSize=="Small") ev.target.className += " misc-block-small"
+			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
+			if (myFontSize=="Large") ev.target.className += " misc-block-large"
+		}
+	}
+}
+function unhighlightMisc(ev) {
+	dragcounter--;
+	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
+		if (ev.target.className.substr(0,10)=="misc-block") {
+			ev.target.className = "misc-block normal-row";
+			var myFontSize = $( "#font-size" ).val();
+			if (myFontSize=="Small") ev.target.className += " misc-block-small"
+			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
+			if (myFontSize=="Large") ev.target.className += " misc-block-large"
+		}
+	}
+}
+
+
+
+
 function allowDrop(ev) {
     ev.preventDefault();
+}
+
+function highlightFinish(ev) {
+    ev.preventDefault();
+	$("#finish-area").removeClass("normal-finish");
+	$("#finish-area").addClass("hover-finish");
+	$("#finish-instructions").show();
+}
+function unhighlightFinish(ev) {
+    ev.preventDefault();
+	$("#finish-area").removeClass("hover-finish");
+	$("#finish-area").addClass("normal-finish");
+	$("#finish-instructions").hide();
 }
 
 function drag(ev) {
@@ -436,6 +516,7 @@ function drag(ev) {
 }
 
 function drop(ev) {
+	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
     var taskID = ev.dataTransfer.getData("text");
@@ -691,9 +772,11 @@ function drawOutput(lines){
 	for (row = 1 ; row<tableRows.length ; row++) {
 		
 		var tableRow = document.createElement("div");
-		tableRow.className = "task-row";
+		tableRow.className = "task-row normal-row";
+		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.setAttribute("ondrop","drop(event)");
-		tableRow.setAttribute("ondragover","allowDrop(event)");
+		tableRow.setAttribute("ondragenter","highlightRow(event)");
+		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
 		
 		var thisRowName = document.createElement("div");
 		var justTheName = document.createElement("div");
@@ -726,12 +809,15 @@ function drawOutput(lines){
 	for (n = 0 ; n<tableRows[0][0].length ; n++) {
 		miscTasks.append(tableRows[0][0][n][3]);
 	}	
-	miscTasks.className = "misc-block";
+	miscTasks.className = "misc-block normal-row";
 	miscTasks.id = "misc-block";
 
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
 	miscTasks.setAttribute("ondragover","allowDrop(event)");
+	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
+	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
+	
 	if (myFontSize=="Small") miscTasks.className += " misc-block-small"
 	if (myFontSize=="Medium") miscTasks.className += " misc-block-medium"
 	if (myFontSize=="Large") miscTasks.className += " misc-block-large"

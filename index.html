@@ -71,8 +71,9 @@
 		<div id="font-size-slider" style="width:150px;"></div>
 	</div>
  
-	<div id="finish-area" ondrop="dropFinish(event)" ondragover="allowDrop(event)" style="display:none;height:100px;margin:10px;padding:10px;width:200px;float:right;background:#000000;margin-right:15px;text-align:center;color:#FFFFFF;">
-			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished
+	<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
+			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
+			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Complete Task</span>
 	</div>
 	<br/>
 	<div class="my-dialog" id="editDialog">
