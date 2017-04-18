@@ -430,6 +430,8 @@ function highlightRow(ev) {
     ev.preventDefault();
 	dragcounter++;
 	console.log(dragcounter);
+	console.log(ev.target.className);
+	console.log(ev.target.id);
 	if (ev.target.className.substr(0,8)=="task-row") {
 		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
@@ -455,17 +457,21 @@ function unhighlightRow(ev) {
 function highlightMisc(ev) {
     ev.preventDefault();
 	dragcounter++;
-	if (ev.target.className.substr(0,10)=="misc-block") {
-		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
+	if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
+		if (ev.target.className.substr(0,10)=="misc-block") {
+		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on Misc "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
-		if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
 			ev.target.className = "misc-block hover-row";
 			var myFontSize = $( "#font-size" ).val();
 			if (myFontSize=="Small") ev.target.className += " misc-block-small"
 			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
 			if (myFontSize=="Large") ev.target.className += " misc-block-large"
 		}
+	}
+	else {
+		$(".task-row").removeClass("hover-row")
+		$(".task-row").addClass("normal-row")
 	}
 }
 function unhighlightMisc(ev) {
@@ -626,8 +632,8 @@ function drawOutput(lines){
 
 		var name = document.createElement("b");
 		name.innerHTML = lines[i][col_task];
-		name.setAttribute("ondrop","drop(event)");
-		name.setAttribute("ondragover","allowDrop(event)");
+		//name.setAttribute("ondrop","drop(event)");
+		//name.setAttribute("ondragover","allowDrop(event)");
 		name.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.appendChild(name);
 		var BR = document.createElement("br");
@@ -814,7 +820,7 @@ function drawOutput(lines){
 
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
-	miscTasks.setAttribute("ondragover","allowDrop(event)");
+	//miscTasks.setAttribute("ondragover","allowDrop(event)");
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
