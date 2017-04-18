@@ -583,7 +583,7 @@ function newFile() {
 		$("span.fileinput-new").hide();
 		$("#savefile-button").removeAttr('disabled');
 		$("#finish-area").show();
-		isSaved = 0;
+		isSaved = 1;
 	}
 }
 
