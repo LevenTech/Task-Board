@@ -90,7 +90,6 @@ $(document).ready(function() {
 
 	var cookieVal = readCookie('zoomCookie');
 	if (cookieVal) {
-		//console.log("cookie value is "+cookieVal)
 		var sliderValue = cookieVal;
 	}
 	else { var sliderValue = 2; }
@@ -335,6 +334,8 @@ function getAsText(fileToRead) {
 function loadHandler(event) {
 	var csv = event.target.result;
 	processData(csv);
+	isSaved = 1;
+	saveFileCookie();
 }
 
 function newTaskCopy() {
@@ -437,7 +438,6 @@ function saveFileCookie() {
 			csvContent += index < lines.length ? dataString+ "^" : dataString;
 		}
 	}); 
-	//console.log(csvContent);
 	createCookie("myCSVFile",csvContent,999);
 	createCookie("isSaved",isSaved);
 }
@@ -447,13 +447,15 @@ function loadCookieFile() {
 	if (csv) {
 		var altcsv = csv.split("^");
 		csv = altcsv.join("\n");
-		//console.log(csv);
-		processData(csv);
-		isSaved = readCookie("isSaved")
+		processData(csv,readCookie("fileName"));
+		isSaved = readCookie("isSaved");
+		currentFileName = readCookie("fileName")
+		$(".fileinput-filename").html(currentFileName);
+		$("span.fileinput-new").hide();
 	}
 }
 
-function processData(csv) {
+function processData(csv,fileName) {
     var allTextLines = csv.split(/\r\n|\n/);
 	lines = [];
     while (allTextLines.length) {
@@ -475,10 +477,11 @@ function processData(csv) {
 	}
 	drawOutput(lines);
 	var fullPath = document.getElementById('csvFileInput').value;
-	var fileName = fullPath.split("\\");
-	currentFileName = fileName[fileName.length-1];
-	isSaved = 1;
-	saveFileCookie();
+	if (!fileName) {
+		var fileName = fullPath.split("\\");
+		currentFileName = fileName[fileName.length-1];
+		createCookie("fileName",currentFileName);
+	}
 	$(".savefile-button").removeAttr('disabled');
 	$("#finish-area").show();
 }
@@ -492,11 +495,7 @@ function errorHandler(evt) {
 function highlightRow(ev) {
     ev.preventDefault();
 	dragcounter++;
-	//console.log(dragcounter);
-	//console.log(ev.target.className);
-	//console.log(ev.target.id);
 	if (ev.target.className.substr(0,8)=="task-row") {
-		//console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 		$(".misc-block").removeClass("hover-row")
@@ -508,7 +507,6 @@ function highlightRow(ev) {
 }
 function unhighlightRow(ev) {
 	dragcounter--;
-	//console.log(dragcounter);
 	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,8)=="task-row") {
@@ -522,7 +520,6 @@ function highlightMisc(ev) {
 	dragcounter++;
 	if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
-		//console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on Misc "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 			ev.target.className = "misc-block hover-row";
@@ -634,7 +631,7 @@ function newRow(ev) {
 }
 
 function newFile() {
-	if (isSaved!==1) {
+	if (parseInt(isSaved)!==1) {
 		showSaveDialog();
 	}
 	else {
@@ -645,10 +642,12 @@ function newFile() {
 		drawOutput(lines);
 		currentFileName = "newTaskFile.csv";
 		$(".fileinput-filename").html("newTaskFile.csv");
+		createCookie("fileName",currentFileName);
 		$("span.fileinput-new").hide();
 		$(".savefile-button").removeAttr('disabled');
 		$("#finish-area").show();
 		isSaved = 1;
+		saveFileCookie();
 	}
 }
 
@@ -941,7 +940,6 @@ function mySortFunction(a,b) {
 
   
 function createCookie(name,value,days) {
-	//console.log("saving cookie")
 	var expires = "";
     if (days) {
         var date = new Date();
