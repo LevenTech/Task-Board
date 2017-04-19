@@ -10,14 +10,14 @@ var lastTaskID = 0;
 
 var	col_ID = 0;
 var	col_task = 1;
-var	col_row = 2;
-var	col_duemonth = 3;
-var	col_dueday = 4;
-var	col_dueyear = 5;
-var	col_startmonth = 6;
-var	col_startday = 7;
-var	col_startyear = 8;
-var	col_color = 9;
+var	col_startmonth = 2;
+var	col_startday = 3;
+var	col_startyear = 4;
+var	col_duemonth = 5;
+var	col_dueday = 6;
+var	col_dueyear = 7;
+var	col_color = 8;
+var	col_row = 9;
 var col_complete = 10;
 var	col_increment = 11;
 
@@ -599,7 +599,6 @@ function drag(ev) {
 }
 
 function dragNew(ev) {
-	//console.log("draggingNew=1")
 	draggingNew = 1;
 	ev.dataTransfer.setData("text", "newtask");
 }
@@ -624,7 +623,6 @@ function drop(ev) {
 function dropFinish(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
-	console.log(taskID);
 	currentTask = taskID;
 	completeTask();
 	ev.stopPropagation();
@@ -702,7 +700,6 @@ function drawOutput(lines){
 	
 	var myFontSize = $( "#font-size" ).val();
 	
-	//alert(lines.length);
 	for (var i = 1; i < lines.length; i++) {
 		var taskID = parseInt(lines[i][col_ID]);
 		//var taskID = i;
