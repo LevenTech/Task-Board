@@ -570,7 +570,6 @@ function allowDrop(ev) {
 }
 
 function highlightFinish(ev) {
-	console.log(draggingNew)
 	if (draggingNew==0) {
 		ev.preventDefault();
 		$("#finish-area").removeClass("normal-finish");
@@ -633,6 +632,7 @@ function dropFinish(ev) {
 	
 function newRow(ev) {
     ev.preventDefault();
+	if (draggingNew==1) return;
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
 	$("#newRowName").val("");
