@@ -489,7 +489,7 @@ function processData(csv,fileName) {
 	}
 	$(".savefile-button").removeAttr('disabled');
 	$("#finish-area").show();
-	$("#new-task-drag").show();
+	$(".new-task-drag").show();
 }
 
 function errorHandler(evt) {
@@ -600,8 +600,9 @@ function drag(ev) {
 }
 
 function dragNew(ev) {
-	console.log("draggingNew=1")
+	//console.log("draggingNew=1")
 	draggingNew = 1;
+	ev.dataTransfer.setData("text", "newtask");
 }
 
 function drop(ev) {
@@ -680,7 +681,7 @@ function newFile() {
 		$("span.fileinput-new").hide();
 		$(".savefile-button").removeAttr('disabled');
 		$("#finish-area").show();
-		$("#new-task-drag").show();
+		$(".new-task-drag").show();
 		isSaved = 1;
 		saveFileCookie();
 	}
