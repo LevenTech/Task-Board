@@ -429,11 +429,11 @@ function errorHandler(evt) {
 function highlightRow(ev) {
     ev.preventDefault();
 	dragcounter++;
-	console.log(dragcounter);
-	console.log(ev.target.className);
-	console.log(ev.target.id);
+	//console.log(dragcounter);
+	//console.log(ev.target.className);
+	//console.log(ev.target.id);
 	if (ev.target.className.substr(0,8)=="task-row") {
-		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
+		//console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 		$(".misc-block").removeClass("hover-row")
@@ -445,7 +445,7 @@ function highlightRow(ev) {
 }
 function unhighlightRow(ev) {
 	dragcounter--;
-	console.log(dragcounter);
+	//console.log(dragcounter);
 	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,8)=="task-row") {
@@ -459,7 +459,7 @@ function highlightMisc(ev) {
 	dragcounter++;
 	if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
-		console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on Misc "+ev.target.getAttribute("data-rowname"));
+		//console.log("Current Row = "+ lines[currentTask][col_row] +", Dropping on Misc "+ev.target.getAttribute("data-rowname"));
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 			ev.target.className = "misc-block hover-row";
@@ -876,21 +876,27 @@ function mySortFunction(a,b) {
 }
 
   $( function() {
+	var cookieVal = readCookie('zoomCookie');
+	if (cookieVal) {
+		//console.log("cookie value is "+cookieVal)
+		var sliderValue = cookieVal;
+	}	
+	else { var sliderValue = 2; }
     $( "#font-size-slider" ).slider({
       orientation: "horizontal",
       range: "min",
       min: 1,
       max: 3,
-      value: 2,
+      value: sliderValue,
       slide: function( event, ui ) {
 		var sliderValue = ui.value.toString();
+		createCookie('zoomCookie',sliderValue);
 		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
 		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
 		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
 		drawOutput(lines);
       }
     });
-    var sliderValue = $( "#font-size-slider" ).slider( "value" )
 	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
 	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
 	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
@@ -902,3 +908,28 @@ function mySortFunction(a,b) {
   } );
 
   
+function createCookie(name,value,days) {
+	//console.log("saving cookie")
+	var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name,"",-1);
+}
