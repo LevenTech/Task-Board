@@ -3,7 +3,7 @@ var lines = [];
 
 var today = new Date();
 
-var currentName = "newTaskFile.csv";
+var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
 var currentTask = 0;
 var lastTaskID = 0;
@@ -23,9 +23,9 @@ var	col_increment = 11;
 
 var dragcounter = 0;
 
-window.onbeforeunload = function() {
+/*window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
-}
+}*/
 
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
@@ -87,7 +87,40 @@ $(document).ready(function() {
 			return false;
 		}
 	});
-	$("#size-slider").slider();	
+
+	var cookieVal = readCookie('zoomCookie');
+	if (cookieVal) {
+		//console.log("cookie value is "+cookieVal)
+		var sliderValue = cookieVal;
+	}
+	else { var sliderValue = 2; }
+	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
+	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
+	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+
+    $( "#font-size-slider" ).slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 1,
+      max: 3,
+      value: sliderValue,
+      slide: function( event, ui ) {
+		var sliderValue = ui.value.toString();
+		createCookie('zoomCookie',sliderValue);
+		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
+		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
+		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+		drawOutput(lines);
+      }
+    });
+  
+  $( function() {
+    $( "#datepicker-start" ).datepicker();
+    $( "#datepicker-due" ).datepicker();
+  } );
+  
+	
+	loadCookieFile();
 });
 
 function showSaveDialog(fileToOpen) {
@@ -149,6 +182,7 @@ function completeTask() {
 				if (lines[currentTask][11]>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
 				isSaved = 0;
+				saveFileCookie();
 				drawOutput(lines);
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
@@ -275,6 +309,7 @@ function updateTask() {
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
 	isSaved = 0;
+	saveFileCookie();
 }
 
 function colorpicked() {
@@ -356,6 +391,7 @@ function newTaskCopy() {
 	lines.push(newTask);
 	drawOutput(lines);
 	isSaved = 0;
+	saveFileCookie();
 }
 
 function newTask(rowName,taskName) {
@@ -368,6 +404,7 @@ function newTask(rowName,taskName) {
 	lines.push(newTask);
 	drawOutput(lines);
 	isSaved = 0;
+	saveFileCookie();
 }
 
 function saveFile() {
@@ -389,6 +426,31 @@ function saveFile() {
 	document.body.appendChild(link); // Required for FF
 	link.click();
 	isSaved = 1;
+	createCookie("isSaved",1);
+}
+
+function saveFileCookie() {
+	var csvContent = "";
+	lines.forEach(function(infoArray, index){
+		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+			dataString = infoArray.join(",");
+			csvContent += index < lines.length ? dataString+ "^" : dataString;
+		}
+	}); 
+	//console.log(csvContent);
+	createCookie("myCSVFile",csvContent,999);
+	createCookie("isSaved",isSaved);
+}
+
+function loadCookieFile() {
+	var csv = readCookie("myCSVFile");
+	if (csv) {
+		var altcsv = csv.split("^");
+		csv = altcsv.join("\n");
+		//console.log(csv);
+		processData(csv);
+		isSaved = readCookie("isSaved")
+	}
 }
 
 function processData(csv) {
@@ -416,7 +478,8 @@ function processData(csv) {
 	var fileName = fullPath.split("\\");
 	currentFileName = fileName[fileName.length-1];
 	isSaved = 1;
-	$("#savefile-button").removeAttr('disabled');
+	saveFileCookie();
+	$(".savefile-button").removeAttr('disabled');
 	$("#finish-area").show();
 }
 
@@ -529,6 +592,7 @@ function drop(ev) {
     var rowName = ev.target.getAttribute("data-rowname");
 	lines[taskID][col_row]=rowName;
 	isSaved = 0;
+	saveFileCookie();
 	drawOutput(lines);
 }
 
@@ -557,6 +621,7 @@ function newRow(ev) {
 				var rowName = $("#newRowName").val();
 				lines[taskID][col_row]=rowName;
 				isSaved = 0;
+				saveFileCookie();
 				drawOutput(lines);
 				$("#newRowDialog").dialog("close");
 			},
@@ -581,7 +646,7 @@ function newFile() {
 		currentFileName = "newTaskFile.csv";
 		$(".fileinput-filename").html("newTaskFile.csv");
 		$("span.fileinput-new").hide();
-		$("#savefile-button").removeAttr('disabled');
+		$(".savefile-button").removeAttr('disabled');
 		$("#finish-area").show();
 		isSaved = 1;
 	}
@@ -589,7 +654,6 @@ function newFile() {
 
 function drawOutput(lines){
 	if (typeof lines[0] =="undefined") {return;}
-	$(".savefile-button").show();
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
@@ -874,38 +938,6 @@ function mySortFunction(a,b) {
 		return returnVal;
 	}
 }
-
-  $( function() {
-	var cookieVal = readCookie('zoomCookie');
-	if (cookieVal) {
-		//console.log("cookie value is "+cookieVal)
-		var sliderValue = cookieVal;
-	}	
-	else { var sliderValue = 2; }
-    $( "#font-size-slider" ).slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 1,
-      max: 3,
-      value: sliderValue,
-      slide: function( event, ui ) {
-		var sliderValue = ui.value.toString();
-		createCookie('zoomCookie',sliderValue);
-		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
-		drawOutput(lines);
-      }
-    });
-	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
-  } );
-  
-  $( function() {
-    $( "#datepicker-start" ).datepicker();
-    $( "#datepicker-due" ).datepicker();
-  } );
 
   
 function createCookie(name,value,days) {
