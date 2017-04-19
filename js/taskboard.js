@@ -22,7 +22,7 @@ var col_complete = 10;
 var	col_increment = 11;
 
 var dragcounter = 0;
-
+var draggingNew = 0;
 /*window.onbeforeunload = function() {
 	if (!isSaved) { return "Did you save your stuff?" }
 }*/
@@ -80,7 +80,12 @@ $(document).ready(function() {
 		if(e.which == 13) {
 			e.preventDefault();
 			var rowName = $("#newRowName").val();
-			lines[currentTask][col_row]=rowName;
+			if(draggingNew) {
+				newTask(rowName)
+			}
+			else {
+				lines[currentTask][col_row]=rowName;
+			}
 			drawOutput(lines);
 			$("#newRowDialog").dialog("close");
 			currentTask = "";
@@ -185,7 +190,7 @@ function completeTask() {
 				drawOutput(lines);
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").show();
+				$("#finish-instructions").hide();
 			},
 			No: function () {
 				$("#completeDialog").dialog("close");
@@ -484,6 +489,7 @@ function processData(csv,fileName) {
 	}
 	$(".savefile-button").removeAttr('disabled');
 	$("#finish-area").show();
+	$("#new-task-drag").show();
 }
 
 function errorHandler(evt) {
@@ -500,7 +506,11 @@ function highlightRow(ev) {
 		$(".task-row").addClass("normal-row")
 		$(".misc-block").removeClass("hover-row")
 		$(".misc-block").addClass("normal-row")
-		if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
+		var toHighlight = 1;
+		if (currentTask) {
+			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) { toHighlight = 0; }
+		}
+		if (toHighlight) {
 			ev.target.className = "task-row hover-row";
 		}
 	}
@@ -518,7 +528,11 @@ function unhighlightRow(ev) {
 function highlightMisc(ev) {
     ev.preventDefault();
 	dragcounter++;
-	if (ev.target.getAttribute("data-rowname")!==lines[currentTask][col_row].toUpperCase()) {
+	var toHighlight = 1;
+	if (currentTask) {
+		if (lines[currentTask][col_row]=="") toHighlight=0;
+	}
+	if (toHighlight) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
@@ -556,10 +570,13 @@ function allowDrop(ev) {
 }
 
 function highlightFinish(ev) {
-    ev.preventDefault();
-	$("#finish-area").removeClass("normal-finish");
-	$("#finish-area").addClass("hover-finish");
-	$("#finish-instructions").show();
+	console.log(draggingNew)
+	if (draggingNew==0) {
+		ev.preventDefault();
+		$("#finish-area").removeClass("normal-finish");
+		$("#finish-area").addClass("hover-finish");
+		$("#finish-instructions").show();
+	}
 }
 function unhighlightFinish(ev) {
     ev.preventDefault();
@@ -569,6 +586,7 @@ function unhighlightFinish(ev) {
 }
 
 function drag(ev) {
+	draggingNew = 0;
 	var taskID = ev.target.getAttribute("data-taskid");
 	
 	for(var i = 0; i < lines.length; i++) {
@@ -581,13 +599,23 @@ function drag(ev) {
     ev.dataTransfer.setData("text", currentTask);
 }
 
+function dragNew(ev) {
+	console.log("draggingNew=1")
+	draggingNew = 1;
+}
+
 function drop(ev) {
 	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
-    var taskID = ev.dataTransfer.getData("text");
     var rowName = ev.target.getAttribute("data-rowname");
-	lines[taskID][col_row]=rowName;
+	if(draggingNew) {
+		newTask(rowName);
+	}
+    else {
+		var taskID = ev.dataTransfer.getData("text");
+		lines[taskID][col_row]=rowName;
+	}
 	isSaved = 0;
 	saveFileCookie();
 	drawOutput(lines);
@@ -596,6 +624,7 @@ function drop(ev) {
 function dropFinish(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
+	console.log(taskID);
 	currentTask = taskID;
 	completeTask();
 	ev.stopPropagation();
@@ -616,7 +645,12 @@ function newRow(ev) {
 		buttons: { 
 			OK: function() {
 				var rowName = $("#newRowName").val();
-				lines[taskID][col_row]=rowName;
+				if(draggingNew) {
+					newTask(rowName)
+				}
+				else {
+					lines[taskID][col_row]=rowName;
+				}
 				isSaved = 0;
 				saveFileCookie();
 				drawOutput(lines);
@@ -646,6 +680,7 @@ function newFile() {
 		$("span.fileinput-new").hide();
 		$(".savefile-button").removeAttr('disabled');
 		$("#finish-area").show();
+		$("#new-task-drag").show();
 		isSaved = 1;
 		saveFileCookie();
 	}
@@ -901,6 +936,19 @@ function drawOutput(lines){
 	$(".misc-block").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
 		newTask(rowName);
+	});
+	$(".task-row").on("taphold", function (){
+		e.preventDefault();
+		var rowName = this.getAttribute("data-rowname");
+		newTask(rowName);
+		return false;
+	});
+	$(".misc-block").on("taphold", function (){
+		e.preventDefault();
+		alert("did it")
+		var rowName = this.getAttribute("data-rowname");
+		newTask(rowName);
+		return false;
 	});
 }
 
