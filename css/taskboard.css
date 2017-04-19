@@ -1,3 +1,20 @@
+#taskboard-toolbar {
+	display:flex;
+}
+#left-buttons {
+	flex: 1 1 600px;
+	text-align:left;
+}
+#middle-buttons {
+	flex: 0 0 150px;
+	text-align:center;
+}
+#right-buttons {
+	flex: 1 1 600px;
+	text-align:right;
+}
+
+
 .task-block {
 	display:inline-block;
 	text-align: center;
