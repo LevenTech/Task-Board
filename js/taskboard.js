@@ -488,8 +488,8 @@ function processData(csv,fileName) {
 		createCookie("fileName",currentFileName);
 	}
 	$(".savefile-button").removeAttr('disabled');
-	$("#finish-area").show();
-	$(".new-task-drag").show();
+	$("#middle-buttons").show();
+	$("#right-buttons").show();
 }
 
 function errorHandler(evt) {
@@ -680,8 +680,8 @@ function newFile() {
 		createCookie("fileName",currentFileName);
 		$("span.fileinput-new").hide();
 		$(".savefile-button").removeAttr('disabled');
-		$("#finish-area").show();
-		$(".new-task-drag").show();
+		$("#middle-buttons").show();
+		$("#right-buttons").show();
 		isSaved = 1;
 		saveFileCookie();
 	}

@@ -65,7 +65,7 @@
 		</button>
 	</div>
 	</div>
-	<div id="middle-buttons">
+	<div id="middle-buttons" style="diplay:none;">
 	<div style="margin-top:30px;margin-left:10px;">
 	  <label for="font-size">Size:</label>
 	  <input type="text" id="font-size" readonly style="text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
@@ -76,9 +76,9 @@
 
 	<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
 			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
-			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Complete Task</span>
+			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;">Drop here to Complete Task</span>
 	</div>
-	<div id="new-task-drag" class="new-task-drag task-block medium-block now-task" draggable="true" style="margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;display:none;" ondragstart="dragNew(event)" >
+	<div id="new-task-drag" class="new-task-drag task-block medium-block now-task" draggable="true" style="margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;" ondragstart="dragNew(event)" >
 		<br/>Drag for new task
 	</div>
 	</div>
