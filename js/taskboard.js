@@ -304,6 +304,7 @@ function editTask(target) {
 				$("#editDialog").dialog("close");
 				makingNewTask = 0;
 				isSaved = 0;
+				$("#unsaved-changes").show();
 			},
 			Cancel: function () {
 				$("#colorpicker").val("");
@@ -462,7 +463,6 @@ function newTask(rowName,taskName,openMe) {
 	newTask[col_row] = rowName;
 	lines.push(newTask);
 	drawOutput(lines);
-	$("#unsaved-changes").show();
 	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
@@ -670,7 +670,6 @@ function drop(ev) {
     var rowName = ev.target.getAttribute("data-rowname");
 	if(draggingNew==1) {
 		newTask(rowName,"",1);
-		$("#unsaved-changes").show();
 		saveFileCookie();
 		drawOutput(lines);
 	}
