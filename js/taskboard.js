@@ -316,8 +316,8 @@ function editTask(target) {
 				$("#datepicker-start").datepicker("setDate","");
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
-					makingNewTask==0;
 				}
+				makingNewTask = 0;
 				currentTask = 0;
 				$("#editDialog").dialog("close");
 				drawOutput(lines);
