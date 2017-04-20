@@ -160,7 +160,7 @@ function showSaveDialog(fileToOpen) {
 
 function handleFiles(files) {
 
-	if (isSaved!==1) {
+	if (parseInt(isSaved)==0) {
 		showSaveDialog(files[0]);
 	}
 	else 
@@ -188,6 +188,7 @@ function completeTask() {
 				if (lines[currentTask][11]>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
 				isSaved = 0;
+				$("#unsaved-changes").show();
 				saveFileCookie();
 				drawOutput(lines);
 				$("#finish-area").removeClass("hover-finish");
@@ -316,6 +317,7 @@ function updateTask() {
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
 	isSaved = 0;
+	$("#unsaved-changes").show();
 	saveFileCookie();
 }
 
@@ -343,6 +345,7 @@ function loadHandler(event) {
 	var csv = event.target.result;
 	processData(csv);
 	isSaved = 1;
+	$("#unsaved-changes").hide();
 	saveFileCookie();
 }
 
@@ -400,6 +403,7 @@ function newTaskCopy() {
 	lines.push(newTask);
 	drawOutput(lines);
 	isSaved = 0;
+	$("#unsaved-changes").show();
 	saveFileCookie();
 }
 
@@ -413,6 +417,7 @@ function newTask(rowName,taskName) {
 	lines.push(newTask);
 	drawOutput(lines);
 	isSaved = 0;
+	$("#unsaved-changes").show();
 	saveFileCookie();
 }
 
@@ -435,6 +440,7 @@ function saveFile() {
 	document.body.appendChild(link); // Required for FF
 	link.click();
 	isSaved = 1;
+	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
 }
 
@@ -457,6 +463,8 @@ function loadCookieFile() {
 		csv = altcsv.join("\n");
 		processData(csv,readCookie("fileName"));
 		isSaved = readCookie("isSaved");
+		if (isSaved==1) $("#unsaved-changes").hide();
+		else $("#unsaved-changes").show();
 		currentFileName = readCookie("fileName")
 		$(".fileinput-filename").html(currentFileName);
 		$("span.fileinput-new").hide();
@@ -614,6 +622,7 @@ function drop(ev) {
 	if(draggingNew) {
 		newTask(rowName);
 		isSaved = 0;
+		$("#unsaved-changes").show();
 		saveFileCookie();
 		drawOutput(lines);
 	}
@@ -622,6 +631,7 @@ function drop(ev) {
 		if (lines[taskID][col_row]!==rowName) {
 			lines[taskID][col_row]=rowName;
 			isSaved = 0;
+			$("#unsaved-changes").show();
 			saveFileCookie();
 			drawOutput(lines);
 		}
@@ -659,6 +669,7 @@ function newRow(ev) {
 					lines[taskID][col_row]=rowName;
 				}
 				isSaved = 0;
+				$("#unsaved-changes").show();
 				saveFileCookie();
 				drawOutput(lines);
 				$("#newRowDialog").dialog("close");
@@ -672,7 +683,7 @@ function newRow(ev) {
 }
 
 function newFile() {
-	if (parseInt(isSaved)!==1) {
+	if (parseInt(isSaved)==0) {
 		showSaveDialog();
 	}
 	else {
@@ -688,7 +699,8 @@ function newFile() {
 		$(".savefile-button").removeAttr('disabled');
 		$("#middle-buttons").show();
 		$("#right-buttons").show();
-		isSaved = 1;
+		isSaved = 2;
+		$("#unsaved-changes").show();
 		saveFileCookie();
 	}
 }

@@ -48,8 +48,12 @@
 				<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
 			</span>
 			<br/><br/><br/>
-			<label for="csvFileInput" style="margin-left:0px;"> <strong>Current File:</strong></label>
-			<span class="fileinput-filename"></span><span class="fileinput-new">No file chosen</span>
+			<span style="margin-left:0px;"><strong>Current File:</strong></span>
+			<span class="fileinput-filename"></span>
+			<span class="fileinput-new">No file chosen</span>
+			<span id="unsaved-changes" title="You have changes that haven't been saved to a file yet." style="display:none;">
+				<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+			</span>
 		</div>
 		<div id="open-drive-file">
 			<button class="btn btn-default btn-file" onclick="createPicker();">
