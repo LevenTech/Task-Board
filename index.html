@@ -33,7 +33,7 @@
 	</style>
 
 </head>
-<body ondrop="newRow(event)" ondragover="allowDrop(event)" style="height:100%;">
+<body ondrop="newRow(event)" ondragover="allowDrop(event)" style="min-height:90%;">
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
 	<div id="taskboard-toolbar">
 	<div id="left-buttons">
@@ -81,7 +81,7 @@
 
 	<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
 			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
-			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Complete Task</span>
+			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
 	</div>
 	<div id="new-task-drag" class="new-task-drag task-block medium-block now-task" draggable="true" style="margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;" ondragstart="dragNew(event)" >
 		<br/>Drag for new task
@@ -92,26 +92,45 @@
 	<br/>
 	<div class="my-dialog" id="editDialog">
 		<table style="float:left;width:100%;height:100%;">
-		<tr>
-			<td style="min-width:100px;">Task Name:</td>
-			<td><textarea type="text" cols="21" rows="2" id="namepicker" style="width:100%;"></textarea></td>
-		</tr>
-		<tr style="height:30px;"></tr>
-		<tr style="height:30px;"><td>Start Date:</td><td><input type="text" id="datepicker-start" style="width:100%;"></td></tr>
-		<tr><td>Due Date:</td><td><input type="text" id="datepicker-due" style="width:100%;"></td></tr>
-		<tr style="height:30px;"></tr>
-		<tr style="height:30px;">
-			<td>Color:</td>
-			<td>
-				<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();" /></td>
-				<td><input style="float:left;width:175px;width:100%;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
-			</td>
-		</tr>
-		<tr><td>Interval:</td><td><input type="text" id="incrementpicker" style="width:100%;"></td></tr>
+			<tr style="vertical-align:top;">
+				<td style="min-width:100px;padding-top:3px;">Task Name:</td>
+				<td>
+					<textarea type="text" cols="21" rows="2" id="namepicker" style="width:100%;margin-bottom:5px;"></textarea>
+					<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:0px;font-size:12px;" onclick="completeTask();">
+					<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:5px;"></i>Finish</button>		
+					<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:2px;font-size:12px;" onclick="deleteTask();">
+					<i class="fa fa-trash" aria-hidden="true" style="margin-right:5px;"></i>Delete</button>						
+				</td>
+			</tr>
+			<tr style="height:15px;"></tr>
+			<tr style="height:30px;"><td>Start Date:</td><td><input type="text" id="datepicker-start" style="width:100%;"></td></tr>
+			<tr><td>Due Date:</td><td><input type="text" id="datepicker-due" style="width:100%;"></td></tr>
+			<tr style="height:30px;"></tr>
+			<tr style="height:30px;">
+				<td>Color:</td>
+				<td>
+					<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();" /></td>
+					<td><input style="float:left;width:175px;width:100%;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
+				</td>
+			</tr>
+			<tr style="height:30px;"><td>Interval:</td><td><input type="text" id="incrementpicker" style="width:100%;"></td></tr>
 		</table>
 	</div>
 	<div class="my-dialog" id="completeDialog">
-		Are you sure you want to complete the task "<span id="completeTaskName" ></span>"?
+		Are you sure you want to finish the task "<span id="completeTaskName" ></span>"?<br/><br/>
+		This will remove the task from your board, but keep a record of it in your save file.<br/><br/>
+		To remove all record of the task, you can 
+		<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:5px;margin:0px;margin-right:5px;font-size:12px;" onclick="deleteTask();">
+				<i class="fa fa-trash" aria-hidden="true" style="margin-right:5px;"></i>Delete</button>
+		 it instead.
+	</div>
+	<div class="my-dialog" id="deleteDialog">
+		Are you sure you want to DELETE the task "<span id="deleteTaskName" ></span>"?<br/><br/>
+		This will remove all trace of this task, from the board and your save file.<br/><br/> 
+		To keep a record of the task, but remove it from the board, you can 
+		<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:5px;margin:0px;margin-right:5px;font-size:12px;" onclick="completeTask();">
+				<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:5px;"></i>Finish</button>
+		it.
 	</div>
 	<div class="my-dialog" id="saveDialog">
 		This file has not been saved, and you're about to lose your changes. Save it now?

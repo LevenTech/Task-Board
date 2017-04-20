@@ -34,6 +34,7 @@ $(document).ready(function() {
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
+	$("#deleteDialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();
 	
 	$("#datepicker-start").keypress( function (e) {
@@ -174,19 +175,22 @@ function handleFiles(files) {
 }
 
 function completeTask() {
+
+	$("#deleteDialog").dialog("close");
 	
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 305,
-        height:300,
-        title: 'Complete Task',
+        width: 350,
+        height:350,
+        title: 'Finish Task',
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11]>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
+				$("#editDialog").dialog("close");
 				isSaved = 0;
 				$("#unsaved-changes").show();
 				saveFileCookie();
@@ -206,6 +210,40 @@ function completeTask() {
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
 	$("#completeDialog").dialog(opt).dialog("open");
+}
+
+function deleteTask() {
+
+	$("#completeDialog").dialog("close");
+	$("#finish-area").removeClass("hover-finish");
+	$("#finish-area").addClass("normal-finish");
+	$("#finish-instructions").hide();
+	
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 350,
+        height:350,
+        title: 'Delete Task',
+		position: {my: "center center", at: "center center", of: "body"},
+		buttons: { 
+			Yes: function() {
+				lines.splice(currentTask,1);
+				$("#deleteDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+			},
+			No: function () {
+				$("#deleteDialog").dialog("close");
+			}
+		}
+    };
+	var taskName = lines[currentTask][1];
+	$("#deleteTaskName").text(taskName);
+	$("#deleteDialog").dialog(opt).dialog("open");
 }
 
 function editTask(target) {
@@ -407,7 +445,7 @@ function newTaskCopy() {
 	saveFileCookie();
 }
 
-function newTask(rowName,taskName) {
+function newTask(rowName,taskName,openMe) {
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	newTask[col_ID] = lastTaskID;
@@ -419,6 +457,9 @@ function newTask(rowName,taskName) {
 	isSaved = 0;
 	$("#unsaved-changes").show();
 	saveFileCookie();
+	if (openMe==1) {
+		$("#taskBlock"+lastTaskID).click();
+	}
 }
 
 function saveFile() {
@@ -625,6 +666,7 @@ function drop(ev) {
 		$("#unsaved-changes").show();
 		saveFileCookie();
 		drawOutput(lines);
+		$("#taskBlock"+lastTaskID).click();
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
@@ -949,11 +991,11 @@ function drawOutput(lines){
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName);
+		newTask(rowName,"",1);
 	});
 	$(".misc-block").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName);
+		newTask(rowName,"",1);
 	});
 	$(".task-row").on("taphold", function (){
 		e.preventDefault();
