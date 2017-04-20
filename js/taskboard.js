@@ -613,14 +613,19 @@ function drop(ev) {
     var rowName = ev.target.getAttribute("data-rowname");
 	if(draggingNew) {
 		newTask(rowName);
+		isSaved = 0;
+		saveFileCookie();
+		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		lines[taskID][col_row]=rowName;
+		if (lines[taskID][col_row]!==rowName) {
+			lines[taskID][col_row]=rowName;
+			isSaved = 0;
+			saveFileCookie();
+			drawOutput(lines);
+		}
 	}
-	isSaved = 0;
-	saveFileCookie();
-	drawOutput(lines);
 }
 
 function dropFinish(ev) {
