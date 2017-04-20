@@ -125,6 +125,8 @@ $(document).ready(function() {
   
 	
 	loadCookieFile();
+	
+	$.ui.dialog.prototype._focusTabbable = function(){};
 });
 
 function showSaveDialog(fileToOpen) {
@@ -275,6 +277,7 @@ function editTask(target) {
 		}		
 	};
 	$("#editDialog").dialog(opt).dialog("open");
+	$("#editDialog").find('button:nth-child(0)').focus();
 }
 
 function updateTask() {
