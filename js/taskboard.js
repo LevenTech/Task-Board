@@ -23,9 +23,7 @@ var	col_increment = 11;
 
 var dragcounter = 0;
 var draggingNew = 0;
-/*window.onbeforeunload = function() {
-	if (!isSaved) { return "Did you save your stuff?" }
-}*/
+var makingNewTask
 
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
@@ -289,18 +287,23 @@ function editTask(target) {
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
 	$("#namepicker").val(lines[currentTask][col_task]);
 	
+	if (makingNewTask==1) var myTitle = "Create New Task"
+	else var myTitle = "Edit Task"
+	
 	var taskBlockID = "#taskBlock"+taskID;
 	var opt = {
         autoOpen: false,
         modal: true,
         width: 360,
         height:360,
-        title: 'Edit Task',
+        title: myTitle,
 		position: {my: "center center", at: "center center", of: taskBlockID},
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
 				$("#editDialog").dialog("close");
+				makingNewTask = 0;
+				isSaved = 0;
 			},
 			Cancel: function () {
 				$("#colorpicker").val("");
@@ -310,8 +313,13 @@ function editTask(target) {
 				$("#namepicker").val("");
 				$("#datepicker-due").datepicker("setDate","");
 				$("#datepicker-start").datepicker("setDate","");
+				if(makingNewTask==1) {
+					lines.splice(currentTask,1);
+					makingNewTask==0;
+				}
 				currentTask = 0;
 				$("#editDialog").dialog("close");
+				drawOutput(lines);
 			}
 		}		
 	};
@@ -454,10 +462,10 @@ function newTask(rowName,taskName,openMe) {
 	newTask[col_row] = rowName;
 	lines.push(newTask);
 	drawOutput(lines);
-	isSaved = 0;
 	$("#unsaved-changes").show();
 	saveFileCookie();
 	if (openMe==1) {
+		makingNewTask = 1;
 		$("#taskBlock"+lastTaskID).click();
 	}
 }
@@ -559,7 +567,7 @@ function highlightRow(ev) {
 		$(".misc-block").removeClass("hover-row")
 		$(".misc-block").addClass("normal-row")
 		var toHighlight = 1;
-		if (currentTask) {
+		if (currentTask && draggingNew==0) {
 			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) { toHighlight = 0; }
 		}
 		if (toHighlight) {
@@ -581,7 +589,7 @@ function highlightMisc(ev) {
     ev.preventDefault();
 	dragcounter++;
 	var toHighlight = 1;
-	if (currentTask) {
+	if (currentTask && draggingNew==0) {
 		if (lines[currentTask][col_row]=="") toHighlight=0;
 	}
 	if (toHighlight) {
@@ -660,13 +668,11 @@ function drop(ev) {
     ev.preventDefault();
 	ev.stopPropagation();
     var rowName = ev.target.getAttribute("data-rowname");
-	if(draggingNew) {
-		newTask(rowName);
-		isSaved = 0;
+	if(draggingNew==1) {
+		newTask(rowName,"",1);
 		$("#unsaved-changes").show();
 		saveFileCookie();
 		drawOutput(lines);
-		$("#taskBlock"+lastTaskID).click();
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
