@@ -125,6 +125,8 @@ $(document).ready(function() {
   
 	
 	loadCookieFile();
+	
+	$.ui.dialog.prototype._focusTabbable = function(){};
 });
 
 function showSaveDialog(fileToOpen) {
@@ -275,6 +277,7 @@ function editTask(target) {
 		}		
 	};
 	$("#editDialog").dialog(opt).dialog("open");
+	$("#editDialog").find('button:nth-child(0)').focus();
 }
 
 function updateTask() {
@@ -610,14 +613,19 @@ function drop(ev) {
     var rowName = ev.target.getAttribute("data-rowname");
 	if(draggingNew) {
 		newTask(rowName);
+		isSaved = 0;
+		saveFileCookie();
+		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		lines[taskID][col_row]=rowName;
+		if (lines[taskID][col_row]!==rowName) {
+			lines[taskID][col_row]=rowName;
+			isSaved = 0;
+			saveFileCookie();
+			drawOutput(lines);
+		}
 	}
-	isSaved = 0;
-	saveFileCookie();
-	drawOutput(lines);
 }
 
 function dropFinish(ev) {

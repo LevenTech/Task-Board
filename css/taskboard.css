@@ -24,6 +24,7 @@
 	margin: 10px;
 	font-family: arial;
 	float:left;
+	cursor:hand;
 	}
 .small-block {
 	width: 200px;
@@ -143,9 +144,9 @@
 	margin:15px;
 	margin-left: 30px;
 }
-.ui-button {
-	font-size: 8px;
-	padding: 2px 2px 2px 2px; /* Or whatever makes it small enough. */
+.ui-dialog .ui-dialog-buttonpane button {
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 .my-dialog {
 	display:none;
