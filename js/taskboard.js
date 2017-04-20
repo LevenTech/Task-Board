@@ -25,6 +25,15 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask
 
+
+function closeEditDialogAndSave() {
+	updateTask(currentTask);
+	$("#editDialog").dialog("close");
+	makingNewTask = 0;
+	isSaved = 0;
+	$("#unsaved-changes").show();
+}
+
 $(document).ready(function() {
 	var opt = { autoOpen: false	};
 
@@ -38,40 +47,35 @@ $(document).ready(function() {
 	$("#datepicker-start").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask();
-			$("#editDialog").dialog("close");
+			closeEditDialogAndSave();
 			return false;
 		}
 	});
 	$("#datepicker-due").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask();
-			$("#editDialog").dialog("close");
+			closeEditDialogAndSave();
 			return false;
 		}
 	});
 	$("#colorpicker").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask();
-			$("#editDialog").dialog("close");
+			closeEditDialogAndSave();
 			return false;
 		}
 	});
 	$("#namepicker").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask();
-			$("#editDialog").dialog("close");
+			closeEditDialogAndSave();
 			return false;
 		}
 	});
 	$("#incrementpicker").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
-			updateTask();
-			$("#editDialog").dialog("close");
+			closeEditDialogAndSave();
 			return false;
 		}
 	});
@@ -458,7 +462,7 @@ function newTask(rowName,taskName,openMe) {
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	newTask[col_ID] = lastTaskID;
-	if (!taskName) taskName = "New Task";
+	//if (!taskName) taskName = "New Task";
 	newTask[col_task] = taskName;
 	newTask[col_row] = rowName;
 	lines.push(newTask);
@@ -467,6 +471,7 @@ function newTask(rowName,taskName,openMe) {
 	if (openMe==1) {
 		makingNewTask = 1;
 		$("#taskBlock"+lastTaskID).click();
+		$("#namepicker").focus();
 	}
 }
 
@@ -702,9 +707,9 @@ function newRow(ev) {
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 305,
-        height:300,
-        title: 'Move Task to New Row',
+        width: 300,
+        height:200,
+        title: 'Move Task to New Group',
 		position: {my: "center center", at: "center center", of: window},
 		buttons: { 
 			OK: function() {
@@ -726,7 +731,8 @@ function newRow(ev) {
 			}
 		}
     };
-	$("#newRowDialog").dialog(opt).dialog("open");	
+	$("#newRowDialog").dialog(opt).dialog("open");
+	$("#newRowName").focus();
 }
 
 function newFile() {
@@ -736,8 +742,8 @@ function newFile() {
 	else {
 		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval"];
 		lines = [line];
-		newTask("","New Misc Task");
-		newTask("ROW","New Grouped Task");
+		newTask("","Misc Task");
+		newTask("Group","Grouped Task");
 		drawOutput(lines);
 		currentFileName = "newTaskFile.csv";
 		$(".fileinput-filename").html("newTaskFile.csv");
