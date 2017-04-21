@@ -485,6 +485,17 @@ function newTask(rowName,taskName,openMe) {
 }
 
 function saveFile() {
+
+	if (currentFileName.indexOf("_")>0) {
+		var fileNameParts = currentFileName.split("_")
+		var myMonth = today.getMonth()+1;
+		if (myMonth.toString().length==1) myMonth = "0"+myMonth
+		var myYear = today.getYear()+1900;
+		currentFileName = fileNameParts[0] + "_" + myMonth + today.getDate() + myYear + ".csv";
+	}
+	createCookie("fileName",currentFileName)
+	$(".fileinput-filename").html(currentFileName);
+	
 	var csvContent = "";
 	lines.forEach(function(infoArray, index){
 		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
@@ -754,8 +765,11 @@ function newFile() {
 		newTask("","Misc Task");
 		newTask("Group","Grouped Task");
 		drawOutput(lines);
-		currentFileName = "newTaskFile.csv";
-		$(".fileinput-filename").html("newTaskFile.csv");
+		var myMonth = today.getMonth()+1;
+		if (myMonth.toString().length==1) myMonth = "0"+myMonth
+		var myYear = today.getYear()+1900;
+		currentFileName = "newTaskFile" + "_" + myMonth + today.getDate() + myYear + ".csv";
+		$(".fileinput-filename").html(currentFileName);
 		createCookie("fileName",currentFileName);
 		$("span.fileinput-new").hide();
 		$(".savefile-button").removeAttr('disabled');
