@@ -950,11 +950,14 @@ function drawOutput(lines){
 
 		if (days_until_start.length==0) { days_until_start = 999; }  //Make blank sort after everything else
 		if (days_until_due.length==0) { days_until_due = 999; }
+
+		var myTaskName = lines[i][col_task]
+		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
 		var taskBlockID = "taskBlock"+taskID;
 		taskBlock.id = taskBlockID;
 		
-		var taskWithMeta = [ days_until_start, days_until_due , lines[i][col_task] , taskBlock ];
+		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
 		tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
