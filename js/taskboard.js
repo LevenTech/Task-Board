@@ -305,8 +305,8 @@ function editTask(target) {
 	var opt = {
         autoOpen: false,
         modal: true,
-        width: 360,
-        height:360,
+        width: 370,
+        height:370,
         title: myTitle,
 		position: {my: "center center", at: "center center", of: taskBlockID},
 		buttons: { 
