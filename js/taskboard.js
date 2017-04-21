@@ -25,6 +25,7 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask
 
+document.onselectstart = function() { return false; };
 
 function closeEditDialogAndSave() {
 	updateTask(currentTask);
@@ -122,8 +123,8 @@ $(document).ready(function() {
     });
   
   $( function() {
-    $( "#datepicker-start" ).datepicker();
-    $( "#datepicker-due" ).datepicker();
+    //$( "#datepicker-start" ).datepicker();
+    //$( "#datepicker-due" ).datepicker();
   } );
   
 	
@@ -259,25 +260,31 @@ function editTask(target) {
 
 	var startDay = lines[currentTask][col_startday];
 	if (startDay>0) {
+		if (startDay.toString().length==1) startDay = "0" + startDay
 		var startYear=lines[currentTask][col_startyear];
 		if (startYear.length==2) startYear = "20"+startYear;
 		if (startYear.length==0) startYear = today.getYear()+1900;
-		var startMonth=lines[currentTask][col_startmonth]-1;
+		var startMonth=lines[currentTask][col_startmonth];
+		if (startMonth.toString().length==1) startMonth = "0" + startMonth
 		var startDate = new Date(startYear,startMonth,startDay);
-		$("#datepicker-start").datepicker("setDate",startDate);
+		var startDateStr = startYear + "-" + startMonth + "-" + startDay;
+		$("#datepicker-start").val(startDateStr);
 	}
-	else $("#datepicker-start").datepicker("setDate","");
+	else $("#datepicker-start").val("");
 
 	var dueDay = lines[currentTask][col_dueday];
 	if (dueDay>0) {
-		var dueMonth=lines[i][col_duemonth]-1;
+		if (dueDay.toString().length==1) dueDay = "0" + dueDay
+		var dueMonth=lines[i][col_duemonth];
+		if (dueMonth.toString().length==1) dueMonth = "0" + dueMonth
 		var dueYear=lines[i][col_dueyear];
 		if (dueYear.length==2) dueYear = "20"+dueYear;
 		if (dueYear.length==0) dueYear = today.getYear()+1900;
 		var dueDate = new Date(dueYear,dueMonth,dueDay);
-		$("#datepicker-due").datepicker("setDate",dueDate);
+		var dueDateStr = dueYear + "-" + dueMonth + "-" + dueDay;
+		$("#datepicker-due").val(dueDateStr);
 	}
-	else $("#datepicker-due").datepicker("setDate","");
+	else $("#datepicker-due").val("");
 	
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
@@ -316,8 +323,8 @@ function editTask(target) {
 				$("#rowpicker").val("");
 				$("#incrementpicker").val("");
 				$("#namepicker").val("");
-				$("#datepicker-due").datepicker("setDate","");
-				$("#datepicker-start").datepicker("setDate","");
+				$("#datepicker-due").val("");
+				$("#datepicker-start").val("");
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
 				}
@@ -335,30 +342,32 @@ function editTask(target) {
 function updateTask() {
 	var newStringParts = lines[currentTask].slice();
 
-	var newStartDate = $("#datepicker-start").datepicker("getDate");
+	var newStartDate = $("#datepicker-start").val();
+	var newStartDateParts = newStartDate.split("-")
 	if (newStartDate==null) {
 		newStringParts[col_startmonth] = "";
 		newStringParts[col_startday] = "";
 		newStringParts[col_startyear] = "";
 	}
 	else {
-		newStringParts[col_startmonth] = newStartDate.getMonth()+1;
-		newStringParts[col_startday] = newStartDate.getDate();
-		newStringParts[col_startyear] = newStartDate.getYear()+1900;
-		if (newStringParts[col_startyear]==today.getYear+1900) newStringParts[col_startyear]="";
+		newStringParts[col_startmonth] = newStartDateParts[1]
+		newStringParts[col_startday] = newStartDateParts[2]
+		newStringParts[col_startyear] = newStartDateParts[0]
+		if (newStringParts[col_startyear]==today.getYear()+1900) newStringParts[col_startyear]="";
 	}
 
-	var newDueDate = $("#datepicker-due").datepicker("getDate");
+	var newDueDate = $("#datepicker-due").val();
+	var newDueDateParts = newDueDate.split("-")
 	if (newDueDate==null) {
 		newStringParts[col_duemonth]="";
 		newStringParts[col_dueday] = "";
 		newStringParts[col_dueyear] = "";
 	}
 	else {
-		newStringParts[col_duemonth] = newDueDate.getMonth()+1;
-		newStringParts[col_dueday] = newDueDate.getDate();
-		newStringParts[col_dueyear] = newDueDate.getYear()+1900;
-		if (newStringParts[col_dueyear]==today.getYear+1900) newStringParts[col_dueyear]="";
+		newStringParts[col_duemonth] = newDueDateParts[1]
+		newStringParts[col_dueday] = newDueDateParts[2]
+		newStringParts[col_dueyear] = newDueDateParts[0]
+		if (newStringParts[col_dueyear]==today.getYear()+1900) newStringParts[col_dueyear]="";
 	}
 
 	newStringParts[col_color]=$("#colorpicker").val();
@@ -412,27 +421,27 @@ function newTaskCopy() {
 	var dueYear=lines[currentTask][col_dueyear];
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
-	var dueMonth = lines[currentTask][col_duemonth]-1;
+	var dueMonth = lines[currentTask][col_duemonth];
 	var dueDate = new Date(dueYear,dueMonth,dueDay);			
 
 	var startDay = lines[currentTask][col_startday];
 	var startYear=lines[currentTask][col_startyear];
 	if (startYear.length==2) startYear = "20"+startYear;
 	if (startYear.length==0) startYear = today.getYear()+1900;
-	var startMonth=lines[currentTask][col_startmonth]-1;
+	var startMonth=lines[currentTask][col_startmonth];
 	var startDate = new Date(startYear,startMonth,startDay);
 	var start_offset = dueDate.getTime() - startDate.getTime();
 		
 	if (startDay>0) {
 
 		var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
-		newTask[col_startmonth] = new_startdate.getMonth()+1;
+		newTask[col_startmonth] = new_startdate.getMonth();
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
 		if(dueDay>0) {
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
-			newTask[col_duemonth] = new_duedate.getMonth()+1;
+			newTask[col_duemonth] = new_duedate.getMonth();
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
@@ -829,8 +838,7 @@ function drawOutput(lines){
 			var date2_ms = startDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
 			var days_until_start = Math.ceil(difference_ms/one_day);
-
-
+			
 			if (days_until_start==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Starts TODAY"));
@@ -846,7 +854,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(")"));
 				taskBlock.className += " later-task";
 			}
-			else if (startDate<today && dueDay<1) {
+			else if (startDate<today && !dueDay>0) {
 				taskBlock.appendChild(document.createTextNode("Start: "));
 				taskBlock.appendChild(document.createTextNode(startDateStr));
 				taskBlock.appendChild(document.createTextNode(" ("));
@@ -949,6 +957,7 @@ function drawOutput(lines){
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
+		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
 		tableRow.setAttribute("ondragenter","highlightRow(event)");
 		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
@@ -975,6 +984,7 @@ function drawOutput(lines){
 	}
 		
 	table.className = "left-side";
+	table.setAttribute("draggable","false")
 	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+50+"px";
 	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+50+"px";
 	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+50+"px";
@@ -986,6 +996,7 @@ function drawOutput(lines){
 	}	
 	miscTasks.className = "misc-block normal-row";
 	miscTasks.id = "misc-block";
+	miscTasks.setAttribute("draggable","false")
 
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
