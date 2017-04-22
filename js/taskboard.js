@@ -191,7 +191,7 @@ function completeTask() {
 		buttons: { 
 			Yes: function() {
 				lines[currentTask][10]="Yes";
-				if (lines[currentTask][11]>0) newTaskCopy();
+				if (lines[currentTask][11].length>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
 				$("#editDialog").dialog("close");
 				isSaved = 0;
@@ -435,13 +435,13 @@ function newTaskCopy() {
 	if (startDay>0) {
 
 		var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
-		newTask[col_startmonth] = new_startdate.getMonth();
+		newTask[col_startmonth] = new_startdate.getMonth()+1;
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
 		if(dueDay>0) {
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
-			newTask[col_duemonth] = new_duedate.getMonth();
+			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
@@ -948,7 +948,7 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		if (days_until_start.length==0) { days_until_start = 999; }  //Make blank sort after everything else
+		//if (days_until_start.length==0) { days_until_start = 999; }
 		if (days_until_due.length==0) { days_until_due = 999; }
 
 		var myTaskName = lines[i][col_task]
