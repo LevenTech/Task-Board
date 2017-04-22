@@ -822,6 +822,7 @@ function drawOutput(lines){
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
 
+		
 		var name = document.createElement("b");
 		name.innerHTML = lines[i][col_task];
 		//name.setAttribute("ondrop","drop(event)");
@@ -905,6 +906,12 @@ function drawOutput(lines){
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
 				taskBlock.appendChild(taskRow);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 			}
 			else if (days_until_due<0) {
 				taskBlock.appendChild(document.createTextNode("Due: "));
@@ -929,8 +936,32 @@ function drawOutput(lines){
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
 				}
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 			}
 		}
+
+		if (lines[i][col_increment].length>0) {
+			var repeatIcon = document.createElement("div");
+			if (myFontSize=="Small") repeatIcon.setAttribute("class","repeat-icon repeat-icon-small")
+			if (myFontSize=="Medium") repeatIcon.setAttribute("class","repeat-icon repeat-icon-medium")
+			if (myFontSize=="Large") repeatIcon.setAttribute("class","repeat-icon repeat-icon-large")
+			repeatIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+			taskBlock.appendChild(repeatIcon);
+			var repeatNum = document.createElement("div");
+			if (myFontSize=="Small") repeatNum.setAttribute("class","repeat-num repeat-num-small")
+			if (myFontSize=="Medium") repeatNum.setAttribute("class","repeat-num repeat-num-medium")
+			if (myFontSize=="Large") repeatNum.setAttribute("class","repeat-num repeat-num-large")
+			repeatNum.setAttribute("font-size","10px")
+			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-left:3px;")
+			repeatNum.innerHTML = lines[i][col_increment];
+			taskBlock.appendChild(repeatNum);
+		};
+
 		var rowName = lines[i][col_row];
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());

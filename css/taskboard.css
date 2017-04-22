@@ -1,3 +1,33 @@
+.repeat-icon{
+	position:absolute;
+	opacity:0.1;
+	font-size:3em;
+}
+.repeat-num{
+	position:absolute;
+	opacity:0.8;
+}
+
+.repeat-icon-large{
+	top:145px;left:248px;
+}
+.repeat-icon-medium{
+	top:108px;left:211px;
+}
+.repeat-icon-small{
+	top:70px;left:172px;
+}
+
+.repeat-num-large{
+	top:160px;left:263px;
+}
+.repeat-num-medium{
+	top:119px;left:222px;
+}
+.repeat-num-small{
+	top:79px;left:179px;
+}
+
 #taskboard-toolbar {
 	display:flex;
 }
@@ -17,6 +47,7 @@
 }
 
 .task-block {
+	position:relative;
 	display:inline-block;
 	text-align: center;
 	padding: 10px;
