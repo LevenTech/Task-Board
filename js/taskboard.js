@@ -373,6 +373,7 @@ function updateTask() {
 	newStringParts[col_color]=$("#colorpicker").val();
 	newStringParts[col_increment]=$("#incrementpicker").val();
 	newStringParts[col_task]=$("#namepicker").val();
+	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
@@ -791,7 +792,7 @@ function drawOutput(lines){
 	var myMonth;
 	var myDay;
 	var myYear;
-
+	var clockIconVal;
 
 	
 	var myFontSize = $( "#font-size" ).val();
@@ -823,8 +824,10 @@ function drawOutput(lines){
 		taskBlock.style.backgroundColor = colorName;
 
 		
+		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("b");
-		name.innerHTML = lines[i][col_task];
+		name.innerHTML = myName;
+		
 		//name.setAttribute("ondrop","drop(event)");
 		//name.setAttribute("ondragover","allowDrop(event)");
 		name.setAttribute("data-rowname",lines[i][col_row]);
@@ -840,6 +843,8 @@ function drawOutput(lines){
 		var days_until_start = "";
 		var days_until_due = "";
 
+		clockIconVal = 0;
+		
 		if (startDay>0) {
 			var startYear=lines[i][col_startyear];
 			if (startYear.length==2) startYear = "20"+startYear;
@@ -876,6 +881,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(0-days_until_start));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
 				taskBlock.className += " now-task";
+				clockIconVal = -days_until_start;
 			}
 			else {
 				taskBlock.className += " now-task";
@@ -961,6 +967,18 @@ function drawOutput(lines){
 			repeatNum.innerHTML = lines[i][col_increment];
 			taskBlock.appendChild(repeatNum);
 		};
+
+		if (clockIconVal>0) {
+			var myOpacity = clockIconVal*0.1;
+			if (myOpacity>1) myOpacity = 1;
+			var clockIcon = document.createElement("div");
+			if (myFontSize=="Small") clockIcon.setAttribute("class","clock-icon clock-icon-small")
+			if (myFontSize=="Medium") clockIcon.setAttribute("class","clock-icon clock-icon-medium")
+			if (myFontSize=="Large") clockIcon.setAttribute("class","clock-icon clock-icon-large")
+			clockIcon.setAttribute("style","opacity:"+myOpacity+";")
+			clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
+			taskBlock.appendChild(clockIcon);
+		};		
 
 		var rowName = lines[i][col_row];
 		if (rowName == "") rowName = "MISC";
