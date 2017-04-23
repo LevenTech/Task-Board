@@ -961,7 +961,6 @@ function drawOutput(lines){
 			else {
 				taskBlock.appendChild(document.createTextNode("Due: "));
 				taskBlock.appendChild(document.createTextNode(dueDateStr));
-				console.log(startDay)
 				if (!startDay>0 || startDate<=today) {
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
