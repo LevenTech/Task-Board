@@ -926,6 +926,7 @@ function drawOutput(lines){
 				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
 				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
 				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
+				alertIcon.setAttribute("style","margin-left:0.4em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 				
@@ -1164,6 +1165,9 @@ function mySortFunction(a,b) {
 	if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
 	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;
 
+	if (a[0].length==0) a[0]=-999;
+	if (b[0].length==0) b[0]=-999;
+	
 	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
 
 	if (a[1]==b[1])
