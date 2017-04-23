@@ -793,6 +793,8 @@ function drawOutput(lines){
 	var myDay;
 	var myYear;
 	var clockIconVal;
+	var noStartDay;
+	var noDueDay;
 
 	
 	var myFontSize = $( "#font-size" ).val();
@@ -844,6 +846,7 @@ function drawOutput(lines){
 		var days_until_due = "";
 
 		clockIconVal = 0;
+		noStartDay = 0;
 		
 		if (startDay>0) {
 			var startYear=lines[i][col_startyear];
@@ -881,18 +884,22 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(0-days_until_start));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
 				taskBlock.className += " now-task";
-				clockIconVal = -days_until_start;
+				clockIconVal = (-days_until_start)*0.1;
+				clockIconLabel = (-days_until_start);
+				clockIconLabel = clockIconLabel.toString()+" +";
 			}
 			else {
 				taskBlock.className += " now-task";
 			}
 		}
 		else {
+			noStartDay = 1;
 			taskBlock.className += " now-task";
 		}
-		
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);		
+
+		noDueDay = 0;
 		
 		if (dueDay > 0) {
 			var dueMonth=lines[i][col_duemonth]-1;
@@ -926,6 +933,13 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(-days_until_due));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
 
+				var alertIcon = document.createElement("div");
+				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
+				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
+				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
+				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("!!! OVERDUE !!!"));
 				var BR = document.createElement("br");
@@ -933,6 +947,8 @@ function drawOutput(lines){
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
 				taskBlock.appendChild(taskRow);
+
+
 			}
 			else {
 				taskBlock.appendChild(document.createTextNode("Due: "));
@@ -941,6 +957,8 @@ function drawOutput(lines){
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
+					clockIconVal = 1-(days_until_due*0.1);
+					clockIconLabel = days_until_due.toString()+" -";
 				}
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -950,6 +968,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);
 			}
 		}
+		else { noDueDay = 1; }
 
 		if (lines[i][col_increment].length>0) {
 			var repeatIcon = document.createElement("div");
@@ -969,17 +988,34 @@ function drawOutput(lines){
 		};
 
 		if (clockIconVal>0) {
-			var myOpacity = clockIconVal*0.1;
+			var myOpacity = clockIconVal;
 			if (myOpacity>1) myOpacity = 1;
 			var clockIcon = document.createElement("div");
-			if (myFontSize=="Small") clockIcon.setAttribute("class","clock-icon clock-icon-small")
-			if (myFontSize=="Medium") clockIcon.setAttribute("class","clock-icon clock-icon-medium")
-			if (myFontSize=="Large") clockIcon.setAttribute("class","clock-icon clock-icon-large")
+			if (myFontSize=="Small") clockIcon.setAttribute("class","left-icon left-icon-small")
+			if (myFontSize=="Medium") clockIcon.setAttribute("class","left-icon left-icon-medium")
+			if (myFontSize=="Large") clockIcon.setAttribute("class","left-icon left-icon-large")
 			clockIcon.setAttribute("style","opacity:"+myOpacity+";")
 			clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
 			taskBlock.appendChild(clockIcon);
-		};		
+			var clockIconNum = document.createElement("div");
+			if (myFontSize=="Small") clockIconNum.setAttribute("class","left-label left-label-small")
+			if (myFontSize=="Medium") clockIconNum.setAttribute("class","left-label left-label-medium")
+			if (myFontSize=="Large") clockIconNum.setAttribute("class","left-label left-label-large")
+			clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+			clockIconNum.innerHTML = clockIconLabel;
+			taskBlock.appendChild(clockIconNum);
+		};
 
+		/*if (noStartDay==1 && noDueDay==1) {
+			var questionIcon = document.createElement("div");
+			if (myFontSize=="Small") questionIcon.setAttribute("class","left-icon left-icon-small")
+			if (myFontSize=="Medium") questionIcon.setAttribute("class","left-icon left-icon-medium")
+			if (myFontSize=="Large") questionIcon.setAttribute("class","left-icon left-icon-large")
+			questionIcon.setAttribute("style","opacity:0.5;")
+			questionIcon.innerHTML = '<i class="fa fa-question-circle-o" aria-hidden="true" ></i>';
+			taskBlock.appendChild(questionIcon);
+		}*/
+		
 		var rowName = lines[i][col_row];
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
@@ -997,8 +1033,7 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		//if (days_until_start.length==0) { days_until_start = 999; }
-		if (days_until_due.length==0) { days_until_due = 999; }
+		//if (startDay>0 && !dueDay>0) { days_until_due = days_until_start; }
 
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
@@ -1111,27 +1146,57 @@ function myRowSortFunction(a,b) {
 function mySortFunction(a,b) {	
 	var debug = 0;
 	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
-	if (a[1] == b[1])
+	var returnVal;
+	if (a[1] == b[1])  // Same Due Date
 	{
-		if (a[0] == b[0]) 
+		if (a[0] == b[0])  // Same Start Date
 		{
-			var returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0
-			if (debug) { alert(compareString + " = " + returnVal); }
-			return returnVal;
+			// Use Alphabetic order
+			returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0
 		}
-		else
+		else  //Same Due Date, Different Start Dates
 		{
-			var returnVal = (a[0] < b[0]) ? -1 : 1;
-			if (debug) { alert(compareString + " = " + returnVal); }
-			return returnVal;
+			// Sort by Start Date
+			returnVal = (a[0] < b[0]) ? -1 : 1;
 		}
 	}
-	else
+	else  //Different due dates
 	{
-		var returnVal = (a[1] < b[1]) ? -1 : 1;
-		if (debug) { alert(compareString + " = " + returnVal); }
-		return returnVal;
+		if (a[1]=="")   // A has no due date
+		{
+			if (b[0]<1)  // B has "begun"
+			{
+				// B started, A never due
+				returnVal = 1;
+			}
+			else  // B hasn't begun
+			{
+				returnVal = -1;
+			}
+		}
+		else   // A has a due date
+		{
+			if (b[1]=="")   // B has no due date
+			{
+				// We're fine
+				if (a[0]<1)  //A has "begun"
+				{
+					returnVal = -1;
+				}
+				else 
+				{
+					returnVal = 1;
+				}
+			}
+			else  // A, B both have a due date, they're different
+			{
+				//Sort by Due Dates
+				returnVal = (a[1] < b[1]) ? -1 : 1;
+			}
+		}
 	}
+	if (debug) { alert(compareString + " = " + returnVal); }
+	return returnVal;
 }
 
   

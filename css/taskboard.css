@@ -28,18 +28,31 @@
 	top:79px;left:179px;
 }
 
-.clock-icon{
+.left-icon{
 	position:absolute;
 	font-size:3em;
 }
-.clock-icon-large{
+.left-icon-large{
 	top:145px;left:2;
 }
-.clock-icon-medium{
+.left-icon-medium{
 	top:108px;left:2;
 }
-.clock-icon-small{
+.left-icon-small{
 	top:70px;left:2px;
+}
+
+.left-label{
+	position:absolute;
+}
+.left-label-large{
+	top:158px;left:56px;
+}
+.left-label-medium{
+	top:120px;left:42px;
+}
+.left-label-small{
+	top:78px;left:33px;
 }
 
 
