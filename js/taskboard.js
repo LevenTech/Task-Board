@@ -1095,9 +1095,9 @@ function drawOutput(lines){
 		
 	table.className = "left-side";
 	table.setAttribute("draggable","false")
-	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+50+"px";
-	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+50+"px";
-	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+50+"px";
+	if (myFontSize=="Small") table.style.flexBasis = 200*maxLength+50+"px";
+	if (myFontSize=="Medium") table.style.flexBasis = 290*maxLength+50+"px";
+	if (myFontSize=="Large") table.style.flexBasis = 340*maxLength+50+"px";
 	
 	tableRows[0][0].sort(mySortFunction);
 	var miscTasks = document.createElement("div");
