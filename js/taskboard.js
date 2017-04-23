@@ -921,6 +921,14 @@ function drawOutput(lines){
 				taskBlock.appendChild(taskRow);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
+				
+				var alertIcon = document.createElement("div");
+				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
+				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
+				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
+				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+				
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);
 				var BR = document.createElement("br");
@@ -953,7 +961,8 @@ function drawOutput(lines){
 			else {
 				taskBlock.appendChild(document.createTextNode("Due: "));
 				taskBlock.appendChild(document.createTextNode(dueDateStr));
-				if (startDay<1 || startDate<=today) {
+				console.log(startDay)
+				if (!startDay>0 || startDate<=today) {
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
@@ -1145,55 +1154,33 @@ function myRowSortFunction(a,b) {
 
 function mySortFunction(a,b) {	
 	var debug = 0;
-	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
 	var returnVal;
-	if (a[1] == b[1])  // Same Due Date
+	
+	if (a[0]=="" && a[1].length==0) a[1]=999;
+	if (b[0]=="" && b[1].length==0) b[1]=999;
+
+	if (a[0]>0 && a[1].length==0) a[1]=a[0];
+	if (b[0]>0 && b[1].length==0) b[1]=b[0];
+	
+	if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
+	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;
+
+	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
+
+	if (a[1]==b[1])
 	{
-		if (a[0] == b[0])  // Same Start Date
+		if (a[0]==b[0]) 
 		{
-			// Use Alphabetic order
-			returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0
+			returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
 		}
-		else  //Same Due Date, Different Start Dates
+		else
 		{
-			// Sort by Start Date
-			returnVal = (a[0] < b[0]) ? -1 : 1;
+			returnVal = (a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0 
 		}
 	}
-	else  //Different due dates
+	else
 	{
-		if (a[1]=="")   // A has no due date
-		{
-			if (b[0]<1)  // B has "begun"
-			{
-				// B started, A never due
-				returnVal = 1;
-			}
-			else  // B hasn't begun
-			{
-				returnVal = -1;
-			}
-		}
-		else   // A has a due date
-		{
-			if (b[1]=="")   // B has no due date
-			{
-				// We're fine
-				if (a[0]<1)  //A has "begun"
-				{
-					returnVal = -1;
-				}
-				else 
-				{
-					returnVal = 1;
-				}
-			}
-			else  // A, B both have a due date, they're different
-			{
-				//Sort by Due Dates
-				returnVal = (a[1] < b[1]) ? -1 : 1;
-			}
-		}
+		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
 	}
 	if (debug) { alert(compareString + " = " + returnVal); }
 	return returnVal;
