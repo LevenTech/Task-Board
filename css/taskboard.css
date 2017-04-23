@@ -15,7 +15,7 @@
 	top:108px;left:211px;
 }
 .repeat-icon-small{
-	top:70px;left:172px;
+	top:70px;left:130px;
 }
 
 .repeat-num-large{
@@ -25,7 +25,7 @@
 	top:119px;left:222px;
 }
 .repeat-num-small{
-	top:79px;left:179px;
+	top:79px;left:137px;
 }
 
 .left-icon{
@@ -85,7 +85,7 @@
 	cursor:hand;
 	}
 .small-block {
-	width: 200px;
+	width: 160px;
 	height: 100px;
 	font-size:10px
 }
@@ -93,6 +93,11 @@
 	width: 250px;
 	height: 150px;
 	font-size:14px
+}
+.large-block {
+	width: 300px;
+	height: 200px;
+	font-size:18px
 }
 
 .finish-area {
@@ -112,11 +117,7 @@
 	background:#444444;
 	border: 2px solid white;
 }
-.large-block {
-	width: 300px;
-	height: 200px;
-	font-size:18px
-}
+
 .now-task {
 	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
 	}
