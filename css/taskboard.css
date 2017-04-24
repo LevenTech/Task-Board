@@ -38,26 +38,26 @@
 	font-size:3em;
 }
 .left-icon-large{
-	top:145px;left:2;
+	top:142px;left:5px;
 }
 .left-icon-medium{
-	top:108px;left:2;
+	top:103px;left:5px;
 }
 .left-icon-small{
-	top:70px;left:2px;
+	top:65px;left:5px;
 }
 
 .left-label{
 	position:absolute;
 }
 .left-label-large{
-	top:158px;left:56px;
+	top:162px;left:16px;
 }
 .left-label-medium{
-	top:120px;left:42px;
+	top:120px;left:12px;
 }
 .left-label-small{
-	top:78px;left:33px;
+	top:78px;left:5px;
 }
 
 

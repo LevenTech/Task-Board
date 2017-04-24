@@ -1038,13 +1038,15 @@ function drawOutput(lines){
 			if (myFontSize=="Medium") clockIcon.setAttribute("class","left-icon left-icon-medium")
 			if (myFontSize=="Large") clockIcon.setAttribute("class","left-icon left-icon-large")
 			clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-			clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
+			clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
 			taskBlock.appendChild(clockIcon);
 			var clockIconNum = document.createElement("div");
 			if (myFontSize=="Small") clockIconNum.setAttribute("class","left-label left-label-small")
 			if (myFontSize=="Medium") clockIconNum.setAttribute("class","left-label left-label-medium")
 			if (myFontSize=="Large") clockIconNum.setAttribute("class","left-label left-label-large")
-			clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+			if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
+			else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+			console.log("clockIconLabel=<"+clockIconLabel+">")
 			clockIconNum.innerHTML = clockIconLabel;
 			taskBlock.appendChild(clockIconNum);
 		};
