@@ -1046,7 +1046,6 @@ function drawOutput(lines){
 			if (myFontSize=="Large") clockIconNum.setAttribute("class","left-label left-label-large")
 			if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
 			else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
-			console.log("clockIconLabel=<"+clockIconLabel+">")
 			clockIconNum.innerHTML = clockIconLabel;
 			taskBlock.appendChild(clockIconNum);
 		};
