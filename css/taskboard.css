@@ -1,3 +1,8 @@
+.my-context-menu{
+	width:100px !important;
+	min-width:100px !important;
+}
+
 .repeat-icon{
 	position:absolute;
 	opacity:0.1;
