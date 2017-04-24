@@ -131,17 +131,25 @@ $(document).ready(function() {
         $.contextMenu({
             selector: '.task-block', 
 			className: 'my-context-menu',
-            callback: function(key, options) {
-				if (key=="Finish") {
-					completeTask();
-				}
-				if (key=="Delete") {
-					deleteTask();
-				}				
-            },
             items: {
-                "Finish": {name: "Finish", icon: "fa-check-square-o"},
-                "Delete": {name: "Delete", icon: "fa-trash"},
+                "Edit": {
+					name: "Edit", icon: "fa-edit",
+					callback: function(key, options) {
+						editTaskContextMenu();
+					}
+				},
+                "Finish": {
+					name: "Finish", icon: "fa-check-square-o",
+					callback: function(key, options) {
+						completeTask();
+					}
+				},
+                "Delete": {
+					name: "Delete", icon: "fa-trash",
+					callback: function(key, options) {
+						deleteTask();
+					}
+				},
             }
         });
     });	
@@ -265,7 +273,12 @@ function deleteTask() {
 	$("#deleteDialog").dialog(opt).dialog("open");
 }
 
-function editTask(target) {
+function editTaskContextMenu() {
+	taskID = lines[currentTask][col_ID];
+	editTask(taskID);
+}
+
+function clickTaskBlock(target) {
 	var taskID = target.getAttribute("data-taskid");
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
@@ -273,7 +286,10 @@ function editTask(target) {
 			break;
 		}
 	}
-
+	editTask(taskID);
+}
+	
+function editTask(taskID) {
 	var startDay = lines[currentTask][col_startday];
 	if (startDay>0) {
 		if (startDay.toString().length==1) startDay = "0" + startDay
@@ -291,9 +307,9 @@ function editTask(target) {
 	var dueDay = lines[currentTask][col_dueday];
 	if (dueDay>0) {
 		if (dueDay.toString().length==1) dueDay = "0" + dueDay
-		var dueMonth=lines[i][col_duemonth];
+		var dueMonth=lines[currentTask][col_duemonth];
 		if (dueMonth.toString().length==1) dueMonth = "0" + dueMonth
-		var dueYear=lines[i][col_dueyear];
+		var dueYear=lines[currentTask][col_dueyear];
 		if (dueYear.length==2) dueYear = "20"+dueYear;
 		if (dueYear.length==0) dueYear = today.getYear()+1900;
 		var dueDate = new Date(dueYear,dueMonth,dueDay);
@@ -838,7 +854,7 @@ function drawOutput(lines){
 		taskBlock.setAttribute("onmousedown","currentTask="+i);
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
 		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
-		taskBlock.setAttribute("onclick","editTask(this)");
+		taskBlock.setAttribute("onclick","clickTaskBlock(this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
