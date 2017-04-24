@@ -835,7 +835,7 @@ function drawOutput(lines){
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		//taskBlock.setAttribute("onmousedown","clickTaskBlock(event)");
-		taskBlock.setAttribute("onmousedown","currentTask="+taskID);
+		taskBlock.setAttribute("onmousedown","currentTask="+i);
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
 		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.setAttribute("onclick","editTask(this)");
