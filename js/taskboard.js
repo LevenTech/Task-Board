@@ -686,30 +686,6 @@ function unhighlightFinish(ev) {
 	$("#finish-instructions").hide();
 }
 
-function clickTaskBlock(ev) {
-    switch (event.which) {
-        case 1:
-            return;
-			break;
-        case 2:
-            return;
-			break;
-        case 3:
-			break;
-        default:
-			return;
-			break;
-    }
-	var taskID = ev.target.getAttribute("data-taskid");
-	
-	for(var i = 0; i < lines.length; i++) {
-		if(parseInt(lines[i][0]) == taskID) {
-			currentTask = i;
-			break;
-		}
-	}
-}
-
 function drag(ev) {
 	draggingNew = 0;
 	var taskID = ev.target.getAttribute("data-taskid");
@@ -858,7 +834,8 @@ function drawOutput(lines){
 		if (myFontSize=="Large") taskBlock.className += " large-block"
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
-		taskBlock.setAttribute("onmousedown","clickTaskBlock(event)");
+		//taskBlock.setAttribute("onmousedown","clickTaskBlock(event)");
+		taskBlock.setAttribute("onmousedown","currentTask="+taskID);
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
 		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.setAttribute("onclick","editTask(this)");
