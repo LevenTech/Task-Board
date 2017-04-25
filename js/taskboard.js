@@ -467,24 +467,8 @@ function delayTask() {
 	
 	lines[currentTask][col_dueday] = newDueDate.getDate();
 	lines[currentTask][col_duemonth] = newDueDate.getMonth()+1;
-	lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
-
-	var startDay = lines[currentTask][col_startday]
-	if (startDay>0) {
-		var startYear=lines[currentTask][col_startyear];
-		if (startYear.length==2) startYear = "20"+startYear;
-		if (startYear.length==0) startYear = today.getYear()+1900;
-		var startMonth=lines[currentTask][col_startmonth];
-		var startDate = new Date(startYear,startMonth,startDay);
-		var newStartDate = new Date(startDate.getTime()+(-days_until_due)*one_day);
-		
-		lines[currentTask][col_startday] = newStartDate.getDate();
-		lines[currentTask][col_startmonth] = newStartDate.getMonth()+1;
-		lines[currentTask][col_startyear] = newStartDate.getYear()+1900;
-	}
-
-
-	console.log(lines[currentTask])
+	if (newDueDate.getYear()==today.getYear()) lines[currentTask][col_dueyear]="";
+	else lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
 
 	drawOutput(lines);
 	isSaved = 0;
