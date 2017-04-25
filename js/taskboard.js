@@ -133,6 +133,36 @@ $(document).ready(function() {
             selector: '.task-block', 
 			className: 'my-context-menu',
             items: {
+                "Delay": {
+					name: "Delay", icon: "fa-bell-slash-o",
+					callback: function(key, options) {
+						delayTask(currentTask);
+					},
+			        visible: function(key, opt){        
+						var myTaskID = currentTask;
+						var isDue = 0;
+						var dueDay = lines[myTaskID][col_dueday];
+						if (dueDay > 0) {
+							var dueMonth=lines[myTaskID][col_duemonth]-1;
+							var dueYear=lines[myTaskID][col_dueyear];
+							if (dueYear.length==2) dueYear = "20"+dueYear;
+							if (dueYear.length==0) dueYear = today.getYear()+1900;
+							var dueDate = new Date(dueYear,dueMonth,dueDay);
+							var dueDateStr = dueDate.toDateString();
+							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
+							var one_day=1000*60*60*24;
+							var date1_ms = today.getTime();
+							var date2_ms = dueDate.getTime();
+							var difference_ms = date2_ms - date1_ms;
+							var days_until_due = Math.ceil(difference_ms/one_day);
+							if (days_until_due<0 || days_until_due==0 ) {
+								isDue = 1;
+							}
+						}
+						if (isDue==1) return true;
+						else return false;
+					}
+				},
                 "Edit": {
 					name: "Edit", icon: "fa-edit",
 					callback: function(key, options) {
@@ -411,6 +441,51 @@ function updateTask() {
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
 	lines[currentTask] = newStringParts;
+	drawOutput(lines);
+	isSaved = 0;
+	$("#unsaved-changes").show();
+	saveFileCookie();
+}
+
+function delayTask() {
+
+	var one_day=1000*60*60*24;
+
+	var dueDay = lines[currentTask][col_dueday];
+	var dueMonth=lines[currentTask][col_duemonth];
+	var dueYear=lines[currentTask][col_dueyear];
+	if (dueYear.length==2) dueYear = "20"+dueYear;
+	if (dueYear.length==0) dueYear = today.getYear()+1900;
+	var dueDate = new Date(dueYear,dueMonth,dueDay);
+
+	var date1_ms = today.getTime();
+	var date2_ms = dueDate.getTime();
+	var difference_ms = date2_ms - date1_ms;
+	var days_until_due = Math.ceil(difference_ms/one_day);
+
+	var newDueDate = new Date(today.getTime() + one_day)
+	
+	lines[currentTask][col_dueday] = newDueDate.getDate();
+	lines[currentTask][col_duemonth] = newDueDate.getMonth()+1;
+	lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
+
+	var startDay = lines[currentTask][col_startday]
+	if (startDay>0) {
+		var startYear=lines[currentTask][col_startyear];
+		if (startYear.length==2) startYear = "20"+startYear;
+		if (startYear.length==0) startYear = today.getYear()+1900;
+		var startMonth=lines[currentTask][col_startmonth];
+		var startDate = new Date(startYear,startMonth,startDay);
+		var newStartDate = new Date(startDate.getTime()+(-days_until_due)*one_day);
+		
+		lines[currentTask][col_startday] = newStartDate.getDate();
+		lines[currentTask][col_startmonth] = newStartDate.getMonth()+1;
+		lines[currentTask][col_startyear] = newStartDate.getYear()+1900;
+	}
+
+
+	console.log(lines[currentTask])
+
 	drawOutput(lines);
 	isSaved = 0;
 	$("#unsaved-changes").show();
@@ -857,7 +932,7 @@ function drawOutput(lines){
 		if (myFontSize=="Large") taskBlock.className += " large-block"
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
-		taskBlock.setAttribute("onmousedown","currentTask="+i);
+		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
 		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 		var colorName = lines[i][col_color];
