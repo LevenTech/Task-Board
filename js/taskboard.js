@@ -847,8 +847,9 @@ function drawOutput(lines){
 		if (isNaN(taskID)) { continue; }
 		if (lines[i][col_complete]=="Yes") { continue; }
 		
-		//alert(taskID);
 		if (taskID>lastTaskID) { lastTaskID = taskID; }
+
+		var isPastTask = 0;
 		
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
@@ -883,7 +884,6 @@ function drawOutput(lines){
 
 		clockIconVal = 0;
 		noStartDay = 0;
-		var isPastTask = 0;
 		
 		if (startDay>0) {
 			var startYear=lines[i][col_startyear];
@@ -904,8 +904,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);
-				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("Starts TODAY"));
+				taskRow = document.createElement("span");
+				taskRow.innerHTML = "<b>Starts TODAY</b>";
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
 			}
@@ -924,28 +924,29 @@ function drawOutput(lines){
 			}
 			else if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
-				var dateText = document.createElement("span");
-				dateText.setAttribute("style","position:absolute;left:20em;")
 
-				var justDate = document.createElement("p");
+				var justDate = document.createElement("span");
 				justDate.innerHTML = startDateStr;
-				justDate.setAttribute("style","float:left;margin-right:10px;")
-				dateText.appendChild(justDate);
+				justDate.setAttribute("style","display:inline-block;margin-left:10px;margin-right:10px;")
+				taskBlock.appendChild(justDate);
 
 				var myOpacity = (-days_until_start)*0.1;
 				if (myOpacity>1) myOpacity = 1;
 				
+				taskBlock.className += " past-task";
+
+				var iconSpan = document.createElement("span")
+				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-right:1.5em;")
+				else iconSpan.setAttribute("style","display:inline-block;")
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
 					//clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-					clockIcon.setAttribute("style","margin:1px;");
+					clockIcon.setAttribute("style","display:inline-block;margin:1px;");
 					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
-					dateText.appendChild(clockIcon);
+					iconSpan.appendChild(clockIcon);
 				}
-
-				taskBlock.appendChild(dateText);
-				taskBlock.className += " past-task";
+				taskBlock.appendChild(iconSpan)
 			}
 			else {
 				var BR = document.createElement("br");
@@ -994,7 +995,7 @@ function drawOutput(lines){
 				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
 				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
 				alertIcon.className += " left-icon-normal";
-				alertIcon.setAttribute("style","margin-left:0.4em;")
+				alertIcon.setAttribute("style","margin-left:0.3em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 				
