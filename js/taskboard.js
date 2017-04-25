@@ -975,6 +975,9 @@ function drawOutput(lines){
 			else if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
 
+				name.setAttribute("style","height:1.2em;display:inline-block;")
+				taskBlock.appendChild(name);
+
 				var justDate = document.createElement("span");
 				justDate.innerHTML = startDateStr;
 				justDate.setAttribute("style","display:inline-block;margin-left:10px;margin-right:10px;")
