@@ -6,7 +6,7 @@ var today = new Date();
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
 var currentTask = 0;
-var currenrRowName = "";
+var currentRowName = "";
 var lastTaskID = 0;
 
 var	col_ID = 0;
@@ -629,7 +629,10 @@ function highlightRow(ev) {
 		$(".misc-block").addClass("normal-row")
 		var toHighlight = 1;
 		if (currentTask && draggingNew==0) {
-			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) { toHighlight = 0; }
+			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
+				toHighlight = 0;
+				currentRowName = ev.target.getAttribute("data-rowname")
+			}
 		}
 		currentRowName = ev.target.getAttribute("data-rowname");
 		if (toHighlight) {
@@ -711,10 +714,11 @@ function drag(ev) {
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
+			currentRowName = lines[i][col_row]
 			break;
 		}
 	}
-
+	
     ev.dataTransfer.setData("text", currentTask);
 }
 
