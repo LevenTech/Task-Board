@@ -6,6 +6,7 @@ var today = new Date();
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
 var currentTask = 0;
+var currenrRowName = "";
 var lastTaskID = 0;
 
 var	col_ID = 0;
@@ -278,7 +279,7 @@ function editTaskContextMenu() {
 	editTask(taskID);
 }
 
-function clickTaskBlock(target) {
+function clickTaskBlock(ev,target) {
 	var taskID = target.getAttribute("data-taskid");
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
@@ -286,10 +287,10 @@ function clickTaskBlock(target) {
 			break;
 		}
 	}
-	editTask(taskID);
+	editTask(taskID,ev);
 }
 	
-function editTask(taskID) {
+function editTask(taskID,ev) {
 	var startDay = lines[currentTask][col_startday];
 	if (startDay>0) {
 		if (startDay.toString().length==1) startDay = "0" + startDay
@@ -340,7 +341,6 @@ function editTask(taskID) {
         width: 370,
         height:370,
         title: myTitle,
-		position: {my: "center center", at: "center center", of: taskBlockID},
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
@@ -367,7 +367,10 @@ function editTask(taskID) {
 			}
 		}		
 	};
-	$("#editDialog").dialog(opt).dialog("open");
+	$("#editDialog").dialog(opt);
+	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
+	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
 }
 
@@ -628,16 +631,19 @@ function highlightRow(ev) {
 		if (currentTask && draggingNew==0) {
 			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) { toHighlight = 0; }
 		}
+		currentRowName = ev.target.getAttribute("data-rowname");
 		if (toHighlight) {
 			ev.target.className = "task-row hover-row";
 		}
 	}
 }
+
 function unhighlightRow(ev) {
 	dragcounter--;
 	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,8)=="task-row") {
+			currentRowName = "";
 			ev.target.className = "task-row normal-row";
 		}
 	}
@@ -654,14 +660,16 @@ function highlightMisc(ev) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
-			ev.target.className = "misc-block hover-row";
-			var myFontSize = $( "#font-size" ).val();
-			if (myFontSize=="Small") ev.target.className += " misc-block-small"
-			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
-			if (myFontSize=="Large") ev.target.className += " misc-block-large"
+		ev.target.className = "misc-block hover-row";
+		var myFontSize = $( "#font-size" ).val();
+		if (myFontSize=="Small") ev.target.className += " misc-block-small"
+		if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
+		if (myFontSize=="Large") ev.target.className += " misc-block-large"
+		currentRowName = ev.target.getAttribute("data-rowname");
 		}
 	}
 	else {
+		currentRowName = ""
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 	}
@@ -725,7 +733,7 @@ function drop(ev) {
 	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
-    var rowName = ev.target.getAttribute("data-rowname");
+    var rowName = currentRowName;
 	if(draggingNew==1) {
 		newTask(rowName,"",1);
 		saveFileCookie();
@@ -733,7 +741,7 @@ function drop(ev) {
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row]!==rowName) {
+		if (lines[taskID][col_row].toUpperCase()!==rowName.toUpperCase()) {
 			lines[taskID][col_row]=rowName;
 			isSaved = 0;
 			$("#unsaved-changes").show();
@@ -850,11 +858,9 @@ function drawOutput(lines){
 		if (myFontSize=="Large") taskBlock.className += " large-block"
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
-		//taskBlock.setAttribute("onmousedown","clickTaskBlock(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i);
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
-		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
-		taskBlock.setAttribute("onclick","clickTaskBlock(this)");
+		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
@@ -866,12 +872,8 @@ function drawOutput(lines){
 		
 		//name.setAttribute("ondrop","drop(event)");
 		//name.setAttribute("ondragover","allowDrop(event)");
-		name.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.appendChild(name);
-		var BR = document.createElement("br");
-		taskBlock.appendChild(BR);
-		var BR = document.createElement("br");
-		taskBlock.appendChild(BR);
+
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
@@ -881,6 +883,7 @@ function drawOutput(lines){
 
 		clockIconVal = 0;
 		noStartDay = 0;
+		var isPastTask = 0;
 		
 		if (startDay>0) {
 			var startYear=lines[i][col_startyear];
@@ -897,12 +900,20 @@ function drawOutput(lines){
 			var days_until_start = Math.ceil(difference_ms/one_day);
 			
 			if (days_until_start==0) {
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Starts TODAY"));
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
 			}
 			else if (startDate>today) {
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 				taskBlock.appendChild(document.createTextNode("Start: "));
 				taskBlock.appendChild(document.createTextNode(startDateStr));
 				//new Date().toString('MM/dd HH:mm')
@@ -912,22 +923,44 @@ function drawOutput(lines){
 				taskBlock.className += " later-task";
 			}
 			else if (startDate<today && !dueDay>0) {
-				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDateStr));
-				taskBlock.appendChild(document.createTextNode(" ("));
-				taskBlock.appendChild(document.createTextNode(0-days_until_start));
-				taskBlock.appendChild(document.createTextNode(" passed)"));
-				taskBlock.className += " now-task";
-				clockIconVal = (-days_until_start)*0.1;
-				clockIconLabel = (-days_until_start);
-				clockIconLabel = clockIconLabel.toString()+" +";
+				isPastTask = 1;
+				var dateText = document.createElement("span");
+				dateText.setAttribute("style","position:absolute;left:20em;")
+
+				var justDate = document.createElement("p");
+				justDate.innerHTML = startDateStr;
+				justDate.setAttribute("style","float:left;margin-right:10px;")
+				dateText.appendChild(justDate);
+
+				var myOpacity = (-days_until_start)*0.1;
+				if (myOpacity>1) myOpacity = 1;
+				
+				for(var k=0;k<(-days_until_start);k++) {
+					var clockIcon = document.createElement("div");
+					clockIcon.className = "clock-icon"
+					//clockIcon.setAttribute("style","opacity:"+myOpacity+";")
+					clockIcon.setAttribute("style","margin:1px;");
+					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
+					dateText.appendChild(clockIcon);
+				}
+
+				taskBlock.appendChild(dateText);
+				taskBlock.className += " past-task";
 			}
 			else {
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 				taskBlock.className += " now-task";
 			}
 		}
 		else {
 			noStartDay = 1;
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);
 			taskBlock.className += " now-task";
 		}
 		var BR = document.createElement("br");
@@ -960,6 +993,7 @@ function drawOutput(lines){
 				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
 				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
 				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
+				alertIcon.className += " left-icon-normal";
 				alertIcon.setAttribute("style","margin-left:0.4em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
@@ -980,6 +1014,7 @@ function drawOutput(lines){
 				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
 				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
 				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
+				alertIcon.className += " left-icon-normal";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 
@@ -1000,8 +1035,20 @@ function drawOutput(lines){
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
-					clockIconVal = 1-(days_until_due*0.1);
 					clockIconLabel = days_until_due.toString()+" -";
+					var myOpacity = 1-(days_until_due*0.1);
+					if (myOpacity>1) myOpacity = 1;
+					var clockIcon = document.createElement("div");
+					clockIcon.className = "left-icon left-icon-normal"
+					clockIcon.setAttribute("style","opacity:"+myOpacity+";")
+					clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
+					taskBlock.appendChild(clockIcon);
+					var clockIconNum = document.createElement("div");
+					clockIconNum.className = "left-label left-label-normal"
+					if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
+					else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+					clockIconNum.innerHTML = clockIconLabel;
+					taskBlock.appendChild(clockIconNum);					
 				}
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -1015,51 +1062,21 @@ function drawOutput(lines){
 
 		if (lines[i][col_increment].length>0) {
 			var repeatIcon = document.createElement("div");
-			if (myFontSize=="Small") repeatIcon.setAttribute("class","repeat-icon repeat-icon-small")
-			if (myFontSize=="Medium") repeatIcon.setAttribute("class","repeat-icon repeat-icon-medium")
-			if (myFontSize=="Large") repeatIcon.setAttribute("class","repeat-icon repeat-icon-large")
+			repeatIcon.className = "repeat-icon"
+			if (isPastTask==1) repeatIcon.className += " repeat-icon-past";
+			else repeatIcon.className += " repeat-icon-normal";
 			repeatIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
 			taskBlock.appendChild(repeatIcon);
 			var repeatNum = document.createElement("div");
-			if (myFontSize=="Small") repeatNum.setAttribute("class","repeat-num repeat-num-small")
-			if (myFontSize=="Medium") repeatNum.setAttribute("class","repeat-num repeat-num-medium")
-			if (myFontSize=="Large") repeatNum.setAttribute("class","repeat-num repeat-num-large")
+			repeatNum.className = "repeat-num"
+			if (isPastTask==1) repeatNum.className += " repeat-num-past";
+			else repeatNum.className += " repeat-num-normal";
 			repeatNum.setAttribute("font-size","10px")
-			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-left:3px;")
+			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
 			repeatNum.innerHTML = lines[i][col_increment];
 			taskBlock.appendChild(repeatNum);
 		};
 
-		if (clockIconVal>0) {
-			var myOpacity = clockIconVal;
-			if (myOpacity>1) myOpacity = 1;
-			var clockIcon = document.createElement("div");
-			if (myFontSize=="Small") clockIcon.setAttribute("class","left-icon left-icon-small")
-			if (myFontSize=="Medium") clockIcon.setAttribute("class","left-icon left-icon-medium")
-			if (myFontSize=="Large") clockIcon.setAttribute("class","left-icon left-icon-large")
-			clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-			clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
-			taskBlock.appendChild(clockIcon);
-			var clockIconNum = document.createElement("div");
-			if (myFontSize=="Small") clockIconNum.setAttribute("class","left-label left-label-small")
-			if (myFontSize=="Medium") clockIconNum.setAttribute("class","left-label left-label-medium")
-			if (myFontSize=="Large") clockIconNum.setAttribute("class","left-label left-label-large")
-			if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
-			else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
-			clockIconNum.innerHTML = clockIconLabel;
-			taskBlock.appendChild(clockIconNum);
-		};
-
-		/*if (noStartDay==1 && noDueDay==1) {
-			var questionIcon = document.createElement("div");
-			if (myFontSize=="Small") questionIcon.setAttribute("class","left-icon left-icon-small")
-			if (myFontSize=="Medium") questionIcon.setAttribute("class","left-icon left-icon-medium")
-			if (myFontSize=="Large") questionIcon.setAttribute("class","left-icon left-icon-large")
-			questionIcon.setAttribute("style","opacity:0.5;")
-			questionIcon.innerHTML = '<i class="fa fa-question-circle-o" aria-hidden="true" ></i>';
-			taskBlock.appendChild(questionIcon);
-		}*/
-		
 		var rowName = lines[i][col_row];
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
@@ -1085,7 +1102,7 @@ function drawOutput(lines){
 		var taskBlockID = "taskBlock"+taskID;
 		taskBlock.id = taskBlockID;
 		
-		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
+		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
 		tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
@@ -1098,6 +1115,7 @@ function drawOutput(lines){
 	tableRows.sort(myRowSortFunction);
 	
 	for (row = 1 ; row<tableRows.length ; row++) {
+		
 		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
@@ -1112,16 +1130,33 @@ function drawOutput(lines){
 		justTheName.innerHTML = tableRows[row][1];
 		justTheName.className = "vertical-text";
 
+
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
 		if (myFontSize=="Small") thisRowName.className += " row-name-small"
 		if (myFontSize=="Medium") thisRowName.className += " row-name-medium"
 		if (myFontSize=="Large") thisRowName.className += " row-name-large"
+
+		var tableBar = document.createElement("div");
+		tableBar.setAttribute("class","table-bar")
+		var tableContents = document.createElement("div");
+		tableContents.setAttribute("class","table-contents")
+		
+		var hasTableBar = 0;
+		for (n = 0 ; n<tableRows[row][0].length ; n++) {
+			if (tableRows[row][0][n][4]==0) tableContents.append(tableRows[row][0][n][3]);
+			else {
+				hasTableBar = 1;
+				tableBar.append(tableRows[row][0][n][3]);
+			}
+		}
+
+		if (hasTableBar) {
+			tableRow.append(tableBar);
+		}
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
-		for (n = 0 ; n<tableRows[row][0].length ; n++) {
-			tableRow.append(tableRows[row][0][n][3]);
-		}
+		tableRow.append(tableContents);
 
 		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 	
@@ -1135,10 +1170,27 @@ function drawOutput(lines){
 	if (myFontSize=="Large") table.style.flexBasis = 340*maxLength+50+"px";
 	
 	tableRows[0][0].sort(mySortFunction);
+
+	var miscBar = document.createElement("div");
+	miscBar.setAttribute("class","table-bar")
+	var miscContents = document.createElement("div");
+	miscContents.setAttribute("class","table-contents")
+
 	var miscTasks = document.createElement("div");
+	var hasTableBar = 0;
 	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		miscTasks.append(tableRows[0][0][n][3]);
+		if (tableRows[0][0][n][4]==0) miscContents.append(tableRows[0][0][n][3]);
+		else {
+			hasTableBar = 1;
+			miscBar.append(tableRows[0][0][n][3]);
+		}		
 	}	
+	
+	if (hasTableBar) {
+		miscTasks.append(miscBar);
+	}
+	miscTasks.append(miscContents);
+	
 	miscTasks.className = "misc-block normal-row";
 	miscTasks.id = "misc-block";
 	miscTasks.setAttribute("draggable","false")
@@ -1197,8 +1249,8 @@ function mySortFunction(a,b) {
 	if (a[0]>0 && a[1].length==0) a[1]=a[0];
 	if (b[0]>0 && b[1].length==0) b[1]=b[0];
 	
-	if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
-	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;
+	/*if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
+	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;*/
 
 	if (a[0].length==0) a[0]=-999;
 	if (b[0].length==0) b[0]=-999;
