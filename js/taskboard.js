@@ -925,13 +925,9 @@ function drawOutput(lines){
 
 		
 		var myName = lines[i][col_task].replace("%44;",",");
-		var name = document.createElement("b");
-		name.innerHTML = myName;
+		var name = document.createElement("div");
+		name.innerHTML = "<b>"+myName+"</b>";
 		
-		//name.setAttribute("ondrop","drop(event)");
-		//name.setAttribute("ondragover","allowDrop(event)");
-		taskBlock.appendChild(name);
-
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
@@ -957,26 +953,23 @@ function drawOutput(lines){
 			var days_until_start = Math.ceil(difference_ms/one_day);
 			
 			if (days_until_start==0) {
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 				taskRow = document.createElement("span");
 				taskRow.innerHTML = "<b>Starts TODAY</b>";
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
 			}
 			else if (startDate>today) {
+				var startDatePhrase = document.createElement("span")
+				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDateStr));
-				//new Date().toString('MM/dd HH:mm')
-				taskBlock.appendChild(document.createTextNode(" (wait "));
-				taskBlock.appendChild(document.createTextNode(days_until_start));
-				taskBlock.appendChild(document.createTextNode(")"));
+				taskBlock.appendChild(BR);				
+				taskBlock.appendChild(startDatePhrase);
 				taskBlock.className += " later-task";
 			}
 			else if (startDate<today && !dueDay>0) {
@@ -1006,20 +999,20 @@ function drawOutput(lines){
 				taskBlock.appendChild(iconSpan)
 			}
 			else {
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 				taskBlock.className += " now-task";
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
 			}
 		}
 		else {
 			noStartDay = 1;
-			var BR = document.createElement("br");
-			taskBlock.appendChild(BR);
-			var BR = document.createElement("br");
-			taskBlock.appendChild(BR);
 			taskBlock.className += " now-task";
+			name.setAttribute("style","height:1.5em;")
+			taskBlock.appendChild(name);
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);		
 		}
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);		

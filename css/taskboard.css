@@ -1,4 +1,6 @@
-.delay-button {
+.context-menu-item {
+	padding-top:5px;
+	padding-bottom:5px;
 }
 .my-context-menu{
 	width:100px !important;
