@@ -51,8 +51,9 @@
 }
 .left-label-normal {
 	position:absolute;
-	left:0.8em;
-	bottom:0.6em;
+	left:1em;
+	bottom:0.4em;
+	font-size:1.2em;
 }
 .left-label-past {
 	float:left;

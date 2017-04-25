@@ -1087,7 +1087,7 @@ function drawOutput(lines){
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
-					clockIconLabel = days_until_due.toString()+" -";
+					clockIconLabel = days_until_due.toString();
 					var myOpacity = 1-(days_until_due*0.1);
 					if (myOpacity>1) myOpacity = 1;
 					var clockIcon = document.createElement("div");
@@ -1097,7 +1097,7 @@ function drawOutput(lines){
 					taskBlock.appendChild(clockIcon);
 					var clockIconNum = document.createElement("div");
 					clockIconNum.className = "left-label left-label-normal"
-					if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
+					if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
 					else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
 					clockIconNum.innerHTML = clockIconLabel;
 					taskBlock.appendChild(clockIconNum);					
