@@ -517,19 +517,19 @@ function newTaskCopy() {
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
 	var dueMonth = lines[currentTask][col_duemonth];
-	var dueDate = new Date(dueYear,dueMonth,dueDay);			
+	var dueDate = new Date(dueYear,dueMonth-1,dueDay);			
 
 	var startDay = lines[currentTask][col_startday];
 	var startYear=lines[currentTask][col_startyear];
 	if (startYear.length==2) startYear = "20"+startYear;
 	if (startYear.length==0) startYear = today.getYear()+1900;
 	var startMonth=lines[currentTask][col_startmonth];
-	var startDate = new Date(startYear,startMonth,startDay);
+	var startDate = new Date(startYear,startMonth-1,startDay);
 	var start_offset = dueDate.getTime() - startDate.getTime();
 		
 	if (startDay>0) {
 
-		var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
+		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
 		newTask[col_startmonth] = new_startdate.getMonth()+1;
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
