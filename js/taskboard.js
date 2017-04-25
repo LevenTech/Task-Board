@@ -662,9 +662,6 @@ function highlightMisc(ev) {
 		$(".task-row").addClass("normal-row")
 		ev.target.className = "misc-block hover-row";
 		var myFontSize = $( "#font-size" ).val();
-		if (myFontSize=="Small") ev.target.className += " misc-block-small"
-		if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
-		if (myFontSize=="Large") ev.target.className += " misc-block-large"
 		currentRowName = ev.target.getAttribute("data-rowname");
 		}
 	}
@@ -681,9 +678,6 @@ function unhighlightMisc(ev) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 			ev.target.className = "misc-block normal-row";
 			var myFontSize = $( "#font-size" ).val();
-			if (myFontSize=="Small") ev.target.className += " misc-block-small"
-			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
-			if (myFontSize=="Large") ev.target.className += " misc-block-large"
 		}
 	}
 }
@@ -991,9 +985,6 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);		
 				
 				var alertIcon = document.createElement("div");
-				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
-				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
-				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
 				alertIcon.className += " left-icon-normal";
 				alertIcon.setAttribute("style","margin-left:0.3em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
@@ -1012,9 +1003,6 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(" passed)"));
 
 				var alertIcon = document.createElement("div");
-				if (myFontSize=="Small") alertIcon.setAttribute("class","left-icon left-icon-small")
-				if (myFontSize=="Medium") alertIcon.setAttribute("class","left-icon left-icon-medium")
-				if (myFontSize=="Large") alertIcon.setAttribute("class","left-icon left-icon-large")
 				alertIcon.className += " left-icon-normal";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
@@ -1120,6 +1108,9 @@ function drawOutput(lines){
 		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
+		if (myFontSize=="Small") tableRow.className += " small-row"
+		if (myFontSize=="Medium") tableRow.className += " medium-row"
+		if (myFontSize=="Large") tableRow.className += " large-row"
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
@@ -1134,12 +1125,10 @@ function drawOutput(lines){
 
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
-		if (myFontSize=="Small") thisRowName.className += " row-name-small"
-		if (myFontSize=="Medium") thisRowName.className += " row-name-medium"
-		if (myFontSize=="Large") thisRowName.className += " row-name-large"
 
 		var tableBar = document.createElement("div");
 		tableBar.setAttribute("class","table-bar")
+		tableBar.setAttribute("style","margin:0px;")
 		var tableContents = document.createElement("div");
 		tableContents.setAttribute("class","table-contents")
 		
@@ -1166,9 +1155,7 @@ function drawOutput(lines){
 		
 	table.className = "left-side";
 	table.setAttribute("draggable","false")
-	if (myFontSize=="Small") table.style.flexBasis = 200*maxLength+50+"px";
-	if (myFontSize=="Medium") table.style.flexBasis = 290*maxLength+50+"px";
-	if (myFontSize=="Large") table.style.flexBasis = 340*maxLength+50+"px";
+	table.style.flexBasis = 17.6*maxLength+5.5+"em";
 	
 	tableRows[0][0].sort(mySortFunction);
 
@@ -1202,12 +1189,13 @@ function drawOutput(lines){
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
-	if (myFontSize=="Small") miscTasks.className += " misc-block-small"
-	if (myFontSize=="Medium") miscTasks.className += " misc-block-medium"
-	if (myFontSize=="Large") miscTasks.className += " misc-block-large"
-
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
+
+	
+	if (myFontSize=="Small") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:12px;"
+	if (myFontSize=="Medium") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:16px;"
+	if (myFontSize=="Large") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:22px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");

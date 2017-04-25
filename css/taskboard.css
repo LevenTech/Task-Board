@@ -79,42 +79,37 @@
 }
 
 .task-block {
+	width:16em;
 	position:relative;
 	display:inline-block;
-	padding: 10px;
-	margin: 10px;
+	padding: 0.8em;
+	margin: 0.8em;
 	font-family: arial;
 	float:left;
 	cursor:hand;
 }
-	
-.small-block {
-	width: 160px;
-	font-size:10px
-}
-.medium-block {
-	width: 250px;
-	font-size:14px
-}
-.large-block {
-	width: 300px;
-	font-size:18px
-}
+
+/*.small-block {	font-size:10px	}
+.medium-block {	font-size:14px	}
+.large-block {	font-size:18px	}
+
+.small-row {	font-size:10px	}
+.medium-row {	font-size:14px	}
+.large-block {	font-size:18px	}*/
 
 .past-task {
 	width: 100% !important;
 	text-align: left;
-	min-width:40em !important;
 }
 .now-task {
 	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-	text-align: center;
 	height:10em;
+	text-align: center;
 	}
 .later-task {
 	height:10em;
-	opacity: 0.5;
 	text-align: center;
+	opacity: 0.5;
 }
 
 .finish-area {
@@ -135,7 +130,6 @@
 	border: 2px solid white;
 }
 
-		
 .task-row:after {
 	clear:both;
 	content:" ";
@@ -147,11 +141,13 @@
 	flex-shrink: 1;
 	}
 .task-row {
-	margin: 10px;
-	padding: 25px;
+	margin: 0.5em;
+	padding: 0.5em;
+	padding-left:0.8em;
+	padding-right:1.6em;
 	border-radius: 10px;
 	border: 2px solid #000000;
-	padding-left:40px;
+	padding-left:2em;
 	}
 .normal-row {
 	background: #F0F0F0;
@@ -170,22 +166,15 @@
 .misc-block {
 	margin:10px;
 	float: left;
-	padding: 25px;
+	padding: 0.5em;
+	padding-left:1em;
+	padding-right:2em;
 	border-radius: 10px;
 	border: 2px solid #000000;
 	flex-grow: 1;
 	flex-shrink: 99;
 	flex-basis: auto;
-	}
-.misc-block-small {
-	min-height:175px;
-	}
-.misc-block-medium {
-	min-height:225px;
-	}
-.misc-block-large {
-	min-height:275px;
-	}
+}
 .misc-block:after {
 	clear:both;
 	content:" ";
@@ -200,18 +189,10 @@
 	clear:both;
 	float:left;
 	width:0px;
+	height:10em;
 	position:relative;
 	display:inline-block;
 	}
-.row-name-small {
-	height:110px;
-	}	
-.row-name-medium {
-	height:160px;
-	}	
-.row-name-large {
-	height:210px;
-	}	
 .vertical-text {
 	transform: translate(-50%) translate(-25px) rotate(-90deg);
 	transform-origin: center center 0;
