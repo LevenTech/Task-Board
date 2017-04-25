@@ -6,6 +6,7 @@ var today = new Date();
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
 var currentTask = 0;
+var currentRowName = "";
 var lastTaskID = 0;
 
 var	col_ID = 0;
@@ -127,9 +128,63 @@ $(document).ready(function() {
     //$( "#datepicker-due" ).datepicker();
   } );
   
-	
+	    $(function() {
+        $.contextMenu({
+            selector: '.task-block', 
+			className: 'my-context-menu',
+            items: {
+                "Delay": {
+					name: "Delay", icon: "fa-bell-slash-o",
+					callback: function(key, options) {
+						delayTask(currentTask);
+					},
+			        visible: function(key, opt){        
+						var myTaskID = currentTask;
+						var isDue = 0;
+						var dueDay = lines[myTaskID][col_dueday];
+						if (dueDay > 0) {
+							var dueMonth=lines[myTaskID][col_duemonth]-1;
+							var dueYear=lines[myTaskID][col_dueyear];
+							if (dueYear.length==2) dueYear = "20"+dueYear;
+							if (dueYear.length==0) dueYear = today.getYear()+1900;
+							var dueDate = new Date(dueYear,dueMonth,dueDay);
+							var dueDateStr = dueDate.toDateString();
+							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
+							var one_day=1000*60*60*24;
+							var date1_ms = today.getTime();
+							var date2_ms = dueDate.getTime();
+							var difference_ms = date2_ms - date1_ms;
+							var days_until_due = Math.ceil(difference_ms/one_day);
+							if (days_until_due<0 || days_until_due==0 ) {
+								isDue = 1;
+							}
+						}
+						if (isDue==1) return true;
+						else return false;
+					}
+				},
+                "Edit": {
+					name: "Edit", icon: "fa-edit",
+					callback: function(key, options) {
+						editTaskContextMenu();
+					}
+				},
+                "Finish": {
+					name: "Finish", icon: "fa-check-square-o",
+					callback: function(key, options) {
+						completeTask();
+					}
+				},
+                "Delete": {
+					name: "Delete", icon: "fa-trash",
+					callback: function(key, options) {
+						deleteTask();
+					}
+				},
+            }
+        });
+    });	
 	loadCookieFile();
-	
 	$.ui.dialog.prototype._focusTabbable = function(){};
 });
 
@@ -249,7 +304,12 @@ function deleteTask() {
 	$("#deleteDialog").dialog(opt).dialog("open");
 }
 
-function editTask(target) {
+function editTaskContextMenu() {
+	taskID = lines[currentTask][col_ID];
+	editTask(taskID);
+}
+
+function clickTaskBlock(ev,target) {
 	var taskID = target.getAttribute("data-taskid");
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
@@ -257,7 +317,10 @@ function editTask(target) {
 			break;
 		}
 	}
-
+	editTask(taskID,ev);
+}
+	
+function editTask(taskID,ev) {
 	var startDay = lines[currentTask][col_startday];
 	if (startDay>0) {
 		if (startDay.toString().length==1) startDay = "0" + startDay
@@ -275,9 +338,9 @@ function editTask(target) {
 	var dueDay = lines[currentTask][col_dueday];
 	if (dueDay>0) {
 		if (dueDay.toString().length==1) dueDay = "0" + dueDay
-		var dueMonth=lines[i][col_duemonth];
+		var dueMonth=lines[currentTask][col_duemonth];
 		if (dueMonth.toString().length==1) dueMonth = "0" + dueMonth
-		var dueYear=lines[i][col_dueyear];
+		var dueYear=lines[currentTask][col_dueyear];
 		if (dueYear.length==2) dueYear = "20"+dueYear;
 		if (dueYear.length==0) dueYear = today.getYear()+1900;
 		var dueDate = new Date(dueYear,dueMonth,dueDay);
@@ -308,7 +371,6 @@ function editTask(target) {
         width: 370,
         height:370,
         title: myTitle,
-		position: {my: "center center", at: "center center", of: taskBlockID},
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
@@ -335,7 +397,10 @@ function editTask(target) {
 			}
 		}		
 	};
-	$("#editDialog").dialog(opt).dialog("open");
+	$("#editDialog").dialog(opt);
+	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
+	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
 }
 
@@ -373,8 +438,38 @@ function updateTask() {
 	newStringParts[col_color]=$("#colorpicker").val();
 	newStringParts[col_increment]=$("#incrementpicker").val();
 	newStringParts[col_task]=$("#namepicker").val();
+	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
 	lines[currentTask] = newStringParts;
+	drawOutput(lines);
+	isSaved = 0;
+	$("#unsaved-changes").show();
+	saveFileCookie();
+}
+
+function delayTask() {
+
+	var one_day=1000*60*60*24;
+
+	var dueDay = lines[currentTask][col_dueday];
+	var dueMonth=lines[currentTask][col_duemonth];
+	var dueYear=lines[currentTask][col_dueyear];
+	if (dueYear.length==2) dueYear = "20"+dueYear;
+	if (dueYear.length==0) dueYear = today.getYear()+1900;
+	var dueDate = new Date(dueYear,dueMonth,dueDay);
+
+	var date1_ms = today.getTime();
+	var date2_ms = dueDate.getTime();
+	var difference_ms = date2_ms - date1_ms;
+	var days_until_due = Math.ceil(difference_ms/one_day);
+
+	var newDueDate = new Date(today.getTime() + one_day)
+	
+	lines[currentTask][col_dueday] = newDueDate.getDate();
+	lines[currentTask][col_duemonth] = newDueDate.getMonth()+1;
+	if (newDueDate.getYear()==today.getYear()) lines[currentTask][col_dueyear]="";
+	else lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
+
 	drawOutput(lines);
 	isSaved = 0;
 	$("#unsaved-changes").show();
@@ -593,18 +688,24 @@ function highlightRow(ev) {
 		$(".misc-block").addClass("normal-row")
 		var toHighlight = 1;
 		if (currentTask && draggingNew==0) {
-			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) { toHighlight = 0; }
+			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
+				toHighlight = 0;
+				currentRowName = ev.target.getAttribute("data-rowname")
+			}
 		}
+		currentRowName = ev.target.getAttribute("data-rowname");
 		if (toHighlight) {
 			ev.target.className = "task-row hover-row";
 		}
 	}
 }
+
 function unhighlightRow(ev) {
 	dragcounter--;
 	var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,8)=="task-row") {
+			currentRowName = "";
 			ev.target.className = "task-row normal-row";
 		}
 	}
@@ -621,14 +722,13 @@ function highlightMisc(ev) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
-			ev.target.className = "misc-block hover-row";
-			var myFontSize = $( "#font-size" ).val();
-			if (myFontSize=="Small") ev.target.className += " misc-block-small"
-			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
-			if (myFontSize=="Large") ev.target.className += " misc-block-large"
+		ev.target.className = "misc-block hover-row";
+		var myFontSize = $( "#font-size" ).val();
+		currentRowName = ev.target.getAttribute("data-rowname");
 		}
 	}
 	else {
+		currentRowName = ""
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 	}
@@ -640,9 +740,6 @@ function unhighlightMisc(ev) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 			ev.target.className = "misc-block normal-row";
 			var myFontSize = $( "#font-size" ).val();
-			if (myFontSize=="Small") ev.target.className += " misc-block-small"
-			if (myFontSize=="Medium") ev.target.className += " misc-block-medium"
-			if (myFontSize=="Large") ev.target.className += " misc-block-large"
 		}
 	}
 }
@@ -676,10 +773,11 @@ function drag(ev) {
 	for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
+			currentRowName = lines[i][col_row]
 			break;
 		}
 	}
-
+	
     ev.dataTransfer.setData("text", currentTask);
 }
 
@@ -692,7 +790,7 @@ function drop(ev) {
 	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
-    var rowName = ev.target.getAttribute("data-rowname");
+    var rowName = currentRowName;
 	if(draggingNew==1) {
 		newTask(rowName,"",1);
 		saveFileCookie();
@@ -700,7 +798,7 @@ function drop(ev) {
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row]!==rowName) {
+		if (lines[taskID][col_row].toUpperCase()!==rowName.toUpperCase()) {
 			lines[taskID][col_row]=rowName;
 			isSaved = 0;
 			$("#unsaved-changes").show();
@@ -791,7 +889,9 @@ function drawOutput(lines){
 	var myMonth;
 	var myDay;
 	var myYear;
-
+	var clockIconVal;
+	var noStartDay;
+	var noDueDay;
 
 	
 	var myFontSize = $( "#font-size" ).val();
@@ -804,8 +904,9 @@ function drawOutput(lines){
 		if (isNaN(taskID)) { continue; }
 		if (lines[i][col_complete]=="Yes") { continue; }
 		
-		//alert(taskID);
 		if (taskID>lastTaskID) { lastTaskID = taskID; }
+
+		var isPastTask = 0;
 		
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
@@ -815,23 +916,22 @@ function drawOutput(lines){
 		if (myFontSize=="Large") taskBlock.className += " large-block"
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
+		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
 		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
-		taskBlock.setAttribute("data-rowname",lines[i][col_row]);
-		taskBlock.setAttribute("onclick","editTask(this)");
+		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
 
+		
+		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("b");
-		name.innerHTML = lines[i][col_task];
+		name.innerHTML = myName;
+		
 		//name.setAttribute("ondrop","drop(event)");
 		//name.setAttribute("ondragover","allowDrop(event)");
-		name.setAttribute("data-rowname",lines[i][col_row]);
 		taskBlock.appendChild(name);
-		var BR = document.createElement("br");
-		taskBlock.appendChild(BR);
-		var BR = document.createElement("br");
-		taskBlock.appendChild(BR);
+
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
@@ -839,6 +939,9 @@ function drawOutput(lines){
 		var days_until_start = "";
 		var days_until_due = "";
 
+		clockIconVal = 0;
+		noStartDay = 0;
+		
 		if (startDay>0) {
 			var startYear=lines[i][col_startyear];
 			if (startYear.length==2) startYear = "20"+startYear;
@@ -854,12 +957,20 @@ function drawOutput(lines){
 			var days_until_start = Math.ceil(difference_ms/one_day);
 			
 			if (days_until_start==0) {
-				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("Starts TODAY"));
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				taskRow = document.createElement("span");
+				taskRow.innerHTML = "<b>Starts TODAY</b>";
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
 			}
 			else if (startDate>today) {
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 				taskBlock.appendChild(document.createTextNode("Start: "));
 				taskBlock.appendChild(document.createTextNode(startDateStr));
 				//new Date().toString('MM/dd HH:mm')
@@ -869,23 +980,51 @@ function drawOutput(lines){
 				taskBlock.className += " later-task";
 			}
 			else if (startDate<today && !dueDay>0) {
-				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDateStr));
-				taskBlock.appendChild(document.createTextNode(" ("));
-				taskBlock.appendChild(document.createTextNode(0-days_until_start));
-				taskBlock.appendChild(document.createTextNode(" passed)"));
-				taskBlock.className += " now-task";
+				isPastTask = 1;
+
+				var justDate = document.createElement("span");
+				justDate.innerHTML = startDateStr;
+				justDate.setAttribute("style","display:inline-block;margin-left:10px;margin-right:10px;")
+				taskBlock.appendChild(justDate);
+
+				var myOpacity = (-days_until_start)*0.1;
+				if (myOpacity>1) myOpacity = 1;
+				
+				taskBlock.className += " past-task";
+
+				var iconSpan = document.createElement("span")
+				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-right:1.5em;")
+				else iconSpan.setAttribute("style","display:inline-block;")
+				for(var k=0;k<(-days_until_start);k++) {
+					var clockIcon = document.createElement("div");
+					clockIcon.className = "clock-icon"
+					//clockIcon.setAttribute("style","opacity:"+myOpacity+";")
+					clockIcon.setAttribute("style","display:inline-block;margin:1px;");
+					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
+					iconSpan.appendChild(clockIcon);
+				}
+				taskBlock.appendChild(iconSpan)
 			}
 			else {
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 				taskBlock.className += " now-task";
 			}
 		}
 		else {
+			noStartDay = 1;
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);
 			taskBlock.className += " now-task";
 		}
-		
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);		
+
+		noDueDay = 0;
 		
 		if (dueDay > 0) {
 			var dueMonth=lines[i][col_duemonth]-1;
@@ -905,6 +1044,19 @@ function drawOutput(lines){
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
 				taskBlock.appendChild(taskRow);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
+				
+				var alertIcon = document.createElement("div");
+				alertIcon.className += " left-icon-normal";
+				alertIcon.setAttribute("style","margin-left:0.3em;")
+				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+				
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 			}
 			else if (days_until_due<0) {
 				taskBlock.appendChild(document.createTextNode("Due: "));
@@ -913,6 +1065,11 @@ function drawOutput(lines){
 				taskBlock.appendChild(document.createTextNode(-days_until_due));
 				taskBlock.appendChild(document.createTextNode(" passed)"));
 
+				var alertIcon = document.createElement("div");
+				alertIcon.className += " left-icon-normal";
+				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("!!! OVERDUE !!!"));
 				var BR = document.createElement("br");
@@ -920,17 +1077,58 @@ function drawOutput(lines){
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
 				taskBlock.appendChild(taskRow);
+
+
 			}
 			else {
 				taskBlock.appendChild(document.createTextNode("Due: "));
 				taskBlock.appendChild(document.createTextNode(dueDateStr));
-				if (startDay<1 || startDate<=today) {
+				if (!startDay>0 || startDate<=today) {
 					taskBlock.appendChild(document.createTextNode(" ("));
 					taskBlock.appendChild(document.createTextNode(days_until_due));
 					taskBlock.appendChild(document.createTextNode(" left)"));
+					clockIconLabel = days_until_due.toString()+" -";
+					var myOpacity = 1-(days_until_due*0.1);
+					if (myOpacity>1) myOpacity = 1;
+					var clockIcon = document.createElement("div");
+					clockIcon.className = "left-icon left-icon-normal"
+					clockIcon.setAttribute("style","opacity:"+myOpacity+";")
+					clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
+					taskBlock.appendChild(clockIcon);
+					var clockIconNum = document.createElement("div");
+					clockIconNum.className = "left-label left-label-normal"
+					if (clockIconLabel.length==3) clockIconNum.setAttribute("style","margin-left:3px;opacity:"+myOpacity+";")
+					else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+					clockIconNum.innerHTML = clockIconLabel;
+					taskBlock.appendChild(clockIconNum);					
 				}
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);
 			}
 		}
+		else { noDueDay = 1; }
+
+		if (lines[i][col_increment].length>0) {
+			var repeatIcon = document.createElement("div");
+			repeatIcon.className = "repeat-icon"
+			if (isPastTask==1) repeatIcon.className += " repeat-icon-past";
+			else repeatIcon.className += " repeat-icon-normal";
+			repeatIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+			taskBlock.appendChild(repeatIcon);
+			var repeatNum = document.createElement("div");
+			repeatNum.className = "repeat-num"
+			if (isPastTask==1) repeatNum.className += " repeat-num-past";
+			else repeatNum.className += " repeat-num-normal";
+			repeatNum.setAttribute("font-size","10px")
+			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
+			repeatNum.innerHTML = lines[i][col_increment];
+			taskBlock.appendChild(repeatNum);
+		};
+
 		var rowName = lines[i][col_row];
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
@@ -948,8 +1146,7 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		//if (days_until_start.length==0) { days_until_start = 999; }
-		if (days_until_due.length==0) { days_until_due = 999; }
+		//if (startDay>0 && !dueDay>0) { days_until_due = days_until_start; }
 
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
@@ -957,7 +1154,7 @@ function drawOutput(lines){
 		var taskBlockID = "taskBlock"+taskID;
 		taskBlock.id = taskBlockID;
 		
-		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
+		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
 		tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
@@ -971,8 +1168,12 @@ function drawOutput(lines){
 	
 	for (row = 1 ; row<tableRows.length ; row++) {
 		
+		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
+		if (myFontSize=="Small") tableRow.className += " small-row"
+		if (myFontSize=="Medium") tableRow.className += " medium-row"
+		if (myFontSize=="Large") tableRow.className += " large-row"
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
@@ -984,16 +1185,31 @@ function drawOutput(lines){
 		justTheName.innerHTML = tableRows[row][1];
 		justTheName.className = "vertical-text";
 
+
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
-		if (myFontSize=="Small") thisRowName.className += " row-name-small"
-		if (myFontSize=="Medium") thisRowName.className += " row-name-medium"
-		if (myFontSize=="Large") thisRowName.className += " row-name-large"
+
+		var tableBar = document.createElement("div");
+		tableBar.setAttribute("class","table-bar")
+		tableBar.setAttribute("style","margin:0px;")
+		var tableContents = document.createElement("div");
+		tableContents.setAttribute("class","table-contents")
+		
+		var hasTableBar = 0;
+		for (n = 0 ; n<tableRows[row][0].length ; n++) {
+			if (tableRows[row][0][n][4]==0) tableContents.append(tableRows[row][0][n][3]);
+			else {
+				hasTableBar = 1;
+				tableBar.append(tableRows[row][0][n][3]);
+			}
+		}
+
+		if (hasTableBar) {
+			tableRow.append(tableBar);
+		}
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
-		for (n = 0 ; n<tableRows[row][0].length ; n++) {
-			tableRow.append(tableRows[row][0][n][3]);
-		}
+		tableRow.append(tableContents);
 
 		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 	
@@ -1002,15 +1218,30 @@ function drawOutput(lines){
 		
 	table.className = "left-side";
 	table.setAttribute("draggable","false")
-	if (myFontSize=="Small") table.style.flexBasis = 250*maxLength+50+"px";
-	if (myFontSize=="Medium") table.style.flexBasis = 300*maxLength+50+"px";
-	if (myFontSize=="Large") table.style.flexBasis = 350*maxLength+50+"px";
+	table.style.flexBasis = 17.6*maxLength+5.5+"em";
 	
 	tableRows[0][0].sort(mySortFunction);
+
+	var miscBar = document.createElement("div");
+	miscBar.setAttribute("class","table-bar")
+	var miscContents = document.createElement("div");
+	miscContents.setAttribute("class","table-contents")
+
 	var miscTasks = document.createElement("div");
+	var hasTableBar = 0;
 	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		miscTasks.append(tableRows[0][0][n][3]);
+		if (tableRows[0][0][n][4]==0) miscContents.append(tableRows[0][0][n][3]);
+		else {
+			hasTableBar = 1;
+			miscBar.append(tableRows[0][0][n][3]);
+		}		
 	}	
+	
+	if (hasTableBar) {
+		miscTasks.append(miscBar);
+	}
+	miscTasks.append(miscContents);
+	
 	miscTasks.className = "misc-block normal-row";
 	miscTasks.id = "misc-block";
 	miscTasks.setAttribute("draggable","false")
@@ -1021,12 +1252,13 @@ function drawOutput(lines){
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
-	if (myFontSize=="Small") miscTasks.className += " misc-block-small"
-	if (myFontSize=="Medium") miscTasks.className += " misc-block-medium"
-	if (myFontSize=="Large") miscTasks.className += " misc-block-large"
-
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
+
+	
+	if (myFontSize=="Small") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:12px;"
+	if (myFontSize=="Medium") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:16px;"
+	if (myFontSize=="Large") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:22px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
@@ -1061,28 +1293,39 @@ function myRowSortFunction(a,b) {
 
 function mySortFunction(a,b) {	
 	var debug = 0;
+	var returnVal;
+	
+	if (a[0]=="" && a[1].length==0) a[1]=999;
+	if (b[0]=="" && b[1].length==0) b[1]=999;
+
+	if (a[0]>0 && a[1].length==0) a[1]=a[0];
+	if (b[0]>0 && b[1].length==0) b[1]=b[0];
+	
+	/*if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
+	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;*/
+
+	if (a[0].length==0) a[0]=-999;
+	if (b[0].length==0) b[0]=-999;
+	
 	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
-	if (a[1] == b[1])
+
+	if (a[1]==b[1])
 	{
-		if (a[0] == b[0]) 
+		if (a[0]==b[0]) 
 		{
-			var returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0
-			if (debug) { alert(compareString + " = " + returnVal); }
-			return returnVal;
+			returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
 		}
 		else
 		{
-			var returnVal = (a[0] < b[0]) ? -1 : 1;
-			if (debug) { alert(compareString + " = " + returnVal); }
-			return returnVal;
+			returnVal = (a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0 
 		}
 	}
 	else
 	{
-		var returnVal = (a[1] < b[1]) ? -1 : 1;
-		if (debug) { alert(compareString + " = " + returnVal); }
-		return returnVal;
+		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
 	}
+	if (debug) { alert(compareString + " = " + returnVal); }
+	return returnVal;
 }
 
   
