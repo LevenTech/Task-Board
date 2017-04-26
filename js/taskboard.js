@@ -1,7 +1,11 @@
 
+var sortDebug = 0;
+var editDebug = 0;
+
 var lines = [];
 
 var today = new Date();
+var one_day=1000*60*60*24;
 
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
@@ -27,6 +31,25 @@ var draggingNew = 0;
 var makingNewTask
 
 document.onselectstart = function() { return false; };
+
+function updateDateSlider(sliderValue) {
+	if (sliderValue<0) return;
+	$("#todays-date-slider").slider('value',sliderValue);
+	makeDateIncremented(sliderValue)
+	drawOutput(lines);
+	//window.setTimeout(function(){updateDateSlider(sliderValue-1)},10);
+}
+
+function makeDateIncremented(numDays) {
+	today = new Date();
+	today = new Date(today.getTime()+numDays*one_day);
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+	drawOutput(lines);
+	$(".date-button").removeClass("active")
+	$("#today-button").addClass("active");
+}
 
 function closeEditDialogAndSave() {
 	updateTask(currentTask);
@@ -106,7 +129,8 @@ $(document).ready(function() {
 	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
 	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
 	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
-
+	
+	
     $( "#font-size-slider" ).slider({
       orientation: "horizontal",
       range: "min",
@@ -122,7 +146,26 @@ $(document).ready(function() {
 		drawOutput(lines);
       }
     });
-  
+
+    $( "#todays-date-slider" ).slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 0,
+      max: 35,
+      value: 0,
+      slide: function( event, ui ) {
+		var sliderValue = Math.floor(ui.value/5)
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+      },
+		stop    : function(e, ui) {
+			updateDateSlider(0);
+		}
+    });
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+	
   $( function() {
     //$( "#datepicker-start" ).datepicker();
     //$( "#datepicker-due" ).datepicker();
@@ -150,7 +193,6 @@ $(document).ready(function() {
 							var dueDate = new Date(dueYear,dueMonth,dueDay);
 							var dueDateStr = dueDate.toDateString();
 							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-							var one_day=1000*60*60*24;
 							var date1_ms = today.getTime();
 							var date2_ms = dueDate.getTime();
 							var difference_ms = date2_ms - date1_ms;
@@ -187,6 +229,8 @@ $(document).ready(function() {
 	loadCookieFile();
 	$.ui.dialog.prototype._focusTabbable = function(){};
 });
+
+
 
 function showSaveDialog(fileToOpen) {
 		var opt = {
@@ -311,12 +355,14 @@ function editTaskContextMenu() {
 
 function clickTaskBlock(ev,target) {
 	var taskID = target.getAttribute("data-taskid");
-	for(var i = 0; i < lines.length; i++) {
+	/*for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
 			break;
 		}
-	}
+	}*/
+	currentTask=taskID;
+	if (editDebug) console.log("clicked currentTask="+currentTask)
 	editTask(taskID,ev);
 }
 	
@@ -389,6 +435,7 @@ function editTask(taskID,ev) {
 				$("#datepicker-start").val("");
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
+					lastTaskID--;
 				}
 				makingNewTask = 0;
 				currentTask = 0;
@@ -397,9 +444,10 @@ function editTask(taskID,ev) {
 			}
 		}		
 	};
-	$("#editDialog").dialog(opt);
+	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
 	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
 	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
 }
@@ -449,7 +497,6 @@ function updateTask() {
 
 function delayTask() {
 
-	var one_day=1000*60*60*24;
 
 	var dueDay = lines[currentTask][col_dueday];
 	var dueMonth=lines[currentTask][col_duemonth];
@@ -510,7 +557,6 @@ function newTaskCopy() {
 	newTask[col_ID] = lastTaskID;
 	newTask[col_complete] = "";
 
-	var one_day=1000*60*60*24;
 	
 	var dueDay = lines[currentTask][col_dueday];
 	var dueYear=lines[currentTask][col_dueyear];
@@ -565,8 +611,8 @@ function newTaskCopy() {
 function newTask(rowName,taskName,openMe) {
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
+	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
 	newTask[col_ID] = lastTaskID;
-	//if (!taskName) taskName = "New Task";
 	newTask[col_task] = taskName;
 	newTask[col_row] = rowName;
 	lines.push(newTask);
@@ -574,7 +620,9 @@ function newTask(rowName,taskName,openMe) {
 	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
-		$("#taskBlock"+lastTaskID).click();
+		var myTaskID = lines.length-1
+		if (editDebug) console.log("opening new task "+myTaskID+" for editing")
+		$("#taskBlock"+myTaskID).click();
 		$("#namepicker").focus();
 	}
 }
@@ -770,13 +818,16 @@ function drag(ev) {
 	draggingNew = 0;
 	var taskID = ev.target.getAttribute("data-taskid");
 	
-	for(var i = 0; i < lines.length; i++) {
+	/*for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
 			currentRowName = lines[i][col_row]
 			break;
 		}
-	}
+	}*/
+
+	currentTask=taskID;
+	currentRowName = lines[currentTask][col_row];
 	
     ev.dataTransfer.setData("text", currentTask);
 }
@@ -884,7 +935,7 @@ function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
-	var rowWithMeta = [[],"MISC"]
+	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
 	var myMonth;
 	var myDay;
@@ -897,14 +948,11 @@ function drawOutput(lines){
 	var myFontSize = $( "#font-size" ).val();
 	
 	for (var i = 1; i < lines.length; i++) {
-		var taskID = parseInt(lines[i][col_ID]);
-		//var taskID = i;
-		//alert(lines[i][col_ID]);
-		//alert(taskID);
-		if (isNaN(taskID)) { continue; }
+		var taskNum = parseInt(lines[i][col_ID]);
+		if (isNaN(taskNum)) { continue; }
 		if (lines[i][col_complete]=="Yes") { continue; }
 		
-		if (taskID>lastTaskID) { lastTaskID = taskID; }
+		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isPastTask = 0;
 		
@@ -917,7 +965,7 @@ function drawOutput(lines){
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
-		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
+		taskBlock.setAttribute("data-taskid",i);
 		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
@@ -925,13 +973,9 @@ function drawOutput(lines){
 
 		
 		var myName = lines[i][col_task].replace("%44;",",");
-		var name = document.createElement("b");
-		name.innerHTML = myName;
+		var name = document.createElement("div");
+		name.innerHTML = "<b>"+myName+"</b>";
 		
-		//name.setAttribute("ondrop","drop(event)");
-		//name.setAttribute("ondragover","allowDrop(event)");
-		taskBlock.appendChild(name);
-
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
@@ -950,37 +994,36 @@ function drawOutput(lines){
 			var startDate = new Date(startYear,startMonth,startDay);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
-			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = startDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
 			var days_until_start = Math.ceil(difference_ms/one_day);
 			
 			if (days_until_start==0) {
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 				taskRow = document.createElement("span");
 				taskRow.innerHTML = "<b>Starts TODAY</b>";
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
 			}
 			else if (startDate>today) {
+				var startDatePhrase = document.createElement("span")
+				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				taskBlock.appendChild(document.createTextNode("Start: "));
-				taskBlock.appendChild(document.createTextNode(startDateStr));
-				//new Date().toString('MM/dd HH:mm')
-				taskBlock.appendChild(document.createTextNode(" (wait "));
-				taskBlock.appendChild(document.createTextNode(days_until_start));
-				taskBlock.appendChild(document.createTextNode(")"));
+				taskBlock.appendChild(BR);				
+				taskBlock.appendChild(startDatePhrase);
 				taskBlock.className += " later-task";
 			}
 			else if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
+
+				name.setAttribute("style","height:1.2em;display:inline-block;")
+				taskBlock.appendChild(name);
 
 				var justDate = document.createElement("span");
 				justDate.innerHTML = startDateStr;
@@ -1006,20 +1049,20 @@ function drawOutput(lines){
 				taskBlock.appendChild(iconSpan)
 			}
 			else {
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 				taskBlock.className += " now-task";
+				name.setAttribute("style","height:1.5em;")
+				taskBlock.appendChild(name);
+				var BR = document.createElement("br");
+				taskBlock.appendChild(BR);		
 			}
 		}
 		else {
 			noStartDay = 1;
-			var BR = document.createElement("br");
-			taskBlock.appendChild(BR);
-			var BR = document.createElement("br");
-			taskBlock.appendChild(BR);
 			taskBlock.className += " now-task";
+			name.setAttribute("style","height:1.5em;")
+			taskBlock.appendChild(name);
+			var BR = document.createElement("br");
+			taskBlock.appendChild(BR);		
 		}
 		var BR = document.createElement("br");
 		taskBlock.appendChild(BR);		
@@ -1034,7 +1077,6 @@ function drawOutput(lines){
 			var dueDate = new Date(dueYear,dueMonth,dueDay);
 			var dueDateStr = dueDate.toDateString();
 			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = dueDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
@@ -1142,7 +1184,7 @@ function drawOutput(lines){
 		}
 		
 		if (rowExists!==1) {
-			var rowWithMeta = [[],rowName];
+			var rowWithMeta = [[],rowName,[]];
 			tableRows.push(rowWithMeta);
 		}
 
@@ -1151,19 +1193,28 @@ function drawOutput(lines){
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
-		var taskBlockID = "taskBlock"+taskID;
+		var taskBlockID = "taskBlock"+i;
 		taskBlock.id = taskBlockID;
 		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
-		tableRows[rowNum][0].push(taskWithMeta);
+		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
+		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
 	var maxLength = 0;
 
 	for (row = 1 ; row<tableRows.length ; row++) {
-		tableRows[row][0].sort(mySortFunction);
+		if (tableRows[row][0]) {
+			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (current tasks)")
+			tableRows[row][0].sort(mySortFunction);
+		}
+		if (tableRows[row][2]) {
+			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (past tasks)")
+			tableRows[row][2].sort(mySortFunction);
+		}
 	}
 
+	if (sortDebug) console.log("Sorting Rows")
 	tableRows.sort(myRowSortFunction);
 	
 	for (row = 1 ; row<tableRows.length ; row++) {
@@ -1195,21 +1246,23 @@ function drawOutput(lines){
 		var tableContents = document.createElement("div");
 		tableContents.setAttribute("class","table-contents")
 		
-		var hasTableBar = 0;
-		for (n = 0 ; n<tableRows[row][0].length ; n++) {
-			if (tableRows[row][0][n][4]==0) tableContents.append(tableRows[row][0][n][3]);
-			else {
+		if (tableRows[row][2].length>0) {
+			for (n = 0 ; n<tableRows[row][2].length ; n++) {
 				hasTableBar = 1;
-				tableBar.append(tableRows[row][0][n][3]);
-			}
-		}
-
-		if (hasTableBar) {
+				tableBar.append(tableRows[row][2][n][3]);
+			}		
 			tableRow.append(tableBar);
 		}
+		
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
-		tableRow.append(tableContents);
+
+		if (tableRows[row][0].length>0) {
+			for (n = 0 ; n<tableRows[row][0].length ; n++) {
+				tableContents.append(tableRows[row][0][n][3]);
+			}
+			tableRow.append(tableContents);
+		}
 
 		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 	
@@ -1227,19 +1280,21 @@ function drawOutput(lines){
 	var miscContents = document.createElement("div");
 	miscContents.setAttribute("class","table-contents")
 
-	var miscTasks = document.createElement("div");
 	var hasTableBar = 0;
-	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		if (tableRows[0][0][n][4]==0) miscContents.append(tableRows[0][0][n][3]);
-		else {
-			hasTableBar = 1;
-			miscBar.append(tableRows[0][0][n][3]);
-		}		
+	for (n = 0 ; n<tableRows[0][2].length ; n++) {
+		hasTableBar = 1;
+		miscBar.append(tableRows[0][2][n][3]);
 	}	
 	
+	var miscTasks = document.createElement("div");
 	if (hasTableBar) {
 		miscTasks.append(miscBar);
 	}
+
+	for (n = 0 ; n<tableRows[0][0].length ; n++) {
+		miscContents.append(tableRows[0][0][n][3]);
+	}		
+	
 	miscTasks.append(miscContents);
 	
 	miscTasks.className = "misc-block normal-row";
@@ -1262,11 +1317,12 @@ function drawOutput(lines){
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
+		if (editDebug) console.log("double-clicked row "+rowName)
 		newTask(rowName,"",1);
 	});
 	$(".misc-block").dblclick( function (){
-		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName,"",1);
+		if (editDebug) console.log("double-clicked misc block")
+		newTask("","",1);
 	});
 	$(".task-row").on("taphold", function (){
 		e.preventDefault();
@@ -1292,7 +1348,6 @@ function myRowSortFunction(a,b) {
 }
 
 function mySortFunction(a,b) {	
-	var debug = 0;
 	var returnVal;
 	
 	if (a[0]=="" && a[1].length==0) a[1]=999;
@@ -1307,7 +1362,7 @@ function mySortFunction(a,b) {
 	if (a[0].length==0) a[0]=-999;
 	if (b[0].length==0) b[0]=-999;
 	
-	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
+	if (sortDebug) var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
 
 	if (a[1]==b[1])
 	{
@@ -1324,7 +1379,7 @@ function mySortFunction(a,b) {
 	{
 		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
 	}
-	if (debug) { alert(compareString + " = " + returnVal); }
+	if (sortDebug) { console.log(compareString + " = " + returnVal); }
 	return returnVal;
 }
 

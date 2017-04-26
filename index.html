@@ -65,11 +65,16 @@
 	</div>
 	</div>
 	<div id="middle-buttons" style="diplay:none;user-select:none;">
-	<div style="margin-top:30px;margin-left:10px;">
-	  <label for="font-size">Size:</label>
-	  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
-	  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
-	</div>
+		<div style="margin-top:30px;margin-left:10px;display:inline-block;">
+		  <label for="font-size">Task size:</label>
+		  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
+		  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
+		</div>
+		<div style="margin-top:30px;margin-left:40px;display:inline-block;">
+		  <label for="date-select">Show for:</label>
+		  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
+		  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
+		</div>		
 	</div>
 	<div id="right-buttons">
 
@@ -133,6 +138,6 @@
 		Name the new group:
 		<input id="newRowName" width="50px" style="margin-top:10px;"></input>
 	</div>
-	<div id="output" style="width:100%;display:flex;flex-direction:row;" draggable="false"></div>
+	<div id="output" style="" draggable="false"></div>
 </body>
 </html>
