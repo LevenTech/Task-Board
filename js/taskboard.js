@@ -1,5 +1,6 @@
 
 var sortDebug = 0;
+var editDebug = 0;
 
 var lines = [];
 
@@ -33,7 +34,6 @@ document.onselectstart = function() { return false; };
 
 function updateDateSlider(sliderValue) {
 	if (sliderValue<0) return;
-	console.log("setting date to "+sliderValue);
 	$("#todays-date-slider").slider('value',sliderValue);
 	makeDateIncremented(sliderValue)
 	drawOutput(lines);
@@ -355,12 +355,14 @@ function editTaskContextMenu() {
 
 function clickTaskBlock(ev,target) {
 	var taskID = target.getAttribute("data-taskid");
-	for(var i = 0; i < lines.length; i++) {
+	/*for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
 			break;
 		}
-	}
+	}*/
+	currentTask=taskID;
+	if (editDebug) console.log("clicked currentTask="+currentTask)
 	editTask(taskID,ev);
 }
 	
@@ -433,6 +435,7 @@ function editTask(taskID,ev) {
 				$("#datepicker-start").val("");
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
+					lastTaskID--;
 				}
 				makingNewTask = 0;
 				currentTask = 0;
@@ -441,9 +444,10 @@ function editTask(taskID,ev) {
 			}
 		}		
 	};
-	$("#editDialog").dialog(opt);
+	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
 	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
 	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
 }
@@ -607,8 +611,8 @@ function newTaskCopy() {
 function newTask(rowName,taskName,openMe) {
 	var newTask = [ "" , "" ,"","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
+	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
 	newTask[col_ID] = lastTaskID;
-	//if (!taskName) taskName = "New Task";
 	newTask[col_task] = taskName;
 	newTask[col_row] = rowName;
 	lines.push(newTask);
@@ -616,7 +620,9 @@ function newTask(rowName,taskName,openMe) {
 	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
-		$("#taskBlock"+lastTaskID).click();
+		var myTaskID = lines.length-1
+		if (editDebug) console.log("opening new task "+myTaskID+" for editing")
+		$("#taskBlock"+myTaskID).click();
 		$("#namepicker").focus();
 	}
 }
@@ -812,13 +818,16 @@ function drag(ev) {
 	draggingNew = 0;
 	var taskID = ev.target.getAttribute("data-taskid");
 	
-	for(var i = 0; i < lines.length; i++) {
+	/*for(var i = 0; i < lines.length; i++) {
 		if(parseInt(lines[i][0]) == taskID) {
 			currentTask = i;
 			currentRowName = lines[i][col_row]
 			break;
 		}
-	}
+	}*/
+
+	currentTask=taskID;
+	currentRowName = lines[currentTask][col_row];
 	
     ev.dataTransfer.setData("text", currentTask);
 }
@@ -939,14 +948,11 @@ function drawOutput(lines){
 	var myFontSize = $( "#font-size" ).val();
 	
 	for (var i = 1; i < lines.length; i++) {
-		var taskID = parseInt(lines[i][col_ID]);
-		//var taskID = i;
-		//alert(lines[i][col_ID]);
-		//alert(taskID);
-		if (isNaN(taskID)) { continue; }
+		var taskNum = parseInt(lines[i][col_ID]);
+		if (isNaN(taskNum)) { continue; }
 		if (lines[i][col_complete]=="Yes") { continue; }
 		
-		if (taskID>lastTaskID) { lastTaskID = taskID; }
+		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isPastTask = 0;
 		
@@ -959,7 +965,7 @@ function drawOutput(lines){
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
-		taskBlock.setAttribute("data-taskid",lines[i][col_ID]);
+		taskBlock.setAttribute("data-taskid",i);
 		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
@@ -1187,7 +1193,7 @@ function drawOutput(lines){
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
-		var taskBlockID = "taskBlock"+taskID;
+		var taskBlockID = "taskBlock"+i;
 		taskBlock.id = taskBlockID;
 		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
@@ -1311,11 +1317,12 @@ function drawOutput(lines){
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
+		if (editDebug) console.log("double-clicked row "+rowName)
 		newTask(rowName,"",1);
 	});
 	$(".misc-block").dblclick( function (){
-		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName,"",1);
+		if (editDebug) console.log("double-clicked misc block")
+		newTask("","",1);
 	});
 	$(".task-row").on("taphold", function (){
 		e.preventDefault();
