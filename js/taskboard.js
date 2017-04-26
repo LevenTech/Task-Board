@@ -1240,10 +1240,10 @@ function drawOutput(lines){
 		var tableContents = document.createElement("div");
 		tableContents.setAttribute("class","table-contents")
 		
-		if (tableRows[row][0].length>0) {
-			for (n = 0 ; n<tableRows[row][0].length ; n++) {
+		if (tableRows[row][2].length>0) {
+			for (n = 0 ; n<tableRows[row][2].length ; n++) {
 				hasTableBar = 1;
-				tableBar.append(tableRows[row][0][n][3]);
+				tableBar.append(tableRows[row][2][n][3]);
 			}		
 			tableRow.append(tableBar);
 		}
@@ -1274,19 +1274,21 @@ function drawOutput(lines){
 	var miscContents = document.createElement("div");
 	miscContents.setAttribute("class","table-contents")
 
-	var miscTasks = document.createElement("div");
 	var hasTableBar = 0;
-	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		if (tableRows[0][0][n][4]==0) miscContents.append(tableRows[0][0][n][3]);
-		else {
-			hasTableBar = 1;
-			miscBar.append(tableRows[0][0][n][3]);
-		}		
+	for (n = 0 ; n<tableRows[0][2].length ; n++) {
+		hasTableBar = 1;
+		miscBar.append(tableRows[0][2][n][3]);
 	}	
 	
+	var miscTasks = document.createElement("div");
 	if (hasTableBar) {
 		miscTasks.append(miscBar);
 	}
+
+	for (n = 0 ; n<tableRows[0][0].length ; n++) {
+		miscContents.append(tableRows[0][0][n][3]);
+	}		
+	
 	miscTasks.append(miscContents);
 	
 	miscTasks.className = "misc-block normal-row";
