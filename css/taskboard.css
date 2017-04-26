@@ -69,16 +69,16 @@
 	display:flex;
 }
 #left-buttons {
-	flex: 1 1 600px;
+	flex: 1 99 600px;
 	text-align:left;
 }
 #middle-buttons {
-	flex: 0 0 150px;
+	flex: 0 1 430px;
 	text-align:center;
 	display:none;
 }
 #right-buttons {
-	flex: 1 1 600px;
+	flex: 1 99 600px;
 	text-align:right;
 	display:none;
 }

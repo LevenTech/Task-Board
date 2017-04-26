@@ -1,7 +1,10 @@
 
+var sortDebug = 0;
+
 var lines = [];
 
 var today = new Date();
+var one_day=1000*60*60*24;
 
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
@@ -27,6 +30,26 @@ var draggingNew = 0;
 var makingNewTask
 
 document.onselectstart = function() { return false; };
+
+function updateDateSlider(sliderValue) {
+	if (sliderValue<0) return;
+	console.log("setting date to "+sliderValue);
+	$("#todays-date-slider").slider('value',sliderValue);
+	makeDateIncremented(sliderValue)
+	drawOutput(lines);
+	//window.setTimeout(function(){updateDateSlider(sliderValue-1)},10);
+}
+
+function makeDateIncremented(numDays) {
+	today = new Date();
+	today = new Date(today.getTime()+numDays*one_day);
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+	drawOutput(lines);
+	$(".date-button").removeClass("active")
+	$("#today-button").addClass("active");
+}
 
 function closeEditDialogAndSave() {
 	updateTask(currentTask);
@@ -106,7 +129,8 @@ $(document).ready(function() {
 	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
 	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
 	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
-
+	
+	
     $( "#font-size-slider" ).slider({
       orientation: "horizontal",
       range: "min",
@@ -122,7 +146,26 @@ $(document).ready(function() {
 		drawOutput(lines);
       }
     });
-  
+
+    $( "#todays-date-slider" ).slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 0,
+      max: 35,
+      value: 0,
+      slide: function( event, ui ) {
+		var sliderValue = Math.floor(ui.value/5)
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+      },
+		stop    : function(e, ui) {
+			updateDateSlider(0);
+		}
+    });
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+	
   $( function() {
     //$( "#datepicker-start" ).datepicker();
     //$( "#datepicker-due" ).datepicker();
@@ -150,7 +193,6 @@ $(document).ready(function() {
 							var dueDate = new Date(dueYear,dueMonth,dueDay);
 							var dueDateStr = dueDate.toDateString();
 							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-							var one_day=1000*60*60*24;
 							var date1_ms = today.getTime();
 							var date2_ms = dueDate.getTime();
 							var difference_ms = date2_ms - date1_ms;
@@ -187,6 +229,8 @@ $(document).ready(function() {
 	loadCookieFile();
 	$.ui.dialog.prototype._focusTabbable = function(){};
 });
+
+
 
 function showSaveDialog(fileToOpen) {
 		var opt = {
@@ -449,7 +493,6 @@ function updateTask() {
 
 function delayTask() {
 
-	var one_day=1000*60*60*24;
 
 	var dueDay = lines[currentTask][col_dueday];
 	var dueMonth=lines[currentTask][col_duemonth];
@@ -510,7 +553,6 @@ function newTaskCopy() {
 	newTask[col_ID] = lastTaskID;
 	newTask[col_complete] = "";
 
-	var one_day=1000*60*60*24;
 	
 	var dueDay = lines[currentTask][col_dueday];
 	var dueYear=lines[currentTask][col_dueyear];
@@ -884,7 +926,7 @@ function drawOutput(lines){
 	//Clear previous data
 	document.getElementById("output").innerHTML = "";
 	var table = document.createElement("div");
-	var rowWithMeta = [[],"MISC"]
+	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
 	var myMonth;
 	var myDay;
@@ -946,7 +988,6 @@ function drawOutput(lines){
 			var startDate = new Date(startYear,startMonth,startDay);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
-			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = startDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
@@ -1030,7 +1071,6 @@ function drawOutput(lines){
 			var dueDate = new Date(dueYear,dueMonth,dueDay);
 			var dueDateStr = dueDate.toDateString();
 			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-			var one_day=1000*60*60*24;
 			var date1_ms = today.getTime();
 			var date2_ms = dueDate.getTime();
 			var difference_ms = date2_ms - date1_ms;
@@ -1138,7 +1178,7 @@ function drawOutput(lines){
 		}
 		
 		if (rowExists!==1) {
-			var rowWithMeta = [[],rowName];
+			var rowWithMeta = [[],rowName,[]];
 			tableRows.push(rowWithMeta);
 		}
 
@@ -1151,15 +1191,24 @@ function drawOutput(lines){
 		taskBlock.id = taskBlockID;
 		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
-		tableRows[rowNum][0].push(taskWithMeta);
+		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
+		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
 	var maxLength = 0;
 
 	for (row = 1 ; row<tableRows.length ; row++) {
-		tableRows[row][0].sort(mySortFunction);
+		if (tableRows[row][0]) {
+			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (current tasks)")
+			tableRows[row][0].sort(mySortFunction);
+		}
+		if (tableRows[row][2]) {
+			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (past tasks)")
+			tableRows[row][2].sort(mySortFunction);
+		}
 	}
 
+	if (sortDebug) console.log("Sorting Rows")
 	tableRows.sort(myRowSortFunction);
 	
 	for (row = 1 ; row<tableRows.length ; row++) {
@@ -1191,21 +1240,23 @@ function drawOutput(lines){
 		var tableContents = document.createElement("div");
 		tableContents.setAttribute("class","table-contents")
 		
-		var hasTableBar = 0;
-		for (n = 0 ; n<tableRows[row][0].length ; n++) {
-			if (tableRows[row][0][n][4]==0) tableContents.append(tableRows[row][0][n][3]);
-			else {
+		if (tableRows[row][0].length>0) {
+			for (n = 0 ; n<tableRows[row][0].length ; n++) {
 				hasTableBar = 1;
 				tableBar.append(tableRows[row][0][n][3]);
-			}
-		}
-
-		if (hasTableBar) {
+			}		
 			tableRow.append(tableBar);
 		}
+		
 		tableRow.append(thisRowName);
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
-		tableRow.append(tableContents);
+
+		if (tableRows[row][0].length>0) {
+			for (n = 0 ; n<tableRows[row][0].length ; n++) {
+				tableContents.append(tableRows[row][0][n][3]);
+			}
+			tableRow.append(tableContents);
+		}
 
 		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 	
@@ -1288,7 +1339,6 @@ function myRowSortFunction(a,b) {
 }
 
 function mySortFunction(a,b) {	
-	var debug = 0;
 	var returnVal;
 	
 	if (a[0]=="" && a[1].length==0) a[1]=999;
@@ -1303,7 +1353,7 @@ function mySortFunction(a,b) {
 	if (a[0].length==0) a[0]=-999;
 	if (b[0].length==0) b[0]=-999;
 	
-	var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
+	if (sortDebug) var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
 
 	if (a[1]==b[1])
 	{
@@ -1320,7 +1370,7 @@ function mySortFunction(a,b) {
 	{
 		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
 	}
-	if (debug) { alert(compareString + " = " + returnVal); }
+	if (sortDebug) { console.log(compareString + " = " + returnVal); }
 	return returnVal;
 }
 
