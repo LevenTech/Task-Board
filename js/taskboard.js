@@ -62,7 +62,7 @@ function makeShapeDefault() {
 	$("#shape-button-default").addClass("active")
 	$("#shape-button-wide").removeClass("active")
 	$(".task-details").show()
-	document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
+	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("wide-row-name")
 	$(".row-name").addClass("default-row-name")
 	$(".now-task").removeClass("wide-task")
@@ -77,7 +77,7 @@ function makeShapeWide() {
 	$("#shape-button-wide").addClass("active")
 	$("#shape-button-default").removeClass("active")
 	$(".task-details").hide()
-	document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
+	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("default-row-name")
 	$(".row-name").addClass("wide-row-name")
 	$(".now-task").removeClass("default-task")
