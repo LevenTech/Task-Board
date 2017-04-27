@@ -960,6 +960,14 @@ function newFile() {
 	}
 }
 
+function getContrastYIQ(hexcolor){
+	var r = parseInt(hexcolor.substr(1,2),16);
+	var g = parseInt(hexcolor.substr(3,2),16);
+	var b = parseInt(hexcolor.substr(5,2),16);
+	var yiq = ((r*299)+(g*587)+(b*114))/1000;
+	return (yiq >= 128) ? 'black' : 'white';
+}
+
 function drawOutput(lines){
 	if (typeof lines[0] =="undefined") {return;}
 	//Clear previous data
@@ -973,7 +981,6 @@ function drawOutput(lines){
 	var clockIconVal;
 	var noStartDay;
 	var noDueDay;
-
 	
 	var myFontSize = $( "#font-size" ).val();
 	
@@ -1000,7 +1007,14 @@ function drawOutput(lines){
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
+		
+		if (colorName.substr(0,1)=="#") var myHexColor = colorName
+		else var myHexColor = colourNameToHex(colorName)
 
+		if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
+		else myTextColor = "black"
+		
+		taskBlock.style.color = myTextColor
 		
 		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("div");
