@@ -404,8 +404,9 @@ function editTask(taskID,ev) {
 		if (hexColor[0]=="#") { document.getElementById("colorpicker2").value = hexColor }
 	}
 	$("#rowpicker").val(lines[currentTask][col_row]);
-	$("#incrementpicker").val(lines[currentTask][col_increment]);
 	$("#namepicker").val(lines[currentTask][col_task]);
+	$("#incrementpicker").val(lines[currentTask][col_increment]);
+	$("#interval-button"+lines[currentTask][col_increment]).addClass("active")
 	
 	if (makingNewTask==1) var myTitle = "Create New Task"
 	else var myTitle = "Edit Task"
@@ -417,14 +418,12 @@ function editTask(taskID,ev) {
         width: 370,
         height:370,
         title: myTitle,
+		resizable: false,
 		buttons: { 
 			Save: function() {
-				$("#editDialog").dialog("close");
-				clearEditDialog();
 				updateTask(currentTask);
 				makingNewTask = 0;
-				isSaved = 0;
-				$("#unsaved-changes").show();
+				$("#editDialog").dialog("close");
 			},
 			Cancel: function () {
 				$("#editDialog").dialog("close");
@@ -439,7 +438,6 @@ function editTask(taskID,ev) {
 			}
 		},	
 		close: function( event, ui ) {
-			clearEditDialog();
 			if(makingNewTask==1) {
 				lines.splice(currentTask,1);
 				lastTaskID--;
@@ -464,9 +462,22 @@ function clearEditDialog() {
 	document.getElementById("colorpicker2").value = "#000000";
 	$("#rowpicker").val("");
 	$("#incrementpicker").val("");
+	$(".interval-button").removeClass("active")
 	$("#namepicker").val("");
 	$("#datepicker-due").val("");
 	$("#datepicker-start").val("");
+}
+
+function changeInterval(intVal) {
+	$('#incrementpicker').val(intVal)
+	$(".interval-button").removeClass("active")
+	$("#interval-button"+intVal).addClass("active")
+}
+
+function checkInterval() {
+	var intVal = $('#incrementpicker').val();
+	$(".interval-button").removeClass("active")
+	$("#interval-button"+intVal).addClass("active")
 }
 
 function updateTask() {
@@ -501,12 +512,14 @@ function updateTask() {
 	}
 
 	newStringParts[col_color]=$("#colorpicker").val();
+	console.log($("#incrementpicker").val())
 	newStringParts[col_increment]=$("#incrementpicker").val();
 	newStringParts[col_task]=$("#namepicker").val();
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
+	clearEditDialog();
 	isSaved = 0;
 	$("#unsaved-changes").show();
 	saveFileCookie();

@@ -112,8 +112,21 @@
 					<td><input style="float:left;width:175px;width:100%;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
 				</td>
 			</tr>
-			<tr style="height:30px;"><td>Interval:</td><td><input type="text" id="incrementpicker" style="width:100%;"></td></tr>
-		</table>
+			<tr style="height:30px;">
+				<td>Interval:</td>
+				<td>
+					<div class="btn-group" role="group">
+						  <button type="button" class="btn btn-default interval-button" id="interval-button1" onclick="changeInterval(1)">1</button>
+						  <button type="button" class="btn btn-default interval-button" id="interval-button2" onclick="changeInterval(2)">2</button>
+						  <button type="button" class="btn btn-default interval-button" id="interval-button3" onclick="changeInterval(3)">3</button>
+						  <button type="button" class="btn btn-default interval-button" id="interval-button7" onclick="changeInterval(7)">7</button>
+						  <button type="button" class="btn btn-default interval-button" id="interval-button14" onclick="changeInterval(14)">14</button>
+						  <button type="button" class="btn btn-default interval-button" id="interval-button30" onclick="changeInterval(30)">30</button>
+						  <input type="text" id="incrementpicker" onchange="checkInterval()" style="width:84px;height:34px;text-align:right;">
+					</div>
+				</td>
+			</tr>
+			</table>
 	</div>
 	<div class="my-dialog" id="completeDialog">
 		Are you sure you want to finish the task "<span id="completeTaskName" ></span>"?<br/><br/>
