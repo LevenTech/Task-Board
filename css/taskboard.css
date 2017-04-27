@@ -98,14 +98,6 @@
 	cursor:hand;
 }
 
-/*.small-block {	font-size:10px	}
-.medium-block {	font-size:14px	}
-.large-block {	font-size:18px	}
-
-.small-row {	font-size:10px	}
-.medium-row {	font-size:14px	}
-.large-block {	font-size:18px	}*/
-
 .past-task {
 	width: 100% !important;
 	text-align: left;
@@ -173,7 +165,7 @@
 }
 
 .misc-block {
-	margin:10px;
+	margin:0.5em;
 	float: left;
 	padding: 0.5em;
 	padding-left:1em;
@@ -203,8 +195,8 @@
 	display:inline-block;
 	}
 .vertical-text {
-	transform: translate(-50%) translate(-25px) rotate(-90deg);
-	transform-origin: center center 0;
+	transform: translate(-50%) translate(-1.5em) rotate(-90deg);
+	transform-origin: center center 0em;
 	text-align:center;
 	position:absolute;
 	top:50%;

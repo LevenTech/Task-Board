@@ -39,7 +39,6 @@ function updateDateSlider(sliderValue) {
 	$("#todays-date-slider").slider('value',sliderValue);
 	makeDateIncremented(sliderValue)
 	drawOutput(lines);
-	//window.setTimeout(function(){updateDateSlider(sliderValue-1)},10);
 }
 
 function makeDateIncremented(numDays) {
@@ -53,17 +52,21 @@ function makeDateIncremented(numDays) {
 	$("#today-button").addClass("active");
 }
 
-function closeEditDialogAndSave() {
-	updateTask(currentTask);
-	$("#editDialog").dialog("close");
-	makingNewTask = 0;
-	isSaved = 0;
-	$("#unsaved-changes").show();
+function editDialogKeypress(e) {
+	if (e.which==13) {
+		e.preventDefault();
+		updateTask(currentTask);
+		$("#editDialog").dialog("close");
+		makingNewTask = 0;
+		isSaved = 0;
+		$("#unsaved-changes").show();
+		return false;
+	}
 }
 
 $(document).ready(function() {
-	var opt = { autoOpen: false	};
 
+	var opt = { autoOpen: false	};
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
@@ -71,41 +74,13 @@ $(document).ready(function() {
 	$("#deleteDialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();
 	
-	$("#datepicker-start").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#datepicker-due").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#colorpicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#namepicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#incrementpicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
+	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
+	
+	
 	$("#newRowName").keypress( function (e) {
 		if(e.which == 13) {
 			e.preventDefault();
@@ -124,27 +99,19 @@ $(document).ready(function() {
 	});
 
 	var cookieVal = readCookie('zoomCookie');
-	if (cookieVal) {
-		var sliderValue = cookieVal;
-	}
-	else { var sliderValue = 2; }
-	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
-	
+	if (cookieVal) {	var sliderValue = cookieVal;	}
+	else { 				var sliderValue = 14; 			}
+	$("#font-size").val(sliderValue)
 	
     $( "#font-size-slider" ).slider({
       orientation: "horizontal",
       range: "min",
-      min: 1,
-      max: 3,
+      min: 8, max: 24,
       value: sliderValue,
       slide: function( event, ui ) {
 		var sliderValue = ui.value.toString();
 		createCookie('zoomCookie',sliderValue);
-		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+		$( "#font-size" ).val(sliderValue);
 		drawOutput(lines);
       }
     });
@@ -152,8 +119,7 @@ $(document).ready(function() {
     $( "#todays-date-slider" ).slider({
       orientation: "horizontal",
       range: "min",
-      min: 0,
-      max: 35,
+      min: 0, max: 35,
       value: 0,
       slide: function( event, ui ) {
 		var sliderValue = Math.floor(ui.value/5)
@@ -168,10 +134,6 @@ $(document).ready(function() {
 	todaysDateStr = todaysDateStr.slice(0,-4)
 	$("#todays-date").val(todaysDateStr);
 	
-  $( function() {
-    //$( "#datepicker-start" ).datepicker();
-    //$( "#datepicker-due" ).datepicker();
-  } );
   
 	    $(function() {
         $.contextMenu({
@@ -250,7 +212,7 @@ $(document).ready(function() {
 	loadCookieFile();
 	$.ui.dialog.prototype._focusTabbable = function(){};
 	
-	$(document).on('mousedown', '.past-task', function (e){ 
+	$(document).on('mousedown', '.task-block', function (e){ 
 		myClickEvent = e
 		return true; 
 	}); 
@@ -539,7 +501,6 @@ function updateTask() {
 	}
 
 	newStringParts[col_color]=$("#colorpicker").val();
-	console.log($("#incrementpicker").val())
 	newStringParts[col_increment]=$("#incrementpicker").val();
 	newStringParts[col_task]=$("#namepicker").val();
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
@@ -832,7 +793,6 @@ function highlightMisc(ev) {
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 		ev.target.className = "misc-block hover-row";
-		var myFontSize = $( "#font-size" ).val();
 		currentRowName = ev.target.getAttribute("data-rowname");
 		}
 	}
@@ -848,7 +808,6 @@ function unhighlightMisc(ev) {
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 			ev.target.className = "misc-block normal-row";
-			var myFontSize = $( "#font-size" ).val();
 		}
 	}
 }
@@ -1027,9 +986,7 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
-		if (myFontSize=="Small") taskBlock.className += " small-block"
-		if (myFontSize=="Medium") taskBlock.className += " medium-block"
-		if (myFontSize=="Large") taskBlock.className += " large-block"
+		taskBlock.style.fontSize = myFontSize+"px";
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
@@ -1240,7 +1197,6 @@ function drawOutput(lines){
 			repeatNum.className = "repeat-num"
 			if (isPastTask==1) repeatNum.className += " repeat-num-past";
 			else repeatNum.className += " repeat-num-normal";
-			repeatNum.setAttribute("font-size","10px")
 			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
 			repeatNum.innerHTML = lines[i][col_increment];
 			taskBlock.appendChild(repeatNum);
@@ -1297,9 +1253,6 @@ function drawOutput(lines){
 		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
-		if (myFontSize=="Small") tableRow.className += " small-row"
-		if (myFontSize=="Medium") tableRow.className += " medium-row"
-		if (myFontSize=="Large") tableRow.className += " large-row"
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
@@ -1386,9 +1339,7 @@ function drawOutput(lines){
 	document.getElementById("output").append(miscTasks);
 
 	
-	if (myFontSize=="Small") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:12px;"
-	if (myFontSize=="Medium") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:16px;"
-	if (myFontSize=="Large") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:22px;"
+	document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
