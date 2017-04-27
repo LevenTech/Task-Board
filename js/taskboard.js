@@ -419,37 +419,54 @@ function editTask(taskID,ev) {
         title: myTitle,
 		buttons: { 
 			Save: function() {
-				updateTask(currentTask);
 				$("#editDialog").dialog("close");
+				clearEditDialog();
+				updateTask(currentTask);
 				makingNewTask = 0;
 				isSaved = 0;
 				$("#unsaved-changes").show();
 			},
 			Cancel: function () {
-				$("#colorpicker").val("");
-				document.getElementById("colorpicker2").value = "#000000";
-				$("#rowpicker").val("");
-				$("#incrementpicker").val("");
-				$("#namepicker").val("");
-				$("#datepicker-due").val("");
-				$("#datepicker-start").val("");
+				$("#editDialog").dialog("close");
+				clearEditDialog();
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
 					lastTaskID--;
 				}
 				makingNewTask = 0;
 				currentTask = 0;
-				$("#editDialog").dialog("close");
 				drawOutput(lines);
 			}
-		}		
+		},	
+		close: function( event, ui ) {
+			clearEditDialog();
+			if(makingNewTask==1) {
+				lines.splice(currentTask,1);
+				lastTaskID--;
+			}
+			makingNewTask = 0;
+			currentTask = 0;
+			drawOutput(lines);
+		}			
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
+
 	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
 	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+
 	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
+}
+
+function clearEditDialog() {
+	$("#colorpicker").val("");
+	document.getElementById("colorpicker2").value = "#000000";
+	$("#rowpicker").val("");
+	$("#incrementpicker").val("");
+	$("#namepicker").val("");
+	$("#datepicker-due").val("");
+	$("#datepicker-start").val("");
 }
 
 function updateTask() {
