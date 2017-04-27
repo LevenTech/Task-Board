@@ -704,15 +704,19 @@ function saveFile() {
 		}
 	}); 
 
-	var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	var link = document.createElement("a");
+
+	//var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	//var url = URL.createObjectURL(blob);
 
 	var encodedUri = encodeURI(csvContent);
-	var url = URL.createObjectURL(blob);
-	var link = document.createElement("a");
+	var url = "data:attachment/csv,"+encodedUri;
+
 	link.setAttribute("href", url);
 	link.setAttribute("download", currentFileName);
 	document.body.appendChild(link); // Required for FF
 	link.click();
+	
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
