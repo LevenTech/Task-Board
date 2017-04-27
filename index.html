@@ -36,58 +36,67 @@
 <body ondrop="newRow(event)" ondragover="allowDrop(event)" style="min-height:90%;" draggable="false">
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
 	<div id="taskboard-toolbar">
-	<div id="left-buttons">
-    <div style="float:left;height:100px;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
-		<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;">
-			<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="float:left;margin:10px;margin-left:0px;">
-				<i class="fa fa-file-code-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>New File
-			</button>
-			<span class="btn btn-default btn-file" style="float:left;margin:10px;margin-left:0px;">
-				<i class="fa fa-folder-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>
-				<span>Open File</span>
-				<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
-			</span>
-			<br/><br/><br/>
-			<span style="margin-left:0px;"><strong>Current File:</strong></span>
-			<span class="fileinput-filename"></span>
-			<span class="fileinput-new">No file chosen</span>
-			<span id="unsaved-changes" title="You have changes that haven't been saved to a file yet." style="display:none;">
-				<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-			</span>
+		<div id="left-buttons">
+			<div style="float:left;height:100px;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
+				<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;">
+					<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="float:left;margin:10px;margin-left:0px;">
+						<i class="fa fa-file-code-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>New File
+					</button>
+					<span class="btn btn-default btn-file" style="float:left;margin:10px;margin-left:0px;">
+						<i class="fa fa-folder-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>
+						<span>Open File</span>
+						<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
+					</span>
+					<br/><br/><br/>
+					<span style="margin-left:0px;"><strong>Current File:</strong></span>
+					<span class="fileinput-filename"></span>
+					<span class="fileinput-new">No file chosen</span>
+					<span id="unsaved-changes" title="You have changes that haven't been saved to a file yet." style="display:none;">
+						<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+					</span>
+				</div>
+				<span id="result"></span>
+			</div>
+			<div style="float:left;margin-top:30px;margin-left:15px;user-select:none;">
+				<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" style="margin:0px;padding:8px;" disabled>
+					<div style="float:left;"><i class="fa fa-floppy-o" aria-hidden="true" style="width:40px;font-size:300%;margin-right:10px;"></i></div>
+					<div style="float:left;">Save<br/>to File</div>
+				</button>
+			</div>
 		</div>
-		<span id="result"></span>
-	</div>
-	<div style="float:left;margin-top:30px;margin-left:15px;user-select:none;">
-		<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" style="margin:0px;padding:8px;" disabled>
-			<div style="float:left;"><i class="fa fa-floppy-o" aria-hidden="true" style="width:40px;font-size:300%;margin-right:10px;"></i></div>
-			<div style="float:left;">Save<br/>to File</div>
-		</button>
-	</div>
-	</div>
-	<div id="middle-buttons" style="diplay:none;user-select:none;">
-		<div style="margin-top:30px;margin-left:10px;display:inline-block;">
-		  <label for="font-size">Task size:</label>
-		  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
-		  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
+		<div id="middle-buttons" style="diplay:none;user-select:none;">
+			<div class="middle-button">
+				<label for="task-shape">Shape</label><br/>
+				<div class="btn-group-vertical" role="group">
+					<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()">
+						<div style="height:1em;width:1.2em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
+					</button>
+					<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()">
+						<div style="height:0.8em;width:2em;background-color:black;border:2px solid black;"></div>
+					</button>
+				</div>
+			</div>
+			<div class="middle-button">
+			  <label for="font-size">Task size:</label>
+			  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
+			  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
+			</div>
+			<div class="middle-button" ">
+			  <label for="date-select">Show for:</label>
+			  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
+			  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
+			</div>		
 		</div>
-		<div style="margin-top:30px;margin-left:40px;display:inline-block;">
-		  <label for="date-select">Show for:</label>
-		  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
-		  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
-		</div>		
+		<div id="right-buttons">
+			<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
+					<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
+					<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
+			</div>
+			<div id="new-task-drag" class="new-task-drag task-block medium-block now-task" draggable="true" style="margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;" ondragstart="dragNew(event)" >
+				<br/>Drag for new task
+			</div>
+		</div>
 	</div>
-	<div id="right-buttons">
-
-	<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
-			<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
-			<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
-	</div>
-	<div id="new-task-drag" class="new-task-drag task-block medium-block now-task" draggable="true" style="margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;" ondragstart="dragNew(event)" >
-		<br/>Drag for new task
-	</div>
-	</div>
-	</div>
-	
 	<br/>
 	<div class="my-dialog" id="editDialog">
 		<table style="float:left;width:100%;height:100%;">

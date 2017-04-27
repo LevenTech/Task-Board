@@ -6,6 +6,10 @@ var editDebug = 0;
 
 var lines = [];
 
+var shape = "";
+
+var maxLength = 0;
+
 var today = new Date();
 var one_day=1000*60*60*24;
 
@@ -51,6 +55,37 @@ function makeDateIncremented(numDays) {
 	$(".date-button").removeClass("active")
 	$("#today-button").addClass("active");
 }
+
+function makeShapeDefault() {
+	shape = ""
+	createCookie('shapeCookie',"");
+	$("#shape-button-default").addClass("active")
+	$("#shape-button-wide").removeClass("active")
+	$(".task-details").show()
+	document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
+	$(".row-name").removeClass("wide-row-name")
+	$(".row-name").addClass("default-row-name")
+	$(".now-task").removeClass("wide-task")
+	$(".later-task").removeClass("wide-task")
+	$(".now-task").addClass("default-task")
+	$(".later-task").addClass("default-task")
+}
+
+function makeShapeWide() {
+	shape = "wide"
+	createCookie('shapeCookie',"wide");
+	$("#shape-button-wide").addClass("active")
+	$("#shape-button-default").removeClass("active")
+	$(".task-details").hide()
+	document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
+	$(".row-name").removeClass("default-row-name")
+	$(".row-name").addClass("wide-row-name")
+	$(".now-task").removeClass("default-task")
+	$(".later-task").removeClass("default-task")
+	$(".now-task").addClass("wide-task")
+	$(".later-task").addClass("wide-task")
+}
+
 
 function editDialogKeypress(e) {
 	if (e.which==13) {
@@ -102,6 +137,15 @@ $(document).ready(function() {
 	if (cookieVal) {	var sliderValue = cookieVal;	}
 	else { 				var sliderValue = 14; 			}
 	$("#font-size").val(sliderValue)
+
+	var shapeCookie = readCookie('shapeCookie');
+	if (shapeCookie=="wide") {
+		$("#shape-button-wide").addClass("active")
+		makeShapeWide()
+	}
+	else {
+		$("#shape-button-default").addClass("active")
+	}
 	
     $( "#font-size-slider" ).slider({
       orientation: "horizontal",
@@ -1034,22 +1078,28 @@ function drawOutput(lines){
 			if (days_until_start==0) {
 				taskRow = document.createElement("span");
 				taskRow.innerHTML = "<b>Starts TODAY</b>";
-				name.setAttribute("style","height:1.5em;")
+				taskRow.className = "task-details"
+				name.setAttribute("style","height:1.5em;width:14em;text-align:center;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 			}
 			else if (startDate>today) {
 				var startDatePhrase = document.createElement("span")
 				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
-				name.setAttribute("style","height:1.5em;")
+				startDatePhrase.className = "task-details"
+				name.setAttribute("style","height:1.5em;width:15em;text-align:center;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(startDatePhrase);
 				taskBlock.className += " later-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 			}
 			else if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
@@ -1058,8 +1108,9 @@ function drawOutput(lines){
 				taskBlock.appendChild(name);
 
 				var justDate = document.createElement("span");
+				justDate.className = "task-details"
 				justDate.innerHTML = startDateStr;
-				justDate.setAttribute("style","display:inline-block;margin-left:10px;margin-right:10px;")
+				justDate.setAttribute("style","display:inline-block;margin-left:1em;")
 				taskBlock.appendChild(justDate);
 
 				var myOpacity = (-days_until_start)*0.1;
@@ -1068,8 +1119,8 @@ function drawOutput(lines){
 				taskBlock.className += " past-task";
 
 				var iconSpan = document.createElement("span")
-				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-right:1.5em;")
-				else iconSpan.setAttribute("style","display:inline-block;")
+				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-left:1em;margin-right:1.5em;")
+				else iconSpan.setAttribute("style","display:inline-block;margin-left:1em;")
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
@@ -1082,6 +1133,8 @@ function drawOutput(lines){
 			}
 			else {
 				taskBlock.className += " now-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 				name.setAttribute("style","height:1.5em;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
@@ -1091,6 +1144,8 @@ function drawOutput(lines){
 		else {
 			noStartDay = 1;
 			taskBlock.className += " now-task";
+			if (shape=="wide") taskBlock.className += " wide-task";
+			else taskBlock.className += " default-task";
 			name.setAttribute("style","height:1.5em;")
 			taskBlock.appendChild(name);
 			var BR = document.createElement("br");
@@ -1117,6 +1172,7 @@ function drawOutput(lines){
 			if (days_until_due==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
+				taskRow.className = "task-details"
 				taskBlock.appendChild(taskRow);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -1133,11 +1189,10 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);
 			}
 			else if (days_until_due<0) {
-				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDateStr));
-				taskBlock.appendChild(document.createTextNode(" ("));
-				taskBlock.appendChild(document.createTextNode(-days_until_due));
-				taskBlock.appendChild(document.createTextNode(" passed)"));
+				var dueDatePhrase = document.createElement("div")
+				dueDatePhrase.setAttribute("class","task-details")
+				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
 				alertIcon.className += " left-icon-normal";
@@ -1145,9 +1200,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(alertIcon);
 
 				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("!!! OVERDUE !!!"));
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
+				taskRow.className = "task-details"
+				taskRow.innerHTML = "!!! OVERDUE !!!"
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
 				taskBlock.appendChild(taskRow);
@@ -1155,12 +1209,12 @@ function drawOutput(lines){
 
 			}
 			else {
-				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDateStr));
+				var dueDatePhrase = document.createElement("div");
+				dueDatePhrase.setAttribute("class","task-details")
+				dueDatePhrase.innerHTML = "Due: "+dueDateStr
 				if (!startDay>0 || startDate<=today) {
-					taskBlock.appendChild(document.createTextNode(" ("));
-					taskBlock.appendChild(document.createTextNode(days_until_due));
-					taskBlock.appendChild(document.createTextNode(" left)"));
+					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
+					taskBlock.appendChild(dueDatePhrase)
 					clockIconLabel = days_until_due.toString();
 					var myOpacity = 1-(days_until_due*0.1);
 					if (myOpacity>1) myOpacity = 1;
@@ -1232,7 +1286,6 @@ function drawOutput(lines){
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
-	var maxLength = 0;
 
 	for (row = 1 ; row<tableRows.length ; row++) {
 		if (tableRows[row][0]) {
@@ -1267,6 +1320,9 @@ function drawOutput(lines){
 
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
+		if (shape=="wide") thisRowName.className += " wide-row-name";
+		else thisRowName.className += " default-row-name";
+		
 
 		var tableBar = document.createElement("div");
 		tableBar.setAttribute("class","table-bar")
@@ -1298,8 +1354,10 @@ function drawOutput(lines){
 	}
 		
 	table.className = "left-side";
+	table.id = "left-side";
 	table.setAttribute("draggable","false")
-	table.style.flexBasis = 17.6*maxLength+5.5+"em";
+	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
+	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
 	
 	tableRows[0][0].sort(mySortFunction);
 
@@ -1338,7 +1396,8 @@ function drawOutput(lines){
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
 
-	
+	if (shape=="wide") $(".task-details").hide();
+
 	document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
