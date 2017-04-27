@@ -191,8 +191,6 @@ $(document).ready(function() {
 							if (dueYear.length==2) dueYear = "20"+dueYear;
 							if (dueYear.length==0) dueYear = today.getYear()+1900;
 							var dueDate = new Date(dueYear,dueMonth,dueDay);
-							var dueDateStr = dueDate.toDateString();
-							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
 							var date1_ms = today.getTime();
 							var date2_ms = dueDate.getTime();
 							var difference_ms = date2_ms - date1_ms;
@@ -205,16 +203,37 @@ $(document).ready(function() {
 						else return false;
 					}
 				},
-                "Edit": {
-					name: "Edit", icon: "fa-edit",
-					callback: function(key, options) {
-						editTaskContextMenu();
-					}
-				},
                 "Finish": {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {
 						completeTask();
+					},
+			        visible: function(key, opt){        
+						var myTaskID = currentTask;
+						var isStarted = 0;
+						var startDay = lines[myTaskID][col_startday];
+						if (startDay > 0) {
+							var startMonth=lines[myTaskID][col_startmonth]-1;
+							var startYear=lines[myTaskID][col_startyear];
+							if (startYear.length==2) startYear = "20"+startYear;
+							if (startYear.length==0) startYear = today.getYear()+1900;
+							var startDate = new Date(startYear,startMonth,startDay);
+							var date1_ms = today.getTime();
+							var date2_ms = startDate.getTime();
+							var difference_ms = date2_ms - date1_ms;
+							var days_until_start = Math.ceil(difference_ms/one_day);
+							if (days_until_start<0 || days_until_start==0 ) {
+								isStarted = 1;
+							}
+						}
+						else { isStarted = 1; }
+						return (isStarted==1);
+					}					
+				},
+                "Edit": {
+					name: "Edit", icon: "fa-edit",
+					callback: function(key, options) {
+						editTaskContextMenu();
 					}
 				},
                 "Delete": {
