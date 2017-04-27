@@ -250,11 +250,8 @@ $(document).ready(function() {
 	loadCookieFile();
 	$.ui.dialog.prototype._focusTabbable = function(){};
 	
-	$(document).on('mousedown', '.task-block', function (e){ 
-		if( e.button == 2 ) { // Right mouse button clicked
-			console.log(e.pageX+"/"+e.pageY)
-			myRightClickEvent = e
-		} 
+	$(document).on('mousedown', '.past-task', function (e){ 
+		myClickEvent = e
 		return true; 
 	}); 
 
@@ -478,7 +475,7 @@ function editTask(taskID,ev) {
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
 
-	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: myRightClickEvent, collision: "fit", within: "body"}});
+	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"}});
 	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
 
 	$("#editDialog").dialog(opt);
