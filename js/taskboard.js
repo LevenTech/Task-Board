@@ -368,8 +368,7 @@ function deleteTask() {
 }
 
 function editTaskContextMenu() {
-	taskID = lines[currentTask][col_ID];
-	editTask(taskID);
+	editTask(currentTask);
 }
 
 function clickTaskBlock(ev,target) {
