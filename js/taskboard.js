@@ -92,15 +92,18 @@ $(document).ready(function() {
 		return true; 
 	}); 
 
-	var miscBlock = document.getElementById('myBody');
-	var fingers = new Fingers(miscBlock);
-	new Fingers(miscBlock)
-    .addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
-    .addHandler(function(eventType, data, fingerList) {
-		inRightClickMode = 1
-		initContextMenu("left")
+	if (isMobile()) {
+		var miscBlock = document.getElementById('myBody');
+		var fingers = new Fingers(miscBlock);
+		new Fingers(miscBlock)
+		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
+		.addHandler(function(eventType, data, fingerList) {
+			inRightClickMode = 1
+			alert('right click');
+			initContextMenu("left")
 		})
-
+	}
+	
 });  // END OF DOC.READY
 	
 	
@@ -140,7 +143,7 @@ function initSliders() {
 }
 
 function initContextMenu(button) {
-	$.contextMenu( 'destroy' );
+	//$.contextMenu( 'destroy' );
 	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
@@ -307,6 +310,10 @@ function completeTask() {
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
+				var finishedItem = document.createElement("span")
+				span.style = "background-color:black;color:white;"
+				span.innerHTML = lines[currentTask][col_task]
+				$("#finished-list").appendChild(finishedItem);
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11].length>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
@@ -663,19 +670,8 @@ function unhighlightFinish(ev) {
 
 function drag(ev) {
 	draggingNew = 0;
-	var taskID = ev.target.getAttribute("data-taskid");
-	
-	/*for(var i = 0; i < lines.length; i++) {
-		if(parseInt(lines[i][0]) == taskID) {
-			currentTask = i;
-			currentRowName = lines[i][col_row]
-			break;
-		}
-	}*/
-
-	currentTask=taskID;
+	currentTask = ev.target.getAttribute("data-taskid");
 	currentRowName = lines[currentTask][col_row];
-	
     ev.dataTransfer.setData("text", currentTask);
 }
 
