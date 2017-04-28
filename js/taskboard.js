@@ -474,6 +474,13 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 		},	
+		open: function(event, ui) 
+		{ 
+			$('.ui-widget-overlay').bind('click', function()
+			{ 
+				$("#editDialog").dialog('close'); 
+			}); 
+		},
 		close: function( event, ui ) {
 			if(makingNewTask==1) {
 				lines.splice(currentTask,1);
