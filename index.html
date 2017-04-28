@@ -16,6 +16,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 
     <script type="text/javascript" src="js/taskboard.js"></script>
+    <script type="text/javascript" src="js/tb_library.js"></script>
     <script type="text/javascript" src="js/googleanalytics.js"></script>
     <script type="text/javascript" src="js/colorconvert.js"></script>
 
@@ -118,7 +119,7 @@
 				<td>Color:</td>
 				<td>
 					<table><tr><td><input style="float:left;" type='color' id="colorpicker2" onchange="colorpicked();" /></td>
-					<td><input style="float:left;width:175px;width:100%;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
+					<td><input style="padding-left:3px;float:left;width:175px;width:100%;" type="text" id="colorpicker" onchange="colortyped();" /></td></tr></table>
 				</td>
 			</tr>
 			<tr style="height:30px;">
@@ -131,7 +132,7 @@
 						  <button type="button" class="btn btn-default interval-button" id="interval-button7" onclick="changeInterval(7)">7</button>
 						  <button type="button" class="btn btn-default interval-button" id="interval-button14" onclick="changeInterval(14)">14</button>
 						  <button type="button" class="btn btn-default interval-button" id="interval-button30" onclick="changeInterval(30)">30</button>
-						  <input type="text" id="incrementpicker" onchange="checkInterval()" style="width:84px;height:34px;text-align:right;">
+						  <input type="text" id="incrementpicker" onchange="checkInterval()" style="padding-right:3px;width:84px;height:34px;text-align:right;">
 					</div>
 				</td>
 			</tr>
