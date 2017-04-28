@@ -98,7 +98,7 @@ $(document).ready(function() {
 		new Fingers(miscBlock)
 		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
 		.addHandler(function(eventType, data, fingerList) {
-			if (inRightClickMode == 0)
+			if (inRightClickMode == 0) {
 				inRightClickMode = 1
 				$("#right-click-mode-indicator").show();
 				initContextMenu("left")
