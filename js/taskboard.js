@@ -7,6 +7,7 @@ var editDebug = 0;
 var lines = [];
 
 var shape = "";
+var inRightClickMode = 0;
 
 var maxLength = 0;
 
@@ -80,7 +81,7 @@ $(document).ready(function() {
 	$("#todays-date").val(todaysDateStr);
 
 	initSliders()
-	initContextMenu()
+	initContextMenu("right")
 	
 	loadCookieFile();
 
@@ -91,7 +92,18 @@ $(document).ready(function() {
 		return true; 
 	}); 
 
-});
+	var miscBlock = document.getElementById('myBody');
+	var fingers = new Fingers(miscBlock);
+	new Fingers(miscBlock)
+    .addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
+    .addHandler(function(eventType, data, fingerList) {
+		inRightClickMode = 1
+		initContextMenu("left")
+		})
+
+});  // END OF DOC.READY
+	
+	
 
 // INIT FUNCTIONS
 
@@ -101,7 +113,7 @@ function initSliders() {
 	else { 				var sliderValue = 14; 			}
 	$("#font-size").val(sliderValue)
     $( "#font-size-slider" ).slider({
-      orientation: "horizontal", range: "min",
+      orientation: "horizontal", range: false,
       min: 8, max: 24,
       value: sliderValue,
       slide: function( event, ui ) {
@@ -127,11 +139,18 @@ function initSliders() {
     });	
 }
 
-function initContextMenu() {
+function initContextMenu(button) {
+	$.contextMenu( 'destroy' );
 	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
-            items: {
+			events: {
+				hide: function(opt) {
+					inRightClickMode = 0;
+					initContextMenu("right")
+				}
+			  },
+			  items: {
                 "Delay": {
 					name: "Delay", icon: "fa-bell-slash-o",
 					callback: function(key, options) {
@@ -195,12 +214,8 @@ function initContextMenu() {
         };
   
 	myOptions.selector = ".task-block"
-	myOptions.trigger = "right"
+	myOptions.trigger = button
     $(function() { $.contextMenu(myOptions) });	
-	var myCornerOptions = JSON.parse(JSON.stringify(myOptions));
-	myCornerOptions.selector = ".corner-button"
-	myCornerOptions.trigger = "hover"
-    $(function() { $.contextMenu(myCornerOptions) });	
 }
 
 // INPUT FUNCTIONS
@@ -356,16 +371,15 @@ function editTaskContextMenu(ev) {
 }
 
 function clickTaskBlock(ev,target) {
-	var taskID = target.getAttribute("data-taskid");
-	/*for(var i = 0; i < lines.length; i++) {
-		if(parseInt(lines[i][0]) == taskID) {
-			currentTask = i;
-			break;
-		}
-	}*/
-	currentTask=taskID;
 	if (editDebug) console.log("left clicked currentTask="+currentTask)
-	editTask(taskID,ev);
+	if (inRightClickMode==1) {
+		
+	}
+	else {
+		var taskID = target.getAttribute("data-taskid");
+		currentTask=taskID;
+		editTask(taskID,ev);
+	}
 }
 
 function cornerClick(ev) {
@@ -1246,7 +1260,6 @@ function drawOutput(lines){
 	});
 	$(".misc-block").on("taphold", function (){
 		e.preventDefault();
-		alert("did it")
 		var rowName = this.getAttribute("data-rowname");
 		newTask(rowName);
 		return false;
