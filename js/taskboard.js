@@ -8,6 +8,7 @@ var lines = [];
 
 var shape = "";
 var inRightClickMode = 0;
+var dateSliderActive = 0;
 
 var maxLength = 0;
 
@@ -145,25 +146,43 @@ function initSliders() {
 	noUiSlider.create(myTodaysDateSlider, {
 		start: [0],
 		step: 1,
+		behavior: "tap-drag",
 		connect: true,
 		range: {
 			'min': 0,
 			'max': 7
-		}
+		},
 	});
 
+	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
 	myTodaysDateSlider.noUiSlider.on('slide', function(){
 		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
 		makeDateIncremented(sliderValue);
 		drawOutput(lines);
-	})	
+	})
+	myTodaysDateSlider.noUiSlider.on('end', function(){	dateSliderActive = 0; })
 
-	myTodaysDateSlider.noUiSlider.on('end', function(){
-		document.getElementById('todays-date-slider').noUiSlider.set(0)
-		makeDateIncremented(0);
+	myTodaysDateSlider.noUiSlider.on('set', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
 		drawOutput(lines);
-	})	
+	})
+
+	myTodaysDateSlider.noUiSlider.on('change', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+		if (dateSliderActive==0) setTimeout(clearDateSlider,300);
+		else {
+			dateSliderActive=0;
+			clearDateSlider();
+		}
+	})
 	
+}
+
+function clearDateSlider() {
+	document.getElementById('todays-date-slider').noUiSlider.reset();
 }
 
 function initContextMenu(button) {
