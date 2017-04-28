@@ -1,8 +1,15 @@
 
+var myRightClickEvent;
+
 var sortDebug = 0;
 var editDebug = 0;
 
 var lines = [];
+
+var shape = "";
+var inRightClickMode = 0;
+
+var maxLength = 0;
 
 var today = new Date();
 var one_day=1000*60*60*24;
@@ -31,37 +38,9 @@ var draggingNew = 0;
 var makingNewTask
 
 document.onselectstart = function() { return false; };
-
-function updateDateSlider(sliderValue) {
-	if (sliderValue<0) return;
-	$("#todays-date-slider").slider('value',sliderValue);
-	makeDateIncremented(sliderValue)
-	drawOutput(lines);
-	//window.setTimeout(function(){updateDateSlider(sliderValue-1)},10);
-}
-
-function makeDateIncremented(numDays) {
-	today = new Date();
-	today = new Date(today.getTime()+numDays*one_day);
-	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
-	$("#todays-date").val(todaysDateStr);
-	drawOutput(lines);
-	$(".date-button").removeClass("active")
-	$("#today-button").addClass("active");
-}
-
-function closeEditDialogAndSave() {
-	updateTask(currentTask);
-	$("#editDialog").dialog("close");
-	makingNewTask = 0;
-	isSaved = 0;
-	$("#unsaved-changes").show();
-}
-
 $(document).ready(function() {
-	var opt = { autoOpen: false	};
 
+	var opt = { autoOpen: false	};
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
@@ -69,89 +48,95 @@ $(document).ready(function() {
 	$("#deleteDialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();
 	
-	$("#datepicker-start").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#datepicker-due").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#colorpicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#namepicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
-	$("#incrementpicker").keypress( function (e) {
-		if(e.which == 13) {
-			e.preventDefault();
-			closeEditDialogAndSave();
-			return false;
-		}
-	});
+	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
+	
 	$("#newRowName").keypress( function (e) {
 		if(e.which == 13) {
+			$("#newRowDialog").dialog("close");
 			e.preventDefault();
 			var rowName = $("#newRowName").val();
-			if(draggingNew) {
-				newTask(rowName)
-			}
-			else {
-				lines[currentTask][col_row]=rowName;
-			}
+			if (draggingNew) {	newTask(rowName)	}
+			else {				lines[currentTask][col_row]=rowName;	}
 			drawOutput(lines);
-			$("#newRowDialog").dialog("close");
 			currentTask = "";
 			return false;
 		}
 	});
 
-	var cookieVal = readCookie('zoomCookie');
-	if (cookieVal) {
-		var sliderValue = cookieVal;
+	var shapeCookie = readCookie('shapeCookie');
+	if (shapeCookie=="wide") {
+		$("#shape-button-wide").addClass("active")
+		makeShapeWide()
 	}
-	else { var sliderValue = 2; }
-	if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-	if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-	if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+	else {
+		$("#shape-button-default").addClass("active")
+	}
+
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+
+	initSliders()
+	initContextMenu("right")
+	
+	loadCookieFile();
+
+	$.ui.dialog.prototype._focusTabbable = function(){};
+	
+	$(document).on('mousedown', '.task-block', function (e){ 
+		myClickEvent = e
+		return true; 
+	}); 
+
+	if (isMobile()) {
+		var miscBlock = document.getElementById('myBody');
+		var fingers = new Fingers(miscBlock);
+		new Fingers(miscBlock)
+		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
+		.addHandler(function(eventType, data, fingerList) {
+			if (inRightClickMode == 0) {
+				inRightClickMode = 1
+				$("#right-click-mode-indicator").show();
+				initContextMenu("left")
+			}
+			else {
+				inRightClickMode = 0
+				$("#right-click-mode-indicator").hide();
+				initContextMenu("right")
+			}
+		})
+	}
+	
+});  // END OF DOC.READY
 	
 	
+
+// INIT FUNCTIONS
+
+function initSliders() {
+	var cookieVal = readCookie('zoomCookie');
+	if (cookieVal) {	var sliderValue = cookieVal;	}
+	else { 				var sliderValue = 14; 			}
+	$("#font-size").val(sliderValue)
     $( "#font-size-slider" ).slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 1,
-      max: 3,
+      orientation: "horizontal", range: false,
+      min: 8, max: 24,
       value: sliderValue,
       slide: function( event, ui ) {
 		var sliderValue = ui.value.toString();
 		createCookie('zoomCookie',sliderValue);
-		if (sliderValue==1) { $( "#font-size" ).val( "Small" );}
-		if (sliderValue==2) { $( "#font-size" ).val( "Medium" );}
-		if (sliderValue==3) { $( "#font-size" ).val( "Large" );}
+		$( "#font-size" ).val(sliderValue);
 		drawOutput(lines);
       }
     });
 
     $( "#todays-date-slider" ).slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 0,
-      max: 35,
+      orientation: "horizontal", range: "min",
+      min: 0, max: 35,
       value: 0,
       slide: function( event, ui ) {
 		var sliderValue = Math.floor(ui.value/5)
@@ -161,21 +146,22 @@ $(document).ready(function() {
 		stop    : function(e, ui) {
 			updateDateSlider(0);
 		}
-    });
-	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
-	$("#todays-date").val(todaysDateStr);
-	
-  $( function() {
-    //$( "#datepicker-start" ).datepicker();
-    //$( "#datepicker-due" ).datepicker();
-  } );
-  
-	    $(function() {
-        $.contextMenu({
+    });	
+}
+
+function initContextMenu(button) {
+	$.contextMenu( 'destroy' );
+	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
-            items: {
+			events: {
+				hide: function(opt) {
+					inRightClickMode = 0;
+					$("#right-click-mode-indicator").hide();
+					initContextMenu("right")
+				}
+			  },
+			  items: {
                 "Delay": {
 					name: "Delay", icon: "fa-bell-slash-o",
 					callback: function(key, options) {
@@ -191,8 +177,6 @@ $(document).ready(function() {
 							if (dueYear.length==2) dueYear = "20"+dueYear;
 							if (dueYear.length==0) dueYear = today.getYear()+1900;
 							var dueDate = new Date(dueYear,dueMonth,dueDay);
-							var dueDateStr = dueDate.toDateString();
-							dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
 							var date1_ms = today.getTime();
 							var date2_ms = dueDate.getTime();
 							var difference_ms = date2_ms - date1_ms;
@@ -205,16 +189,30 @@ $(document).ready(function() {
 						else return false;
 					}
 				},
-                "Edit": {
-					name: "Edit", icon: "fa-edit",
-					callback: function(key, options) {
-						editTaskContextMenu();
-					}
-				},
                 "Finish": {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {
 						completeTask();
+					},
+			        visible: function(key, opt){        
+						var myTaskID = currentTask;
+						var isStarted = 0;
+						var startDay = lines[myTaskID][col_startday];
+						if (startDay > 0) {
+							var startDate = getStartDate(myTaskID)
+							var days_until_start = getDateDifference(today,startDate)
+							if (days_until_start<0 || days_until_start==0 ) {
+								isStarted = 1;
+							}
+						}
+						else { isStarted = 1; }
+						return (isStarted==1);
+					}					
+				},
+                "Edit": {
+					name: "Edit", icon: "fa-edit",
+					callback: function(key, options) {
+						editTaskContextMenu();
 					}
 				},
                 "Delete": {
@@ -224,57 +222,88 @@ $(document).ready(function() {
 					}
 				},
             }
-        });
-    });	
-	loadCookieFile();
-	$.ui.dialog.prototype._focusTabbable = function(){};
-});
-
-
-
-function showSaveDialog(fileToOpen) {
-		var opt = {
-        autoOpen: false,
-        modal: true,
-        width: 305,
-        height:300,
-        title: 'Save File?',
-		position: {my: "center center", at: "center center", of: window},
-		buttons: { 
-			Yes: function() {
-				saveFile();
-				$("#saveDialog").dialog(opt).dialog("close");
-				if (fileToOpen) { getAsText(fileToOpen); }
-				else { newFile(); }
-			},
-			No: function () {
-				isSaved = 1;
-				$("#saveDialog").dialog(opt).dialog("close");
-				if (fileToOpen) { getAsText(fileToOpen); }
-				else { newFile(); }
-			},
-			Cancel: function () {
-				$("#saveDialog").dialog(opt).dialog("close");
-			}			
-		}
-    };
-	$("#saveDialog").dialog(opt).dialog("open");
+        };
+  
+	myOptions.selector = ".task-block"
+	myOptions.trigger = button
+    $(function() { $.contextMenu(myOptions) });	
 }
 
-function handleFiles(files) {
+// INPUT FUNCTIONS
 
-	if (parseInt(isSaved)==0) {
-		showSaveDialog(files[0]);
+function updateDateSlider(sliderValue) {
+	if (sliderValue<0) return;
+	$("#todays-date-slider").slider('value',sliderValue);
+	makeDateIncremented(sliderValue)
+	drawOutput(lines);
+}
+
+function makeDateIncremented(numDays) {
+	today = new Date();
+	today = new Date(today.getTime()+numDays*one_day);
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)
+	$("#todays-date").val(todaysDateStr);
+	drawOutput(lines);
+	$(".date-button").removeClass("active")
+	$("#today-button").addClass("active");
+}
+
+function makeShapeDefault() {
+	shape = ""
+	createCookie('shapeCookie',"");
+	$("#shape-button-default").addClass("active")
+	$("#shape-button-wide").removeClass("active")
+	$(".task-details").show()
+	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
+	$(".row-name").removeClass("wide-row-name")
+	$(".row-name").addClass("default-row-name")
+	$(".now-task").removeClass("wide-task")
+	$(".later-task").removeClass("wide-task")
+	$(".now-task").addClass("default-task")
+	$(".later-task").addClass("default-task")
+}
+
+function makeShapeWide() {
+	shape = "wide"
+	createCookie('shapeCookie',"wide");
+	$("#shape-button-wide").addClass("active")
+	$("#shape-button-default").removeClass("active")
+	$(".task-details").hide()
+	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
+	$(".row-name").removeClass("default-row-name")
+	$(".row-name").addClass("wide-row-name")
+	$(".now-task").removeClass("default-task")
+	$(".later-task").removeClass("default-task")
+	$(".now-task").addClass("wide-task")
+	$(".later-task").addClass("wide-task")
+}
+
+function editDialogKeypress(e) {
+	if (e.which==13) {
+		e.preventDefault();
+		updateTask(currentTask);
+		$("#editDialog").dialog("close");
+		makingNewTask = 0;
+		isSaved = 0;
+		$("#unsaved-changes").show();
+		return false;
 	}
-	else 
-		// Check for the various File API support.
-		if (window.FileReader) {
-			// FileReader are supported.
-			getAsText(files[0]);
-		} else {
-			alert('FileReader are not supported in this browser.');
-		}
 }
+
+function changeInterval(intVal) {
+	$('#incrementpicker').val(intVal)
+	$(".interval-button").removeClass("active")
+	$("#interval-button"+intVal).addClass("active")
+}
+
+function checkInterval() {
+	var intVal = $('#incrementpicker').val();
+	$(".interval-button").removeClass("active")
+	$("#interval-button"+intVal).addClass("active")
+}
+
+// EDIT TASK FUNCTIONS
 
 function completeTask() {
 
@@ -289,6 +318,10 @@ function completeTask() {
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
+				var finishedItem = document.createElement("span")
+				span.style = "background-color:black;color:white;"
+				span.innerHTML = lines[currentTask][col_task]
+				$("#finished-list").appendChild(finishedItem);
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11].length>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
@@ -348,23 +381,27 @@ function deleteTask() {
 	$("#deleteDialog").dialog(opt).dialog("open");
 }
 
-function editTaskContextMenu() {
-	taskID = lines[currentTask][col_ID];
-	editTask(taskID);
+function editTaskContextMenu(ev) {
+	editTask(currentTask,ev);
 }
 
 function clickTaskBlock(ev,target) {
-	var taskID = target.getAttribute("data-taskid");
-	/*for(var i = 0; i < lines.length; i++) {
-		if(parseInt(lines[i][0]) == taskID) {
-			currentTask = i;
-			break;
-		}
-	}*/
-	currentTask=taskID;
-	if (editDebug) console.log("clicked currentTask="+currentTask)
-	editTask(taskID,ev);
+	if (editDebug) console.log("left clicked currentTask="+currentTask)
+	if (inRightClickMode==1) {
+	}
+	else {
+		var taskID = target.getAttribute("data-taskid");
+		currentTask=taskID;
+		editTask(taskID,ev);
+	}
 }
+
+function cornerClick(ev) {
+	if (editDebug) console.log("corner clicked currentTask="+currentTask)
+	ev.stopPropagation();
+}
+
+
 	
 function editTask(taskID,ev) {
 	var startDay = lines[currentTask][col_startday];
@@ -404,8 +441,9 @@ function editTask(taskID,ev) {
 		if (hexColor[0]=="#") { document.getElementById("colorpicker2").value = hexColor }
 	}
 	$("#rowpicker").val(lines[currentTask][col_row]);
-	$("#incrementpicker").val(lines[currentTask][col_increment]);
 	$("#namepicker").val(lines[currentTask][col_task]);
+	$("#incrementpicker").val(lines[currentTask][col_increment]);
+	$("#interval-button"+lines[currentTask][col_increment]).addClass("active")
 	
 	if (makingNewTask==1) var myTitle = "Create New Task"
 	else var myTitle = "Edit Task"
@@ -417,39 +455,62 @@ function editTask(taskID,ev) {
         width: 370,
         height:370,
         title: myTitle,
+		resizable: false,
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
-				$("#editDialog").dialog("close");
 				makingNewTask = 0;
-				isSaved = 0;
-				$("#unsaved-changes").show();
+				$("#editDialog").dialog("close");
 			},
 			Cancel: function () {
-				$("#colorpicker").val("");
-				document.getElementById("colorpicker2").value = "#000000";
-				$("#rowpicker").val("");
-				$("#incrementpicker").val("");
-				$("#namepicker").val("");
-				$("#datepicker-due").val("");
-				$("#datepicker-start").val("");
+				$("#editDialog").dialog("close");
+				clearEditDialog();
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
 					lastTaskID--;
 				}
 				makingNewTask = 0;
 				currentTask = 0;
-				$("#editDialog").dialog("close");
 				drawOutput(lines);
 			}
-		}		
+		},	
+		open: function(event, ui) 
+		{ 
+			$('.ui-widget-overlay').bind('click', function()
+			{ 
+				$("#editDialog").dialog('close'); 
+			}); 
+		},
+		close: function( event, ui ) {
+			if(makingNewTask==1) {
+				lines.splice(currentTask,1);
+				lastTaskID--;
+			}
+			makingNewTask = 0;
+			currentTask = 0;
+			drawOutput(lines);
+		}			
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
-	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"}});
+
+	if (startDay>0 && !dueDay>0) $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"}});
 	else $("#editDialog").dialog("option", { position: {my: "center center", at: "center center", of: taskBlockID, collision: "fit", within: "body"}} );
+
 	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
 	$("#editDialog").find('button:nth-child(0)').focus();
+}
+
+
+function clearEditDialog() {
+	$("#colorpicker").val("");
+	document.getElementById("colorpicker2").value = "#000000";
+	$("#rowpicker").val("");
+	$("#incrementpicker").val("");
+	$(".interval-button").removeClass("active")
+	$("#namepicker").val("");
+	$("#datepicker-due").val("");
+	$("#datepicker-start").val("");
 }
 
 function updateTask() {
@@ -490,6 +551,7 @@ function updateTask() {
 	
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
+	clearEditDialog();
 	isSaved = 0;
 	$("#unsaved-changes").show();
 	saveFileCookie();
@@ -534,197 +596,8 @@ function colortyped() {
 	if (hexColor[0]=="#") document.getElementById("colorpicker2").value=hexColor;
 }
 
-function getAsText(fileToRead) {
-	var reader = new FileReader();
-	// Handle errors load
-	reader.onload = loadHandler;
-	reader.onerror = errorHandler;
-	// Read file into memory as UTF-8      
-	reader.readAsText(fileToRead);
-}
 
-function loadHandler(event) {
-	var csv = event.target.result;
-	processData(csv);
-	isSaved = 1;
-	$("#unsaved-changes").hide();
-	saveFileCookie();
-}
-
-function newTaskCopy() {
-	var newTask = lines[currentTask].slice();
-	lastTaskID = lastTaskID+1;
-	newTask[col_ID] = lastTaskID;
-	newTask[col_complete] = "";
-
-	
-	var dueDay = lines[currentTask][col_dueday];
-	var dueYear=lines[currentTask][col_dueyear];
-	if (dueYear.length==2) dueYear = "20"+dueYear;
-	if (dueYear.length==0) dueYear = today.getYear()+1900;
-	var dueMonth = lines[currentTask][col_duemonth];
-	var dueDate = new Date(dueYear,dueMonth-1,dueDay);			
-
-	var startDay = lines[currentTask][col_startday];
-	var startYear=lines[currentTask][col_startyear];
-	if (startYear.length==2) startYear = "20"+startYear;
-	if (startYear.length==0) startYear = today.getYear()+1900;
-	var startMonth=lines[currentTask][col_startmonth];
-	var startDate = new Date(startYear,startMonth-1,startDay);
-	var start_offset = dueDate.getTime() - startDate.getTime();
-		
-	if (startDay>0) {
-
-		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
-		newTask[col_startmonth] = new_startdate.getMonth()+1;
-		newTask[col_startday] = new_startdate.getDate();
-		newTask[col_startyear] = new_startdate.getYear()+1900;
-		
-		if(dueDay>0) {
-			var new_duedate = new Date(new_startdate.getTime() + start_offset);
-			newTask[col_duemonth] = new_duedate.getMonth()+1;
-			newTask[col_dueday] = new_duedate.getDate();
-			newTask[col_dueyear] = new_duedate.getYear()+1900;
-		}
-	}
-	else if (dueDay>0) {
-		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
-		newTask[col_duemonth] = new_duedate.getMonth()+1;
-		newTask[col_dueday] = new_duedate.getDate();
-		newTask[col_dueyear] = new_duedate.getYear()+1900;
-
-		if (startDay>0) {
-			var new_startdate = new Date(new_duedate.getTime() - start_offset);
-			newTask[col_startmonth] = new_startdate.getMonth()+1;
-			newTask[col_startday] = new_startdate.getDate();
-			newTask[col_startyear] = new_startdate.getYear()+1900;
-		}
-	}
-
-	lines.push(newTask);
-	drawOutput(lines);
-	isSaved = 0;
-	$("#unsaved-changes").show();
-	saveFileCookie();
-}
-
-function newTask(rowName,taskName,openMe) {
-	var newTask = [ "" , "" ,"","","","","","","","","",""];
-	lastTaskID = lastTaskID+1;
-	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
-	newTask[col_ID] = lastTaskID;
-	newTask[col_task] = taskName;
-	newTask[col_row] = rowName;
-	lines.push(newTask);
-	drawOutput(lines);
-	saveFileCookie();
-	if (openMe==1) {
-		makingNewTask = 1;
-		var myTaskID = lines.length-1
-		if (editDebug) console.log("opening new task "+myTaskID+" for editing")
-		$("#taskBlock"+myTaskID).click();
-		$("#namepicker").focus();
-	}
-}
-
-function saveFile() {
-
-	if (currentFileName.indexOf("_")>0) {
-		var fileNameParts = currentFileName.split("_")
-		var myMonth = today.getMonth()+1;
-		if (myMonth.toString().length==1) myMonth = "0"+myMonth
-		var myYear = today.getYear()+1900;
-		currentFileName = fileNameParts[0] + "_" + myMonth + today.getDate() + myYear + ".csv";
-	}
-	createCookie("fileName",currentFileName)
-	$(".fileinput-filename").html(currentFileName);
-	
-	var csvContent = "";
-	lines.forEach(function(infoArray, index){
-		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
-			dataString = infoArray.join(",");
-			csvContent += index < lines.length ? dataString+ "\n" : dataString;
-		}
-	}); 
-
-	var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-	var encodedUri = encodeURI(csvContent);
-	var url = URL.createObjectURL(blob);
-	var link = document.createElement("a");
-	link.setAttribute("href", url);
-	link.setAttribute("download", currentFileName);
-	document.body.appendChild(link); // Required for FF
-	link.click();
-	isSaved = 1;
-	$("#unsaved-changes").hide();
-	createCookie("isSaved",1);
-}
-
-function saveFileCookie() {
-	var csvContent = "";
-	lines.forEach(function(infoArray, index){
-		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
-			dataString = infoArray.join(",");
-			csvContent += index < lines.length ? dataString+ "^" : dataString;
-		}
-	}); 
-	createCookie("myCSVFile",csvContent,999);
-	createCookie("isSaved",isSaved);
-}
-
-function loadCookieFile() {
-	var csv = readCookie("myCSVFile");
-	if (csv) {
-		var altcsv = csv.split("^");
-		csv = altcsv.join("\n");
-		processData(csv,readCookie("fileName"));
-		isSaved = readCookie("isSaved");
-		if (isSaved==1) $("#unsaved-changes").hide();
-		else $("#unsaved-changes").show();
-		currentFileName = readCookie("fileName")
-		$(".fileinput-filename").html(currentFileName);
-		$("span.fileinput-new").hide();
-	}
-}
-
-function processData(csv,fileName) {
-    var allTextLines = csv.split(/\r\n|\n/);
-	lines = [];
-    while (allTextLines.length) {
-        lines.push(allTextLines.shift().split(','));
-    }
-	for (var j = 0; j < lines[0].length; j++) {
-		if (lines[0][j]=="TaskNum") col_ID = j;
-		if (lines[0][j]=="Task") col_task = j;
-		if (lines[0][j]=="Row") col_row = j;
-		if (lines[0][j]=="Due-Month") col_duemonth = j;
-		if (lines[0][j]=="Due-Day") col_dueday = j;
-		if (lines[0][j]=="Due-Year") col_dueyear = j;
-		if (lines[0][j]=="Start-Month") col_startmonth = j;
-		if (lines[0][j]=="Start-Day") col_startday = j;
-		if (lines[0][j]=="Start-Year") col_startyear = j;
-		if (lines[0][j]=="Color") col_color = j;
-		if (lines[0][j]=="Complete?") col_complete = j;
-		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
-	}
-	drawOutput(lines);
-	var fullPath = document.getElementById('csvFileInput').value;
-	if (!fileName) {
-		var fileName = fullPath.split("\\");
-		currentFileName = fileName[fileName.length-1];
-		createCookie("fileName",currentFileName);
-	}
-	$(".savefile-button").removeAttr('disabled');
-	$("#middle-buttons").show();
-	$("#right-buttons").show();
-}
-
-function errorHandler(evt) {
-	if(evt.target.error.name == "NotReadableError") {
-		alert("Cannot read file !");
-	}
-}
+// DRAG AND DROP FUNCTIONS
 
 function highlightRow(ev) {
     ev.preventDefault();
@@ -771,7 +644,6 @@ function highlightMisc(ev) {
 		$(".task-row").removeClass("hover-row")
 		$(".task-row").addClass("normal-row")
 		ev.target.className = "misc-block hover-row";
-		var myFontSize = $( "#font-size" ).val();
 		currentRowName = ev.target.getAttribute("data-rowname");
 		}
 	}
@@ -787,13 +659,9 @@ function unhighlightMisc(ev) {
 	if (dragcounter===0 || (isFirefox && dragcounter==1)) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
 			ev.target.className = "misc-block normal-row";
-			var myFontSize = $( "#font-size" ).val();
 		}
 	}
 }
-
-
-
 
 function allowDrop(ev) {
     ev.preventDefault();
@@ -816,19 +684,8 @@ function unhighlightFinish(ev) {
 
 function drag(ev) {
 	draggingNew = 0;
-	var taskID = ev.target.getAttribute("data-taskid");
-	
-	/*for(var i = 0; i < lines.length; i++) {
-		if(parseInt(lines[i][0]) == taskID) {
-			currentTask = i;
-			currentRowName = lines[i][col_row]
-			break;
-		}
-	}*/
-
-	currentTask=taskID;
+	currentTask = ev.target.getAttribute("data-taskid");
 	currentRowName = lines[currentTask][col_row];
-	
     ev.dataTransfer.setData("text", currentTask);
 }
 
@@ -866,6 +723,8 @@ function dropFinish(ev) {
 	completeTask();
 	ev.stopPropagation();
 }
+
+// CREATION FUNCTIONS
 	
 function newRow(ev) {
     ev.preventDefault();
@@ -930,6 +789,72 @@ function newFile() {
 	}
 }
 
+function newTaskCopy() {
+	var newTask = lines[currentTask].slice();
+	lastTaskID = lastTaskID+1;
+	newTask[col_ID] = lastTaskID;
+	newTask[col_complete] = "";
+
+	var startDate = getStartDate(currentTask)
+	var dueDate = getDueDate(currentTask)
+	var start_offset = dueDate.getTime() - startDate.getTime();
+		
+	if (startDay>0) {
+
+		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
+		newTask[col_startmonth] = new_startdate.getMonth()+1;
+		newTask[col_startday] = new_startdate.getDate();
+		newTask[col_startyear] = new_startdate.getYear()+1900;
+		
+		if(dueDay>0) {
+			var new_duedate = new Date(new_startdate.getTime() + start_offset);
+			newTask[col_duemonth] = new_duedate.getMonth()+1;
+			newTask[col_dueday] = new_duedate.getDate();
+			newTask[col_dueyear] = new_duedate.getYear()+1900;
+		}
+	}
+	else if (dueDay>0) {
+		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
+		newTask[col_duemonth] = new_duedate.getMonth()+1;
+		newTask[col_dueday] = new_duedate.getDate();
+		newTask[col_dueyear] = new_duedate.getYear()+1900;
+
+		if (startDay>0) {
+			var new_startdate = new Date(new_duedate.getTime() - start_offset);
+			newTask[col_startmonth] = new_startdate.getMonth()+1;
+			newTask[col_startday] = new_startdate.getDate();
+			newTask[col_startyear] = new_startdate.getYear()+1900;
+		}
+	}
+
+	lines.push(newTask);
+	drawOutput(lines);
+	isSaved = 0;
+	$("#unsaved-changes").show();
+	saveFileCookie();
+}
+
+function newTask(rowName,taskName,openMe) {
+	var newTask = [ "" , "" ,"","","","","","","","","",""];
+	lastTaskID = lastTaskID+1;
+	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
+	newTask[col_ID] = lastTaskID;
+	newTask[col_task] = taskName;
+	newTask[col_row] = rowName;
+	lines.push(newTask);
+	drawOutput(lines);
+	saveFileCookie();
+	if (openMe==1) {
+		makingNewTask = 1;
+		var myTaskID = lines.length-1
+		if (editDebug) console.log("opening new task "+myTaskID+" for editing")
+		$("#taskBlock"+myTaskID).click();
+		$("#namepicker").focus();
+	}
+}
+
+// MAIN BUILD FUNCTION
+
 function drawOutput(lines){
 	if (typeof lines[0] =="undefined") {return;}
 	//Clear previous data
@@ -943,7 +868,7 @@ function drawOutput(lines){
 	var clockIconVal;
 	var noStartDay;
 	var noDueDay;
-
+	maxLength = 0
 	
 	var myFontSize = $( "#font-size" ).val();
 	
@@ -959,9 +884,7 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
-		if (myFontSize=="Small") taskBlock.className += " small-block"
-		if (myFontSize=="Medium") taskBlock.className += " medium-block"
-		if (myFontSize=="Large") taskBlock.className += " large-block"
+		taskBlock.style.fontSize = myFontSize+"px";
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
@@ -970,7 +893,14 @@ function drawOutput(lines){
 		var colorName = lines[i][col_color];
 		if (colorName=="") colorName = "LemonChiffon";
 		taskBlock.style.backgroundColor = colorName;
+		
+		if (colorName.substr(0,1)=="#") var myHexColor = colorName
+		else var myHexColor = colourNameToHex(colorName)
 
+		if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
+		else myTextColor = "black"
+		
+		taskBlock.style.color = myTextColor
 		
 		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("div");
@@ -986,38 +916,43 @@ function drawOutput(lines){
 		clockIconVal = 0;
 		noStartDay = 0;
 		
+		var cornerButton = document.createElement("div")
+		cornerButton.style = "float:right;position:absolute;right:0;"
+		cornerButton.className = "corner-button"
+		cornerButton.setAttribute("onclick","cornerClick(event)")
+		cornerButton.innerHTML = '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>';
+		//taskBlock.appendChild(cornerButton)
+		
 		if (startDay>0) {
-			var startYear=lines[i][col_startyear];
-			if (startYear.length==2) startYear = "20"+startYear;
-			if (startYear.length==0) startYear = today.getYear()+1900;
-			var startMonth=lines[i][col_startmonth]-1;
-			var startDate = new Date(startYear,startMonth,startDay);
+			var startDate = getStartDate(i);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
-			var date1_ms = today.getTime();
-			var date2_ms = startDate.getTime();
-			var difference_ms = date2_ms - date1_ms;
-			var days_until_start = Math.ceil(difference_ms/one_day);
-			
+			var days_until_start = getDateDifference(today,startDate)
 			if (days_until_start==0) {
 				taskRow = document.createElement("span");
 				taskRow.innerHTML = "<b>Starts TODAY</b>";
-				name.setAttribute("style","height:1.5em;")
+				taskRow.className = "task-details"
+				name.setAttribute("style","height:1.5em;width:14em;text-align:center;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(taskRow);
 				taskBlock.className += " now-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 			}
 			else if (startDate>today) {
 				var startDatePhrase = document.createElement("span")
 				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
-				name.setAttribute("style","height:1.5em;")
+				startDatePhrase.className = "task-details"
+				name.setAttribute("style","height:1.5em;width:15em;text-align:center;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);				
 				taskBlock.appendChild(startDatePhrase);
 				taskBlock.className += " later-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 			}
 			else if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
@@ -1026,8 +961,9 @@ function drawOutput(lines){
 				taskBlock.appendChild(name);
 
 				var justDate = document.createElement("span");
+				justDate.className = "task-details"
 				justDate.innerHTML = startDateStr;
-				justDate.setAttribute("style","display:inline-block;margin-left:10px;margin-right:10px;")
+				justDate.setAttribute("style","display:inline-block;margin-left:1em;")
 				taskBlock.appendChild(justDate);
 
 				var myOpacity = (-days_until_start)*0.1;
@@ -1036,8 +972,8 @@ function drawOutput(lines){
 				taskBlock.className += " past-task";
 
 				var iconSpan = document.createElement("span")
-				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-right:1.5em;")
-				else iconSpan.setAttribute("style","display:inline-block;")
+				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-left:1em;margin-right:1.5em;")
+				else iconSpan.setAttribute("style","display:inline-block;margin-left:1em;")
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
@@ -1050,6 +986,8 @@ function drawOutput(lines){
 			}
 			else {
 				taskBlock.className += " now-task";
+				if (shape=="wide") taskBlock.className += " wide-task";
+				else taskBlock.className += " default-task";
 				name.setAttribute("style","height:1.5em;")
 				taskBlock.appendChild(name);
 				var BR = document.createElement("br");
@@ -1059,6 +997,8 @@ function drawOutput(lines){
 		else {
 			noStartDay = 1;
 			taskBlock.className += " now-task";
+			if (shape=="wide") taskBlock.className += " wide-task";
+			else taskBlock.className += " default-task";
 			name.setAttribute("style","height:1.5em;")
 			taskBlock.appendChild(name);
 			var BR = document.createElement("br");
@@ -1085,6 +1025,7 @@ function drawOutput(lines){
 			if (days_until_due==0) {
 				taskRow = document.createElement("b");
 				taskRow.appendChild(document.createTextNode("Due TODAY"));
+				taskRow.className = "task-details"
 				taskBlock.appendChild(taskRow);
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -1101,11 +1042,10 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);
 			}
 			else if (days_until_due<0) {
-				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDateStr));
-				taskBlock.appendChild(document.createTextNode(" ("));
-				taskBlock.appendChild(document.createTextNode(-days_until_due));
-				taskBlock.appendChild(document.createTextNode(" passed)"));
+				var dueDatePhrase = document.createElement("div")
+				dueDatePhrase.setAttribute("class","task-details")
+				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
 				alertIcon.className += " left-icon-normal";
@@ -1113,9 +1053,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(alertIcon);
 
 				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("!!! OVERDUE !!!"));
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
+				taskRow.className = "task-details"
+				taskRow.innerHTML = "!!! OVERDUE !!!"
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
 				taskBlock.appendChild(taskRow);
@@ -1123,12 +1062,12 @@ function drawOutput(lines){
 
 			}
 			else {
-				taskBlock.appendChild(document.createTextNode("Due: "));
-				taskBlock.appendChild(document.createTextNode(dueDateStr));
+				var dueDatePhrase = document.createElement("div");
+				dueDatePhrase.setAttribute("class","task-details")
+				dueDatePhrase.innerHTML = "Due: "+dueDateStr
 				if (!startDay>0 || startDate<=today) {
-					taskBlock.appendChild(document.createTextNode(" ("));
-					taskBlock.appendChild(document.createTextNode(days_until_due));
-					taskBlock.appendChild(document.createTextNode(" left)"));
+					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
+					taskBlock.appendChild(dueDatePhrase)
 					clockIconLabel = days_until_due.toString();
 					var myOpacity = 1-(days_until_due*0.1);
 					if (myOpacity>1) myOpacity = 1;
@@ -1165,7 +1104,6 @@ function drawOutput(lines){
 			repeatNum.className = "repeat-num"
 			if (isPastTask==1) repeatNum.className += " repeat-num-past";
 			else repeatNum.className += " repeat-num-normal";
-			repeatNum.setAttribute("font-size","10px")
 			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
 			repeatNum.innerHTML = lines[i][col_increment];
 			taskBlock.appendChild(repeatNum);
@@ -1201,7 +1139,6 @@ function drawOutput(lines){
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
-	var maxLength = 0;
 
 	for (row = 1 ; row<tableRows.length ; row++) {
 		if (tableRows[row][0]) {
@@ -1222,9 +1159,6 @@ function drawOutput(lines){
 		
 		var tableRow = document.createElement("div");
 		tableRow.className = "task-row normal-row";
-		if (myFontSize=="Small") tableRow.className += " small-row"
-		if (myFontSize=="Medium") tableRow.className += " medium-row"
-		if (myFontSize=="Large") tableRow.className += " large-row"
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
@@ -1239,6 +1173,9 @@ function drawOutput(lines){
 
 		thisRowName.append(justTheName);
 		thisRowName.className = "row-name";
+		if (shape=="wide") thisRowName.className += " wide-row-name";
+		else thisRowName.className += " default-row-name";
+		
 
 		var tableBar = document.createElement("div");
 		tableBar.setAttribute("class","table-bar")
@@ -1270,8 +1207,10 @@ function drawOutput(lines){
 	}
 		
 	table.className = "left-side";
+	table.id = "left-side";
 	table.setAttribute("draggable","false")
-	table.style.flexBasis = 17.6*maxLength+5.5+"em";
+	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
+	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
 	
 	tableRows[0][0].sort(mySortFunction);
 
@@ -1310,10 +1249,9 @@ function drawOutput(lines){
 	document.getElementById("output").append(table);
 	document.getElementById("output").append(miscTasks);
 
-	
-	if (myFontSize=="Small") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:12px;"
-	if (myFontSize=="Medium") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:16px;"
-	if (myFontSize=="Large") document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:22px;"
+	if (shape=="wide") $(".task-details").hide();
+
+	document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
@@ -1332,13 +1270,179 @@ function drawOutput(lines){
 	});
 	$(".misc-block").on("taphold", function (){
 		e.preventDefault();
-		alert("did it")
 		var rowName = this.getAttribute("data-rowname");
 		newTask(rowName);
 		return false;
 	});
 }
 
+// FILE HANDLING FUNCTIONS
+
+function handleFiles(files) {
+
+	if (parseInt(isSaved)==0) {
+		showSaveDialog(files[0]);
+	}
+	else 
+		// Check for the various File API support.
+		if (window.FileReader) {
+			// FileReader are supported.
+			getAsText(files[0]);
+		} else {
+			alert('FileReader are not supported in this browser.');
+		}
+}
+
+function getAsText(fileToRead) {
+	var reader = new FileReader();
+	// Handle errors load
+	reader.onload = loadHandler;
+	reader.onerror = errorHandler;
+	// Read file into memory as UTF-8      
+	reader.readAsText(fileToRead);
+}
+
+function loadHandler(event) {
+	var csv = event.target.result;
+	processData(csv);
+	isSaved = 1;
+	$("#unsaved-changes").hide();
+	saveFileCookie();
+}
+
+function saveFileCookie() {
+	var csvContent = "";
+	lines.forEach(function(infoArray, index){
+		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+			dataString = infoArray.join(",");
+			csvContent += index < lines.length ? dataString+ "^" : dataString;
+		}
+	}); 
+	createCookie("myCSVFile",csvContent,999);
+	createCookie("isSaved",isSaved);
+}
+
+function loadCookieFile() {
+	var csv = readCookie("myCSVFile");
+	if (csv) {
+		var altcsv = csv.split("^");
+		csv = altcsv.join("\n");
+		processData(csv,readCookie("fileName"));
+		isSaved = readCookie("isSaved");
+		if (isSaved==1) $("#unsaved-changes").hide();
+		else $("#unsaved-changes").show();
+		currentFileName = readCookie("fileName")
+		$(".fileinput-filename").html(currentFileName);
+		$("span.fileinput-new").hide();
+	}
+}
+
+function processData(csv,fileName) {
+    var allTextLines = csv.split(/\r\n|\n/);
+	lines = [];
+    while (allTextLines.length) {
+        lines.push(allTextLines.shift().split(','));
+    }
+	for (var j = 0; j < lines[0].length; j++) {
+		if (lines[0][j]=="TaskNum") col_ID = j;
+		if (lines[0][j]=="Task") col_task = j;
+		if (lines[0][j]=="Row") col_row = j;
+		if (lines[0][j]=="Due-Month") col_duemonth = j;
+		if (lines[0][j]=="Due-Day") col_dueday = j;
+		if (lines[0][j]=="Due-Year") col_dueyear = j;
+		if (lines[0][j]=="Start-Month") col_startmonth = j;
+		if (lines[0][j]=="Start-Day") col_startday = j;
+		if (lines[0][j]=="Start-Year") col_startyear = j;
+		if (lines[0][j]=="Color") col_color = j;
+		if (lines[0][j]=="Complete?") col_complete = j;
+		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
+	}
+	drawOutput(lines);
+	var fullPath = document.getElementById('csvFileInput').value;
+	if (!fileName) {
+		var fileName = fullPath.split("\\");
+		currentFileName = fileName[fileName.length-1];
+		createCookie("fileName",currentFileName);
+	}
+	$(".savefile-button").removeAttr('disabled');
+	$("#middle-buttons").show();
+	$("#right-buttons").show();
+}
+
+function showSaveDialog(fileToOpen) {
+		var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Save File?',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			Yes: function() {
+				saveFile();
+				$("#saveDialog").dialog(opt).dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+				else { newFile(); }
+			},
+			No: function () {
+				isSaved = 1;
+				$("#saveDialog").dialog(opt).dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+				else { newFile(); }
+			},
+			Cancel: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+			}			
+		}
+    };
+	$("#saveDialog").dialog(opt).dialog("open");
+}
+
+function saveFile() {
+
+	if (currentFileName.indexOf("_")>0) {
+		var fileNameParts = currentFileName.split("_")
+		var myMonth = today.getMonth()+1;
+		if (myMonth.toString().length==1) myMonth = "0"+myMonth
+		var myYear = today.getYear()+1900;
+		currentFileName = fileNameParts[0] + "_" + myMonth + today.getDate() + myYear + ".csv";
+	}
+	createCookie("fileName",currentFileName)
+	$(".fileinput-filename").html(currentFileName);
+	
+	var csvContent = "";
+	lines.forEach(function(infoArray, index){
+		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+			dataString = infoArray.join(",");
+			csvContent += index < lines.length ? dataString+ "\n" : dataString;
+		}
+	}); 
+
+	var link = document.createElement("a");
+
+	//var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	//var url = URL.createObjectURL(blob);
+
+	var encodedUri = encodeURI(csvContent);
+	var url = "data:attachment/csv,"+encodedUri;
+
+	link.setAttribute("href", url);
+	link.setAttribute("download", currentFileName);
+	document.body.appendChild(link); // Required for FF
+	link.click();
+	
+	isSaved = 1;
+	$("#unsaved-changes").hide();
+	createCookie("isSaved",1);
+}
+
+function errorHandler(evt) {
+	if(evt.target.error.name == "NotReadableError") {
+		alert("Cannot read file !");
+	}
+}
+
+// SORTING FUNCTIONS
 
 function myRowSortFunction(a,b) {	
 	var compareString = a[1]+" vs "+b[1];
@@ -1384,27 +1488,3 @@ function mySortFunction(a,b) {
 }
 
   
-function createCookie(name,value,days) {
-	var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + value + expires + "; path=/";
-}
-
-function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-
-function eraseCookie(name) {
-    createCookie(name,"",-1);
-}

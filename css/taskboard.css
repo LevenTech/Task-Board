@@ -1,3 +1,7 @@
+.interval-button {
+	padding:5px;
+}
+
 .context-menu-item {
 	padding-top:5px;
 	padding-bottom:5px;
@@ -73,9 +77,22 @@
 	text-align:left;
 }
 #middle-buttons {
-	flex: 0 1 430px;
+	flex-grow: 0;
+	flex-shrink: 1;
+	flex-basis: 40em;
+	/*flex: 0 1 430px;*/
 	text-align:center;
 	display:none;
+}
+.middle-button {
+	top:-2em;
+	position:relative;
+	margin-top:30px;
+	margin-left:30px;
+	display:inline-block;
+}
+.shape-button {
+	height:2em;
 }
 #right-buttons {
 	flex: 1 99 600px;
@@ -84,7 +101,6 @@
 }
 
 .task-block {
-	width:16em;
 	position:relative;
 	display:inline-block;
 	padding: 0.8em;
@@ -94,27 +110,27 @@
 	cursor:hand;
 }
 
-/*.small-block {	font-size:10px	}
-.medium-block {	font-size:14px	}
-.large-block {	font-size:18px	}
-
-.small-row {	font-size:10px	}
-.medium-row {	font-size:14px	}
-.large-block {	font-size:18px	}*/
-
 .past-task {
-	width: 100% !important;
+	width: 95%;
 	text-align: left;
 }
 .now-task {
 	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
-	height:10em;
 	text-align: center;
 	}
 .later-task {
-	height:10em;
 	text-align: center;
 	opacity: 0.5;
+}
+.wide-task {
+	height:4em;
+	width:20em;
+	padding-left:3em;
+	padding-right:3em;
+}
+.default-task {
+	height:10em;
+	width:16em;
 }
 
 .finish-area {
@@ -169,7 +185,7 @@
 }
 
 .misc-block {
-	margin:10px;
+	margin:0.5em;
 	float: left;
 	padding: 0.5em;
 	padding-left:1em;
@@ -194,13 +210,18 @@
 	clear:both;
 	float:left;
 	width:0px;
-	height:10em;
 	position:relative;
 	display:inline-block;
 	}
+.wide-row-name {
+	height:4em;
+}
+.default-row-name {
+	height:10em;
+}
 .vertical-text {
-	transform: translate(-50%) translate(-25px) rotate(-90deg);
-	transform-origin: center center 0;
+	transform: translate(-50%) translate(-1.5em) rotate(-90deg);
+	transform-origin: center center 0em;
 	text-align:center;
 	position:absolute;
 	top:50%;
