@@ -121,32 +121,49 @@ function initSliders() {
 	var cookieVal = readCookie('zoomCookie');
 	if (cookieVal) {	var sliderValue = cookieVal;	}
 	else { 				var sliderValue = 14; 			}
-	$("#font-size").val(sliderValue)
-    $( "#font-size-slider" ).slider({
-      orientation: "horizontal", range: false,
-      min: 8, max: 24,
-      value: sliderValue,
-      slide: function( event, ui ) {
-		var sliderValue = ui.value.toString();
+	$( "#font-size" ).val(sliderValue);
+	
+	var myFontSizeSlider = document.getElementById('font-size-slider');
+	noUiSlider.create(myFontSizeSlider, {
+		start: [sliderValue],
+		step: 1,
+		connect: true,
+		range: {
+			'min': 8,
+			'max': 24
+		}
+	});
+
+	myFontSizeSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
 		createCookie('zoomCookie',sliderValue);
 		$( "#font-size" ).val(sliderValue);
 		drawOutput(lines);
-      }
-    });
+	})
+	
+	var myTodaysDateSlider = document.getElementById('todays-date-slider');
+	noUiSlider.create(myTodaysDateSlider, {
+		start: [0],
+		step: 1,
+		connect: true,
+		range: {
+			'min': 0,
+			'max': 7
+		}
+	});
 
-    $( "#todays-date-slider" ).slider({
-      orientation: "horizontal", range: "min",
-      min: 0, max: 35,
-      value: 0,
-      slide: function( event, ui ) {
-		var sliderValue = Math.floor(ui.value/5)
+	myTodaysDateSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
 		makeDateIncremented(sliderValue);
 		drawOutput(lines);
-      },
-		stop    : function(e, ui) {
-			updateDateSlider(0);
-		}
-    });	
+	})	
+
+	myTodaysDateSlider.noUiSlider.on('end', function(){
+		document.getElementById('todays-date-slider').noUiSlider.set(0)
+		makeDateIncremented(0);
+		drawOutput(lines);
+	})	
+	
 }
 
 function initContextMenu(button) {
@@ -230,13 +247,6 @@ function initContextMenu(button) {
 }
 
 // INPUT FUNCTIONS
-
-function updateDateSlider(sliderValue) {
-	if (sliderValue<0) return;
-	$("#todays-date-slider").slider('value',sliderValue);
-	makeDateIncremented(sliderValue)
-	drawOutput(lines);
-}
 
 function makeDateIncremented(numDays) {
 	today = new Date();
