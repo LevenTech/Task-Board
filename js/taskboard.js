@@ -98,9 +98,16 @@ $(document).ready(function() {
 		new Fingers(miscBlock)
 		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
 		.addHandler(function(eventType, data, fingerList) {
-			inRightClickMode = 1
-			$("#right-click-mode-indicator").show();
-			initContextMenu("left")
+			if (inRightClickMode == 0)
+				inRightClickMode = 1
+				$("#right-click-mode-indicator").show();
+				initContextMenu("left")
+			}
+			else {
+				inRightClickMode = 0
+				$("#right-click-mode-indicator").hide();
+				initContextMenu("right")
+			}
 		})
 	}
 	
