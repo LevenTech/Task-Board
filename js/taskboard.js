@@ -99,7 +99,7 @@ $(document).ready(function() {
 		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
 		.addHandler(function(eventType, data, fingerList) {
 			inRightClickMode = 1
-			alert('right click');
+			$("#right-click-mode-indicator").show();
 			initContextMenu("left")
 		})
 	}
@@ -143,13 +143,14 @@ function initSliders() {
 }
 
 function initContextMenu(button) {
-	//$.contextMenu( 'destroy' );
+	$.contextMenu( 'destroy' );
 	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
 			events: {
 				hide: function(opt) {
 					inRightClickMode = 0;
+					$("#right-click-mode-indicator").hide();
 					initContextMenu("right")
 				}
 			  },
@@ -380,7 +381,6 @@ function editTaskContextMenu(ev) {
 function clickTaskBlock(ev,target) {
 	if (editDebug) console.log("left clicked currentTask="+currentTask)
 	if (inRightClickMode==1) {
-		
 	}
 	else {
 		var taskID = target.getAttribute("data-taskid");

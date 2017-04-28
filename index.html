@@ -71,6 +71,7 @@
 			</div>
 		</div>
 		<div id="middle-buttons" style="diplay:none;user-select:none;">
+			<div style="width:100%;">
 			<div class="middle-button" style="top:-0.5em;">
 				<label for="task-shape">Shape</label><br/>
 				<div class="btn-group-vertical" role="group">
@@ -91,7 +92,9 @@
 			  <label for="date-select">Show for:</label>
 			  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
 			  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
-			</div>		
+			</div>
+			</div>			
+			<div id="right-click-mode-indicator" style="display:none;text-align:center;width:100%;font-size:20px;color:white;font-weight:bold;">** IN RIGHT CLICK MODE **</div>
 		</div>
 		<div id="right-buttons">
 			<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
