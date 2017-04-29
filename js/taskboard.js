@@ -1,5 +1,5 @@
 
-var myRightClickEvent;
+var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
@@ -9,8 +9,6 @@ var lines = [];
 var shape = "";
 var inRightClickMode = 0;
 var dateSliderActive = 0;
-
-var maxLength = 0;
 
 var today = new Date();
 var one_day=1000*60*60*24;
@@ -262,7 +260,6 @@ function makeShapeDefault() {
 	$("#shape-button-default").addClass("active")
 	$("#shape-button-wide").removeClass("active")
 	$(".task-details").show()
-	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("wide-row-name")
 	$(".row-name").addClass("default-row-name")
 	$(".now-task").removeClass("wide-task")
@@ -277,7 +274,6 @@ function makeShapeWide() {
 	$("#shape-button-wide").addClass("active")
 	$("#shape-button-default").removeClass("active")
 	$(".task-details").hide()
-	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("default-row-name")
 	$(".row-name").addClass("wide-row-name")
 	$(".now-task").removeClass("default-task")
@@ -854,7 +850,6 @@ function drawOutput(lines){
 
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
-	maxLength = 0
 	
 	for (var i = 1; i < lines.length; i++) {
 		var taskNum = parseInt(lines[i][col_ID]);
@@ -1076,11 +1071,8 @@ function createTable(tableRows) {
 		tableRow.setAttribute("ondragenter","highlightRow(event)");
 		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
 		tableRow.append(createRowContents(tableRows[row],tableRows[row][1]));
-		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
 		table.append(tableRow);
 	}
-	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
-	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
 	return table;
 }
 	
