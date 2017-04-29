@@ -257,19 +257,21 @@
 .left-side{
 	min-width:21.9em;
 	float: left;
+	margin-right:0.5em;
 	}
 .misc-block {
 	margin:0.5em;
-	margin-top:1em;
 	padding: 0.5em;
 	padding-left:1em;
 	padding-right:1em;
 	border-radius: 10px;
 	border: 2px solid #000000;
 	width:auto;
+	height:auto;
 	overflow:hidden;
 	min-height:12.8em;
 	min-width:20em;
+	padding-bottom:13em;
 }	
 .misc-block:after {
 	clear:both;
