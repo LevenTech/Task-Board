@@ -882,12 +882,11 @@ function drawOutput(lines){
 				if (myOpacity>1) myOpacity = 1;
 
 				var iconSpan = document.createElement("span")
-				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-left:1em;margin-right:1.5em;")
-				else iconSpan.setAttribute("style","display:inline-block;margin-left:1em;")
+				iconSpan.className = "icon-span"
+				if (lines[i][col_increment]>0) iconSpan.className += " icon-margin"
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
-					clockIcon.setAttribute("style","display:inline-block;margin:1px;");
 					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
 					iconSpan.appendChild(clockIcon);
 				}
@@ -1154,8 +1153,7 @@ function createCountdownIcon(days_until_due) {
 
 	var clockIconNum = document.createElement("div");
 	clockIconNum.className = "countdown-label"
-	if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
-	else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+	clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
 	clockIconNum.innerHTML = clockIconLabel;
 	countdownIcon.appendChild(clockIconNum);	
 	

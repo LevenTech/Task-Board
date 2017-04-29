@@ -70,11 +70,19 @@
 .countdown-label{
 	position:absolute;
 	top:0.8em;
-	left:-0.1em;
 	font-size:1.2em;
 	width:100%;
 }
 
+.icon-span {
+	display:inline-block;margin-left:1em;
+}
+.icon-span-margin {
+	margin-right:1.5em;
+}
+.clock-icon {
+	display:inline-block;margin:1px;
+}
 
 #taskboard-toolbar {
 	display:flex;
