@@ -347,9 +347,6 @@ function completeTask() {
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
-				var finishedItem = document.createElement("span")
-				span.style = "background-color:black;color:white;"
-				span.innerHTML = lines[currentTask][col_task]
 				$("#finished-list").appendChild(finishedItem);
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11].length>0) newTaskCopy();
