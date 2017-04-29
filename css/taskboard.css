@@ -2,6 +2,10 @@
 	padding:5px;
 }
 
+#output {
+	width:100%;display:flex;flex-direction:row;
+}
+
 .context-menu-item {
 	padding-top:5px;
 	padding-bottom:5px;

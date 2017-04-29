@@ -136,7 +136,7 @@ function initSliders() {
 		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
 		createCookie('zoomCookie',sliderValue);
 		$( "#font-size" ).val(sliderValue);
-		drawOutput(lines);
+		document.getElementById("output").style = "font-size:"+sliderValue+"px;"
 	})
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
@@ -441,11 +441,9 @@ function editTask(taskID,ev) {
 	var taskBlockID = "#taskBlock"+taskID;
 	var opt = {
         autoOpen: false,
-        modal: true,
-        width: 370,
-        height:370,
+        modal: true, resizable: false,
+        height:370, width: 370,
         title: myTitle,
-		resizable: false,
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
@@ -458,10 +456,10 @@ function editTask(taskID,ev) {
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
 					lastTaskID--;
+					makingNewTask = 0;
+					drawOutput(lines);
 				}
-				makingNewTask = 0;
-				currentTask = 0;
-				drawOutput(lines);
+				currentTask = "";
 			}
 		},	
 		open: function(event, ui) 
@@ -475,10 +473,10 @@ function editTask(taskID,ev) {
 			if(makingNewTask==1) {
 				lines.splice(currentTask,1);
 				lastTaskID--;
+				makingNewTask = 0;
+				drawOutput(lines);
 			}
-			makingNewTask = 0;
-			currentTask = 0;
-			drawOutput(lines);
+			currentTask = "";
 		}			
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
@@ -874,7 +872,7 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
-		taskBlock.style.fontSize = myFontSize+"px";
+		//taskBlock.style.fontSize = myFontSize+"px";
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
@@ -1217,7 +1215,7 @@ function drawOutput(lines){
 
 	if (shape=="wide") $(".task-details").hide();
 
-	document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:"+myFontSize+"px;"
+	document.getElementById("output").style =	"font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
