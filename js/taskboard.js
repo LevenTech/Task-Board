@@ -686,16 +686,16 @@ function drop(ev) {
 	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
-    var rowName = currentRowName;
+    var newRowName = currentRowName;
 	if(draggingNew==1) {
-		newTask(rowName,"",1);
+		newTask(newRowName,"",1);
 		saveFileCookie();
 		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row].toUpperCase()!==rowName.toUpperCase()) {
-			lines[taskID][col_row]=rowName;
+		if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
+			lines[taskID][col_row]=newRowName;
 			isSaved = 0;
 			$("#unsaved-changes").show();
 			saveFileCookie();
@@ -1057,6 +1057,7 @@ function createTable(tableRows) {
 		var tableRow = document.createElement("div");
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.className = "task-row normal-row";
+		tableRow.setAttribute("data-rowname",tableRows[row][1])
 		tableRow.setAttribute("draggable","false");
 		tableRow.setAttribute("ondrop","drop(event)");
 		tableRow.setAttribute("ondragenter","highlightRow(event)");
