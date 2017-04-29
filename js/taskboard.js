@@ -841,8 +841,6 @@ function drawOutput(lines){
 
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
-	var clockIconVal;
-	var noStartDay;
 	maxLength = 0
 	
 	for (var i = 1; i < lines.length; i++) {
@@ -854,92 +852,34 @@ function drawOutput(lines){
 
 		var isPastTask = 0;
 		
-		//Create and Style Task Block
-		var taskBlock = document.createElement('div');
-		taskBlock.className = "task-block"
-		taskBlock.setAttribute("draggable","true");
-		taskBlock.setAttribute("ondragstart","drag(event)");
-		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
-		taskBlock.setAttribute("data-taskid",i);
-		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
-		var colorName = lines[i][col_color];
-		if (colorName=="") colorName = "LemonChiffon";
-		taskBlock.style.backgroundColor = colorName;
-		
-		if (colorName.substr(0,1)=="#") var myHexColor = colorName
-		else var myHexColor = colourNameToHex(colorName)
-
-		if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
-		else myTextColor = "black"
-		
-		taskBlock.style.color = myTextColor
+		var taskBlock = createTaskBlock(i,lines[i][col_color])
 		
 		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("div");
+		name.className = "task-name"
 		name.innerHTML = "<b>"+myName+"</b>";
-		
+		taskBlock.appendChild(name)
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
-		
 		var days_until_start = "";
 		var days_until_due = "";
-
-		clockIconVal = 0;
-		noStartDay = 0;
-		
-		var cornerButton = document.createElement("div")
-		cornerButton.style = "float:right;position:absolute;right:0;"
-		cornerButton.className = "corner-button"
-		cornerButton.setAttribute("onclick","cornerClick(event)")
-		cornerButton.innerHTML = '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>';
-		//taskBlock.appendChild(cornerButton)
-		
 		if (startDay>0) {
 			var startDate = getStartDate(i);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
 			var days_until_start = getDateDifference(today,startDate)
-			if (days_until_start==0) {
-				taskRow = document.createElement("span");
-				taskRow.innerHTML = "<b>Starts TODAY</b>";
-				taskRow.className = "task-details"
-				name.setAttribute("style","height:1.5em;width:14em;text-align:center;")
-				taskBlock.appendChild(name);
-				taskBlock.appendChild(createBR());				
-				taskBlock.appendChild(taskRow);
-				taskBlock.className += " now-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-			}
-			else if (startDate>today) {
-				var startDatePhrase = document.createElement("span")
-				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
-				startDatePhrase.className = "task-details"
-				name.setAttribute("style","height:1.5em;width:15em;text-align:center;")
-				taskBlock.appendChild(name);
-				taskBlock.appendChild(createBR());				
-				taskBlock.appendChild(startDatePhrase);
-				taskBlock.className += " later-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-			}
-			else if (startDate<today && !dueDay>0) {
+			var startDatePhrase = document.createElement("span");
+			startDatePhrase.className = "task-details start-date"
+			if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
+				taskBlock.className += " past-task";
 
-				name.setAttribute("style","height:1.2em;display:inline-block;")
-				taskBlock.appendChild(name);
-
-				var justDate = document.createElement("span");
-				justDate.className = "task-details"
-				justDate.innerHTML = startDateStr;
-				justDate.setAttribute("style","display:inline-block;margin-left:1em;")
-				taskBlock.appendChild(justDate);
+				startDatePhrase.innerHTML = startDateStr;
+				taskBlock.appendChild(startDatePhrase);
 
 				var myOpacity = (-days_until_start)*0.1;
 				if (myOpacity>1) myOpacity = 1;
-				
-				taskBlock.className += " past-task";
 
 				var iconSpan = document.createElement("span")
 				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-left:1em;margin-right:1.5em;")
@@ -947,7 +887,6 @@ function drawOutput(lines){
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
-					//clockIcon.setAttribute("style","opacity:"+myOpacity+";")
 					clockIcon.setAttribute("style","display:inline-block;margin:1px;");
 					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
 					iconSpan.appendChild(clockIcon);
@@ -955,50 +894,49 @@ function drawOutput(lines){
 				taskBlock.appendChild(iconSpan)
 			}
 			else {
-				taskBlock.className += " now-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-				name.setAttribute("style","height:1.5em;")
-				taskBlock.appendChild(name);
-				taskBlock.appendChild(createBR());		
+				taskBlock.appendChild(createBR());				
+				if (days_until_start<1) {
+					if (days_until_start==0) startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+					taskBlock.className += " now-task";
+				}
+				else {
+					startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+					taskBlock.className += " later-task";
+				}
+				taskBlock.appendChild(startDatePhrase);
 			}
 		}
 		else {
-			noStartDay = 1;
 			taskBlock.className += " now-task";
-			if (shape=="wide") taskBlock.className += " wide-task";
-			else taskBlock.className += " default-task";
-			name.setAttribute("style","height:1.5em;")
-			taskBlock.appendChild(name);
 			taskBlock.appendChild(createBR());		
 		}
-		taskBlock.appendChild(createBR());		
 
+		if (isPastTask==0) {
+			if (shape=="wide") taskBlock.className += " wide-task";
+			else taskBlock.className += " default-task";
+		}
+		
 		if (dueDay > 0) {
 			var dueDate = getDueDate(i)
 			var dueDateStr = dueDate.toDateString();
 			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
 			var days_until_due = getDateDifference(today,dueDate)
 
+			var dueDatePhrase = document.createElement("div")
+			dueDatePhrase.className = "task-details"
+			taskBlock.appendChild(createBR());		
+
 			if (days_until_due==0) {
-				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("Due TODAY"));
-				taskRow.className = "task-details"
-				taskBlock.appendChild(taskRow);
-				taskBlock.appendChild(createBR());		
+				dueDatePhrase.style.fontWeight = "bold"
+				dueDatePhrase.innerHTML = "Due TODAY";
+				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
-				alertIcon.className = " alert-icon";
-				alertIcon.setAttribute("style","margin-left:0.3em;")
+				alertIcon.className = "alert-icon alert-indent";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
-				
-				taskBlock.appendChild(createBR());
-				taskBlock.appendChild(createBR());
 			}
 			else if (days_until_due<0) {
-				var dueDatePhrase = document.createElement("div")
-				dueDatePhrase.setAttribute("class","task-details")
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
 				taskBlock.appendChild(dueDatePhrase);
 
@@ -1007,25 +945,19 @@ function drawOutput(lines){
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 
-				taskRow = document.createElement("b");
-				taskRow.className = "task-details"
-				taskRow.innerHTML = "!!! OVERDUE !!!"
+				var overDue = document.createElement("b");
+				overDue.className = "task-details"
+				overDue.innerHTML = "!!! OVERDUE !!!"
 				taskBlock.appendChild(createBR());		
-				taskBlock.appendChild(taskRow);
+				taskBlock.appendChild(overDue);
 			}
 			else {
-				var dueDatePhrase = document.createElement("div");
-				dueDatePhrase.setAttribute("class","task-details")
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
 					taskBlock.appendChild(dueDatePhrase)
-					var countdownIcon = createCountdownIcon(days_until_due)
-					taskBlock.appendChild(countdownIcon);
+					taskBlock.appendChild(createCountdownIcon(days_until_due));
 				}
-				taskBlock.appendChild(createBR());		
-				taskBlock.appendChild(createBR());		
-				taskBlock.appendChild(createBR());		
 			}
 		}
 
@@ -1054,128 +986,17 @@ function drawOutput(lines){
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
-		var taskBlockID = "taskBlock"+i;
-		taskBlock.id = taskBlockID;
-		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
 		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
-
-	var table = document.createElement("div");
-
-	for (row = 1 ; row<tableRows.length ; row++) {
-		if (tableRows[row][0]) {
-			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (current tasks)")
-			tableRows[row][0].sort(mySortFunction);
-		}
-		if (tableRows[row][2]) {
-			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (past tasks)")
-			tableRows[row][2].sort(mySortFunction);
-		}
-	}
-
-	if (sortDebug) console.log("Sorting Rows")
-	tableRows.sort(myRowSortFunction);
-	
-	for (row = 1 ; row<tableRows.length ; row++) {
-		
-		
-		var tableRow = document.createElement("div");
-		tableRow.className = "task-row normal-row";
-		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
-		tableRow.setAttribute("draggable","false");
-		tableRow.setAttribute("ondrop","drop(event)");
-		tableRow.setAttribute("ondragenter","highlightRow(event)");
-		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
-		
-		var thisRowName = document.createElement("div");
-		var justTheName = document.createElement("div");
-		justTheName.innerHTML = tableRows[row][1];
-		justTheName.className = "vertical-text";
-
-
-		thisRowName.append(justTheName);
-		thisRowName.className = "row-name";
-		if (shape=="wide") thisRowName.className += " wide-row-name";
-		else thisRowName.className += " default-row-name";
-		
-
-		var tableBar = document.createElement("div");
-		tableBar.setAttribute("class","table-bar")
-		tableBar.setAttribute("style","margin:0px;")
-		var tableContents = document.createElement("div");
-		tableContents.setAttribute("class","table-contents")
-		
-		if (tableRows[row][2].length>0) {
-			for (n = 0 ; n<tableRows[row][2].length ; n++) {
-				hasTableBar = 1;
-				tableBar.append(tableRows[row][2][n][3]);
-			}		
-			tableRow.append(tableBar);
-		}
-		
-		tableRow.append(thisRowName);
-		tableRow.setAttribute("data-rowname",tableRows[row][1])
-
-		if (tableRows[row][0].length>0) {
-			for (n = 0 ; n<tableRows[row][0].length ; n++) {
-				tableContents.append(tableRows[row][0][n][3]);
-			}
-			tableRow.append(tableContents);
-		}
-
-		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
-	
-		table.append(tableRow);
-	}
-		
-	table.className = "left-side";
-	table.id = "left-side";
-	table.setAttribute("draggable","false")
-	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
-	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
-	
-	tableRows[0][0].sort(mySortFunction);
-	tableRows[0][2].sort(mySortFunction);
-
-	var miscBar = document.createElement("div");
-	miscBar.setAttribute("class","table-bar")
-	var miscContents = document.createElement("div");
-	miscContents.setAttribute("class","table-contents")
-
-	var hasTableBar = 0;
-	for (n = 0 ; n<tableRows[0][2].length ; n++) {
-		hasTableBar = 1;
-		miscBar.append(tableRows[0][2][n][3]);
-	}	
-	
-	var miscTasks = document.createElement("div");
-	if (hasTableBar) {
-		miscTasks.append(miscBar);
-	}
-
-	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		miscContents.append(tableRows[0][0][n][3]);
-	}		
-	
-	miscTasks.append(miscContents);
-	
-	miscTasks.id = "misc-block";
-	miscTasks.className = "misc-block normal-row";
-	miscTasks.setAttribute("data-rowname","")
-	miscTasks.setAttribute("draggable","false")
-	miscTasks.setAttribute("ondrop","drop(event)");
-	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
-	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
 	document.getElementById("output").innerHTML = "";
-	document.getElementById("output").append(table);
-	document.getElementById("output").append(miscTasks);
+	document.getElementById("output").append(createTable(tableRows));
+	document.getElementById("output").append(createMiscBlock(tableRows));
+	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
 	if (shape=="wide") $(".task-details").hide();
-
-	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
@@ -1200,25 +1021,101 @@ function drawOutput(lines){
 	});
 }
 
-function createRowContents(myRowArray) {
+// ELEMENT CREATION FUNCTIONS
+
+function createTaskBlock(taskID,myColor) {
+	var taskBlock = document.createElement('div');
+	taskBlock.id = "taskBlock"+taskID;
+	taskBlock.className = "task-block"
+	taskBlock.setAttribute("draggable","true");
+	taskBlock.setAttribute("ondragstart","drag(event)");
+	taskBlock.setAttribute("onmousedown","currentTask="+taskID+";");
+	taskBlock.setAttribute("data-taskid",taskID);
+	taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
+
+	var colorName = myColor;
+	if (colorName=="") colorName = "LemonChiffon";
+	taskBlock.style.backgroundColor = colorName;
+	
+	if (colorName.substr(0,1)=="#") var myHexColor = colorName
+	else var myHexColor = colourNameToHex(colorName)
+	if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
+	else myTextColor = "black"
+	taskBlock.style.color = myTextColor	
+	return taskBlock;
+}
+
+function createTable(tableRows) {
+	var table = document.createElement("div");
+	table.className = "left-side";
+	table.id = "left-side";
+	table.setAttribute("draggable","false")
+
+	if (sortDebug) console.log("Sorting Rows")
+	tableRows.sort(myRowSortFunction);
+	
+	for (row = 1 ; row<tableRows.length ; row++) {
+		var tableRow = document.createElement("div");
+		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
+		tableRow.className = "task-row normal-row";
+		tableRow.setAttribute("draggable","false");
+		tableRow.setAttribute("ondrop","drop(event)");
+		tableRow.setAttribute("ondragenter","highlightRow(event)");
+		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
+		tableRow.append(createRowContents(tableRows[row],tableRows[row][1]));
+		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
+		table.append(tableRow);
+	}
+	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
+	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
+	return table;
+}
+	
+function createMiscBlock(tableRows) {	
+	var miscTasks = document.createElement("div")
+	miscTasks.id = "misc-block";
+	miscTasks.className = "misc-block normal-row";
+	miscTasks.setAttribute("data-rowname","")
+	miscTasks.setAttribute("draggable","false")
+	miscTasks.setAttribute("ondrop","drop(event)");
+	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
+	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
+	miscTasks.append(createRowContents(tableRows[0]));
+	return miscTasks;
+}
+
+function createRowContents(myRowArray,myRowName) {
 	myRowArray[0].sort(mySortFunction);
 	myRowArray[2].sort(mySortFunction);
+
+	var myContents = document.createElement("div");
 
 	var myBar = document.createElement("div");
 	myBar.setAttribute("class","table-bar")
 	for (n = 0 ; n<myRowArray[2].length ; n++) {
 		myBar.append(myRowArray[2][n][3]);
 	}	
+	myContents.append(myBar);
+
+	if (myRowName) {
+		var thisRowName = document.createElement("div");
+		var justTheName = document.createElement("div");
+		justTheName.innerHTML = myRowName;
+		justTheName.className = "vertical-text";
+		thisRowName.append(justTheName);
+		thisRowName.className = "row-name";
+		if (shape=="wide") thisRowName.className += " wide-row-name";
+		else thisRowName.className += " default-row-name";
+		myContents.append(thisRowName);
+	}
 
 	var myTasks = document.createElement("div");
 	myTasks.setAttribute("class","table-contents")
 	for (n = 0 ; n<myRowArray[0].length ; n++) {
 		myTasks.append(myRowArray[0][n][3]);
 	}		
-
-	var myContents = document.createElement("div");
-	myContents.append(myBar);
 	myContents.append(myTasks);
+
 	return myContents;
 }
 
