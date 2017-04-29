@@ -8,6 +8,7 @@ var lines = [];
 
 var shape = "";
 var inRightClickMode = 0;
+var dateSliderActive = 0;
 
 var maxLength = 0;
 
@@ -121,32 +122,67 @@ function initSliders() {
 	var cookieVal = readCookie('zoomCookie');
 	if (cookieVal) {	var sliderValue = cookieVal;	}
 	else { 				var sliderValue = 14; 			}
-	$("#font-size").val(sliderValue)
-    $( "#font-size-slider" ).slider({
-      orientation: "horizontal", range: false,
-      min: 8, max: 24,
-      value: sliderValue,
-      slide: function( event, ui ) {
-		var sliderValue = ui.value.toString();
+	$( "#font-size" ).val(sliderValue);
+	
+	var myFontSizeSlider = document.getElementById('font-size-slider');
+	noUiSlider.create(myFontSizeSlider, {
+		start: [sliderValue],
+		step: 1,
+		connect: true,
+		range: {
+			'min': 8,
+			'max': 24
+		}
+	});
+
+	myFontSizeSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
 		createCookie('zoomCookie',sliderValue);
 		$( "#font-size" ).val(sliderValue);
 		drawOutput(lines);
-      }
-    });
+	})
+	
+	var myTodaysDateSlider = document.getElementById('todays-date-slider');
+	noUiSlider.create(myTodaysDateSlider, {
+		start: [0],
+		step: 1,
+		behavior: "tap-drag",
+		connect: true,
+		range: {
+			'min': 0,
+			'max': 7
+		},
+	});
 
-    $( "#todays-date-slider" ).slider({
-      orientation: "horizontal", range: "min",
-      min: 0, max: 35,
-      value: 0,
-      slide: function( event, ui ) {
-		var sliderValue = Math.floor(ui.value/5)
+	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
+	myTodaysDateSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
 		makeDateIncremented(sliderValue);
 		drawOutput(lines);
-      },
-		stop    : function(e, ui) {
-			updateDateSlider(0);
+	})
+	myTodaysDateSlider.noUiSlider.on('end', function(){	dateSliderActive = 0; })
+
+	myTodaysDateSlider.noUiSlider.on('set', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+	})
+
+	myTodaysDateSlider.noUiSlider.on('change', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+		if (dateSliderActive==0) setTimeout(clearDateSlider,300);
+		else {
+			dateSliderActive=0;
+			clearDateSlider();
 		}
-    });	
+	})
+	
+}
+
+function clearDateSlider() {
+	document.getElementById('todays-date-slider').noUiSlider.reset();
 }
 
 function initContextMenu(button) {
@@ -231,13 +267,6 @@ function initContextMenu(button) {
 
 // INPUT FUNCTIONS
 
-function updateDateSlider(sliderValue) {
-	if (sliderValue<0) return;
-	$("#todays-date-slider").slider('value',sliderValue);
-	makeDateIncremented(sliderValue)
-	drawOutput(lines);
-}
-
 function makeDateIncremented(numDays) {
 	today = new Date();
 	today = new Date(today.getTime()+numDays*one_day);
@@ -318,10 +347,6 @@ function completeTask() {
 		position: {my: "center center", at: "center center", of: "body"},
 		buttons: { 
 			Yes: function() {
-				var finishedItem = document.createElement("span")
-				span.style = "background-color:black;color:white;"
-				span.innerHTML = lines[currentTask][col_task]
-				$("#finished-list").appendChild(finishedItem);
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11].length>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
