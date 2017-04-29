@@ -1056,7 +1056,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);		
 				
 				var alertIcon = document.createElement("div");
-				alertIcon.className += " left-icon-normal";
+				alertIcon.className = " alert-icon";
 				alertIcon.setAttribute("style","margin-left:0.3em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
@@ -1073,7 +1073,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
-				alertIcon.className += " left-icon-normal";
+				alertIcon.className = "alert-icon";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 
@@ -1093,20 +1093,8 @@ function drawOutput(lines){
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
 					taskBlock.appendChild(dueDatePhrase)
-					clockIconLabel = days_until_due.toString();
-					var myOpacity = 1-(days_until_due*0.1);
-					if (myOpacity>1) myOpacity = 1;
-					var clockIcon = document.createElement("div");
-					clockIcon.className = "left-icon left-icon-normal"
-					clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-					clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
-					taskBlock.appendChild(clockIcon);
-					var clockIconNum = document.createElement("div");
-					clockIconNum.className = "left-label left-label-normal"
-					if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
-					else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
-					clockIconNum.innerHTML = clockIconLabel;
-					taskBlock.appendChild(clockIconNum);					
+					var countdownIcon = createCountdownIcon(days_until_due)
+					taskBlock.appendChild(countdownIcon);
 				}
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -1119,19 +1107,8 @@ function drawOutput(lines){
 		else { noDueDay = 1; }
 
 		if (lines[i][col_increment].length>0) {
-			var repeatIcon = document.createElement("div");
-			repeatIcon.className = "repeat-icon"
-			if (isPastTask==1) repeatIcon.className += " repeat-icon-past";
-			else repeatIcon.className += " repeat-icon-normal";
-			repeatIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+			var repeatIcon = createRepeatIcon(i,isPastTask)
 			taskBlock.appendChild(repeatIcon);
-			var repeatNum = document.createElement("div");
-			repeatNum.className = "repeat-num"
-			if (isPastTask==1) repeatNum.className += " repeat-num-past";
-			else repeatNum.className += " repeat-num-normal";
-			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
-			repeatNum.innerHTML = lines[i][col_increment];
-			taskBlock.appendChild(repeatNum);
 		};
 
 		var rowName = lines[i][col_row];
@@ -1267,7 +1244,6 @@ function drawOutput(lines){
 
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
-	//miscTasks.setAttribute("ondragover","allowDrop(event)");
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
@@ -1299,6 +1275,49 @@ function drawOutput(lines){
 		newTask(rowName);
 		return false;
 	});
+}
+
+function createRepeatIcon(taskID,isPastTask) {
+	var repeatIcon = document.createElement("div")
+	if (isPastTask==1) repeatIcon.className = "repeat-block repeat-block-past";
+	else repeatIcon.className = "repeat-block repeat-block-normal";
+
+	var justIcon = document.createElement("div");
+	if (isPastTask==1) justIcon.className = "repeat-icon repeat-icon-past";
+	else justIcon.className = "repeat-icon repeat-icon-normal";
+	justIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+	repeatIcon.appendChild(justIcon);
+
+	var repeatNum = document.createElement("div");
+	if (isPastTask==1) repeatNum.className = "repeat-num repeat-num-past";
+	else repeatNum.className = "repeat-num repeat-num-normal";
+	repeatNum.innerHTML = lines[taskID][col_increment];
+	repeatIcon.appendChild(repeatNum);
+
+	return repeatIcon;
+}
+
+function createCountdownIcon(days_until_due) {
+	var countdownIcon = document.createElement("div")
+	countdownIcon.className = "countdown-block"
+	
+	clockIconLabel = days_until_due.toString();
+	var myOpacity = 1-(days_until_due*0.1);
+	if (myOpacity>1) myOpacity = 1;
+	var justIcon = document.createElement("div");
+	justIcon.className = "countdown-icon"
+	justIcon.setAttribute("style","opacity:"+myOpacity+";")
+	justIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
+	countdownIcon.appendChild(justIcon);
+
+	var clockIconNum = document.createElement("div");
+	clockIconNum.className = "countdown-label"
+	if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
+	else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+	clockIconNum.innerHTML = clockIconLabel;
+	countdownIcon.appendChild(clockIconNum);	
+	
+	return countdownIcon;
 }
 
 // FILE HANDLING FUNCTIONS
