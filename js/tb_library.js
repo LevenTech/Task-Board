@@ -15,6 +15,10 @@ function isMobile() {
   }
 }
 
+function createBR() {
+	return document.createElement("br");
+}
+
 // COLOR FUNCTIONS
 
 function getContrastYIQ(hexcolor){
