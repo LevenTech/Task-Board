@@ -129,17 +129,14 @@ function initSliders() {
 		start: [sliderValue],
 		step: 1,
 		connect: true,
-		range: {
-			'min': 8,
-			'max': 24
-		}
+		range: { 'min': 8, 'max': 24 }
 	});
 
 	myFontSizeSlider.noUiSlider.on('slide', function(){
 		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
 		createCookie('zoomCookie',sliderValue);
 		$( "#font-size" ).val(sliderValue);
-		drawOutput(lines);
+		document.getElementById("output").style = "font-size:"+sliderValue+"px;"
 	})
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
@@ -148,10 +145,7 @@ function initSliders() {
 		step: 1,
 		behavior: "tap-drag",
 		connect: true,
-		range: {
-			'min': 0,
-			'max': 7
-		},
+		range: { 'min': 0, 'max': 7 }
 	});
 
 	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
@@ -196,66 +190,37 @@ function initContextMenu(button) {
 					$("#right-click-mode-indicator").hide();
 					initContextMenu("right")
 				}
-			  },
-			  items: {
+			},
+			items: {
                 "Delay": {
 					name: "Delay", icon: "fa-bell-slash-o",
-					callback: function(key, options) {
-						delayTask(currentTask);
-					},
+					callback: function(key, options) {	delayTask(currentTask);	},
 			        visible: function(key, opt){        
-						var myTaskID = currentTask;
-						var isDue = 0;
-						var dueDay = lines[myTaskID][col_dueday];
-						if (dueDay > 0) {
-							var dueMonth=lines[myTaskID][col_duemonth]-1;
-							var dueYear=lines[myTaskID][col_dueyear];
-							if (dueYear.length==2) dueYear = "20"+dueYear;
-							if (dueYear.length==0) dueYear = today.getYear()+1900;
-							var dueDate = new Date(dueYear,dueMonth,dueDay);
-							var date1_ms = today.getTime();
-							var date2_ms = dueDate.getTime();
-							var difference_ms = date2_ms - date1_ms;
-							var days_until_due = Math.ceil(difference_ms/one_day);
-							if (days_until_due<0 || days_until_due==0 ) {
-								isDue = 1;
-							}
-						}
-						if (isDue==1) return true;
-						else return false;
+						if (lines[currentTask][col_dueday] < 1) return false;
+						var dueDate = getDueDate(currentTask);
+						var days_until_due = getDateDifference(today,dueDate)
+						if (days_until_due<0 || days_until_due==0 ) return true;
+						return false;
 					}
 				},
                 "Finish": {
 					name: "Finish", icon: "fa-check-square-o",
-					callback: function(key, options) {
-						completeTask();
-					},
+					callback: function(key, options) {	completeTask();	},
 			        visible: function(key, opt){        
-						var myTaskID = currentTask;
-						var isStarted = 0;
-						var startDay = lines[myTaskID][col_startday];
-						if (startDay > 0) {
-							var startDate = getStartDate(myTaskID)
-							var days_until_start = getDateDifference(today,startDate)
-							if (days_until_start<0 || days_until_start==0 ) {
-								isStarted = 1;
-							}
-						}
-						else { isStarted = 1; }
-						return (isStarted==1);
+						if (lines[currentTask][col_startday] < 1) return true;
+						var startDate = getStartDate(currentTask)
+						var days_until_start = getDateDifference(today,startDate)
+						if (days_until_start<0 || days_until_start==0 ) return true;
+						return false;
 					}					
 				},
                 "Edit": {
 					name: "Edit", icon: "fa-edit",
-					callback: function(key, options) {
-						editTaskContextMenu();
-					}
+					callback: function(key, options) {	editTaskContextMenu();	}
 				},
                 "Delete": {
 					name: "Delete", icon: "fa-trash",
-					callback: function(key, options) {
-						deleteTask();
-					}
+					callback: function(key, options) {	deleteTask();	}
 				},
             }
         };
@@ -476,11 +441,9 @@ function editTask(taskID,ev) {
 	var taskBlockID = "#taskBlock"+taskID;
 	var opt = {
         autoOpen: false,
-        modal: true,
-        width: 370,
-        height:370,
+        modal: true, resizable: false,
+        height:370, width: 370,
         title: myTitle,
-		resizable: false,
 		buttons: { 
 			Save: function() {
 				updateTask(currentTask);
@@ -493,10 +456,10 @@ function editTask(taskID,ev) {
 				if(makingNewTask==1) {
 					lines.splice(currentTask,1);
 					lastTaskID--;
+					makingNewTask = 0;
+					drawOutput(lines);
 				}
-				makingNewTask = 0;
-				currentTask = 0;
-				drawOutput(lines);
+				currentTask = "";
 			}
 		},	
 		open: function(event, ui) 
@@ -510,10 +473,10 @@ function editTask(taskID,ev) {
 			if(makingNewTask==1) {
 				lines.splice(currentTask,1);
 				lastTaskID--;
+				makingNewTask = 0;
+				drawOutput(lines);
 			}
-			makingNewTask = 0;
-			currentTask = 0;
-			drawOutput(lines);
+			currentTask = "";
 		}			
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
@@ -824,27 +787,27 @@ function newTaskCopy() {
 	var dueDate = getDueDate(currentTask)
 	var start_offset = dueDate.getTime() - startDate.getTime();
 		
-	if (startDay>0) {
+	if (startDate) {
 
 		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
 		newTask[col_startmonth] = new_startdate.getMonth()+1;
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
-		if(dueDay>0) {
+		if(dueDate) {
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
 			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
 	}
-	else if (dueDay>0) {
+	else if (dueDate) {
 		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
 		newTask[col_duemonth] = new_duedate.getMonth()+1;
 		newTask[col_dueday] = new_duedate.getDate();
 		newTask[col_dueyear] = new_duedate.getYear()+1900;
 
-		if (startDay>0) {
+		if (startDate) {
 			var new_startdate = new Date(new_duedate.getTime() - start_offset);
 			newTask[col_startmonth] = new_startdate.getMonth()+1;
 			newTask[col_startday] = new_startdate.getDate();
@@ -909,7 +872,7 @@ function drawOutput(lines){
 		//Create and Style Task Block
 		var taskBlock = document.createElement('div');
 		taskBlock.className = "task-block"
-		taskBlock.style.fontSize = myFontSize+"px";
+		//taskBlock.style.fontSize = myFontSize+"px";
 		taskBlock.setAttribute("draggable","true");
 		taskBlock.setAttribute("ondragstart","drag(event)");
 		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
@@ -1056,7 +1019,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(BR);		
 				
 				var alertIcon = document.createElement("div");
-				alertIcon.className += " left-icon-normal";
+				alertIcon.className = " alert-icon";
 				alertIcon.setAttribute("style","margin-left:0.3em;")
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
@@ -1073,7 +1036,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
-				alertIcon.className += " left-icon-normal";
+				alertIcon.className = "alert-icon";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 
@@ -1093,20 +1056,8 @@ function drawOutput(lines){
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
 					taskBlock.appendChild(dueDatePhrase)
-					clockIconLabel = days_until_due.toString();
-					var myOpacity = 1-(days_until_due*0.1);
-					if (myOpacity>1) myOpacity = 1;
-					var clockIcon = document.createElement("div");
-					clockIcon.className = "left-icon left-icon-normal"
-					clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-					clockIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
-					taskBlock.appendChild(clockIcon);
-					var clockIconNum = document.createElement("div");
-					clockIconNum.className = "left-label left-label-normal"
-					if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
-					else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
-					clockIconNum.innerHTML = clockIconLabel;
-					taskBlock.appendChild(clockIconNum);					
+					var countdownIcon = createCountdownIcon(days_until_due)
+					taskBlock.appendChild(countdownIcon);
 				}
 				var BR = document.createElement("br");
 				taskBlock.appendChild(BR);		
@@ -1119,19 +1070,8 @@ function drawOutput(lines){
 		else { noDueDay = 1; }
 
 		if (lines[i][col_increment].length>0) {
-			var repeatIcon = document.createElement("div");
-			repeatIcon.className = "repeat-icon"
-			if (isPastTask==1) repeatIcon.className += " repeat-icon-past";
-			else repeatIcon.className += " repeat-icon-normal";
-			repeatIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+			var repeatIcon = createRepeatIcon(i,isPastTask)
 			taskBlock.appendChild(repeatIcon);
-			var repeatNum = document.createElement("div");
-			repeatNum.className = "repeat-num"
-			if (isPastTask==1) repeatNum.className += " repeat-num-past";
-			else repeatNum.className += " repeat-num-normal";
-			if (lines[i][col_increment].length==1) repeatNum.setAttribute("style","margin-right:3px;")
-			repeatNum.innerHTML = lines[i][col_increment];
-			taskBlock.appendChild(repeatNum);
 		};
 
 		var rowName = lines[i][col_row];
@@ -1267,7 +1207,6 @@ function drawOutput(lines){
 
 	miscTasks.setAttribute("data-rowname","")
 	miscTasks.setAttribute("ondrop","drop(event)");
-	//miscTasks.setAttribute("ondragover","allowDrop(event)");
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
 	
@@ -1276,7 +1215,7 @@ function drawOutput(lines){
 
 	if (shape=="wide") $(".task-details").hide();
 
-	document.getElementById("output").style =	"width:100%;display:flex;flex-direction:row;font-size:"+myFontSize+"px;"
+	document.getElementById("output").style =	"font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
@@ -1299,6 +1238,49 @@ function drawOutput(lines){
 		newTask(rowName);
 		return false;
 	});
+}
+
+function createRepeatIcon(taskID,isPastTask) {
+	var repeatIcon = document.createElement("div")
+	if (isPastTask==1) repeatIcon.className = "repeat-block repeat-block-past";
+	else repeatIcon.className = "repeat-block repeat-block-normal";
+
+	var justIcon = document.createElement("div");
+	if (isPastTask==1) justIcon.className = "repeat-icon repeat-icon-past";
+	else justIcon.className = "repeat-icon repeat-icon-normal";
+	justIcon.innerHTML = '<i class="fa fa-refresh" aria-hidden="true" ></i>';
+	repeatIcon.appendChild(justIcon);
+
+	var repeatNum = document.createElement("div");
+	if (isPastTask==1) repeatNum.className = "repeat-num repeat-num-past";
+	else repeatNum.className = "repeat-num repeat-num-normal";
+	repeatNum.innerHTML = lines[taskID][col_increment];
+	repeatIcon.appendChild(repeatNum);
+
+	return repeatIcon;
+}
+
+function createCountdownIcon(days_until_due) {
+	var countdownIcon = document.createElement("div")
+	countdownIcon.className = "countdown-block"
+	
+	clockIconLabel = days_until_due.toString();
+	var myOpacity = 1-(days_until_due*0.1);
+	if (myOpacity>1) myOpacity = 1;
+	var justIcon = document.createElement("div");
+	justIcon.className = "countdown-icon"
+	justIcon.setAttribute("style","opacity:"+myOpacity+";")
+	justIcon.innerHTML = '<i class="fa fa-calendar-o" aria-hidden="true" ></i>';
+	countdownIcon.appendChild(justIcon);
+
+	var clockIconNum = document.createElement("div");
+	clockIconNum.className = "countdown-label"
+	if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
+	else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+	clockIconNum.innerHTML = clockIconLabel;
+	countdownIcon.appendChild(clockIconNum);	
+	
+	return countdownIcon;
 }
 
 // FILE HANDLING FUNCTIONS
