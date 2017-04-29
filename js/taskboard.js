@@ -787,27 +787,27 @@ function newTaskCopy() {
 	var dueDate = getDueDate(currentTask)
 	var start_offset = dueDate.getTime() - startDate.getTime();
 		
-	if (startDay>0) {
+	if (startDate) {
 
 		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
 		newTask[col_startmonth] = new_startdate.getMonth()+1;
 		newTask[col_startday] = new_startdate.getDate();
 		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
-		if(dueDay>0) {
+		if(dueDate) {
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
 			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
 	}
-	else if (dueDay>0) {
+	else if (dueDate) {
 		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
 		newTask[col_duemonth] = new_duedate.getMonth()+1;
 		newTask[col_dueday] = new_duedate.getDate();
 		newTask[col_dueyear] = new_duedate.getYear()+1900;
 
-		if (startDay>0) {
+		if (startDate) {
 			var new_startdate = new Date(new_duedate.getTime() - start_offset);
 			newTask[col_startmonth] = new_startdate.getMonth()+1;
 			newTask[col_startday] = new_startdate.getDate();
