@@ -129,10 +129,7 @@ function initSliders() {
 		start: [sliderValue],
 		step: 1,
 		connect: true,
-		range: {
-			'min': 8,
-			'max': 24
-		}
+		range: { 'min': 8, 'max': 24 }
 	});
 
 	myFontSizeSlider.noUiSlider.on('slide', function(){
@@ -148,10 +145,7 @@ function initSliders() {
 		step: 1,
 		behavior: "tap-drag",
 		connect: true,
-		range: {
-			'min': 0,
-			'max': 7
-		},
+		range: { 'min': 0, 'max': 7 }
 	});
 
 	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
@@ -196,66 +190,37 @@ function initContextMenu(button) {
 					$("#right-click-mode-indicator").hide();
 					initContextMenu("right")
 				}
-			  },
-			  items: {
+			},
+			items: {
                 "Delay": {
 					name: "Delay", icon: "fa-bell-slash-o",
-					callback: function(key, options) {
-						delayTask(currentTask);
-					},
+					callback: function(key, options) {	delayTask(currentTask);	},
 			        visible: function(key, opt){        
-						var myTaskID = currentTask;
-						var isDue = 0;
-						var dueDay = lines[myTaskID][col_dueday];
-						if (dueDay > 0) {
-							var dueMonth=lines[myTaskID][col_duemonth]-1;
-							var dueYear=lines[myTaskID][col_dueyear];
-							if (dueYear.length==2) dueYear = "20"+dueYear;
-							if (dueYear.length==0) dueYear = today.getYear()+1900;
-							var dueDate = new Date(dueYear,dueMonth,dueDay);
-							var date1_ms = today.getTime();
-							var date2_ms = dueDate.getTime();
-							var difference_ms = date2_ms - date1_ms;
-							var days_until_due = Math.ceil(difference_ms/one_day);
-							if (days_until_due<0 || days_until_due==0 ) {
-								isDue = 1;
-							}
-						}
-						if (isDue==1) return true;
-						else return false;
+						if (lines[currentTask][col_dueday] < 1) return false;
+						var dueDate = getDueDate(currentTask);
+						var days_until_due = getDateDifference(today,dueDate)
+						if (days_until_due<0 || days_until_due==0 ) return true;
+						return false;
 					}
 				},
                 "Finish": {
 					name: "Finish", icon: "fa-check-square-o",
-					callback: function(key, options) {
-						completeTask();
-					},
+					callback: function(key, options) {	completeTask();	},
 			        visible: function(key, opt){        
-						var myTaskID = currentTask;
-						var isStarted = 0;
-						var startDay = lines[myTaskID][col_startday];
-						if (startDay > 0) {
-							var startDate = getStartDate(myTaskID)
-							var days_until_start = getDateDifference(today,startDate)
-							if (days_until_start<0 || days_until_start==0 ) {
-								isStarted = 1;
-							}
-						}
-						else { isStarted = 1; }
-						return (isStarted==1);
+						if (lines[currentTask][col_startday] < 1) return true;
+						var startDate = getStartDate(currentTask)
+						var days_until_start = getDateDifference(today,startDate)
+						if (days_until_start<0 || days_until_start==0 ) return true;
+						return false;
 					}					
 				},
                 "Edit": {
 					name: "Edit", icon: "fa-edit",
-					callback: function(key, options) {
-						editTaskContextMenu();
-					}
+					callback: function(key, options) {	editTaskContextMenu();	}
 				},
                 "Delete": {
 					name: "Delete", icon: "fa-trash",
-					callback: function(key, options) {
-						deleteTask();
-					}
+					callback: function(key, options) {	deleteTask();	}
 				},
             }
         };

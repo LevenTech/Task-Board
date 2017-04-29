@@ -62,7 +62,7 @@ function getStartDate(myTaskID) {
 	return new Date(startYear,lines[myTaskID][col_startmonth]-1,lines[myTaskID][col_startday]);
 }
 
-function getDueDate() {
+function getDueDate(myTaskID) {
 	if (lines[myTaskID][col_dueday] < 1) { return "" }
 	var dueYear=lines[myTaskID][col_dueyear];
 	if (dueYear.length==2) dueYear = "20"+dueYear;
