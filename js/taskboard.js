@@ -114,7 +114,6 @@ function initToolSelector () {
 	
 	$("#taskboard-toolbar").addClass("padded-toolbar");
 	$("#taskboard-toolbar").addClass("moving-toolbar");
-	//document.getElementById("app-header").style.position="fixed"
 	$("#output").addClass("padded-output");
 	$("#app-header").addClass("padded-app-header");
 }
@@ -128,12 +127,6 @@ function initDialogs() {
 	$("#saveDialog").dialog(opt).dialog("close");
 	$("#deleteDialog").dialog(opt).dialog("close");
 
-	/*$('#completeDialog').keypress(function(e) {
-		if (e.keyCode == $.ui.keyCode.ENTER) {
-			console.log($("#completeDialog"));
-		}
-	});*/
-	
 	$(".my-dialog").show();	
 }
 
@@ -400,14 +393,33 @@ function editDialogKeypress(e) {
 	}
 }
 
+function changeColor(color) {
+	$(".color-button").removeClass("active")
+	$("#color-button-"+color).addClass("active")
+	if (color=="LemonChiffon") $('#colorpicker').val("")
+	else $('#colorpicker').val(color)
+	colortyped();
+}
+
+function checkColor() {
+	var color = $('#colorpicker').val()
+	if (!color) color="LemonChiffon"
+	$(".color-button").removeClass("active")
+	$("#color-button-"+color).addClass("active")
+}
+
+
 function changeInterval(intVal) {
-	$('#incrementpicker').val(intVal)
 	$(".interval-button").removeClass("active")
 	$("#interval-button"+intVal).addClass("active")
+	if (intVal==0) $('#incrementpicker').val("")
+	else $('#incrementpicker').val(intVal)
 }
 
 function checkInterval() {
 	var intVal = $('#incrementpicker').val();
+	if (!intVal) intVal=0;
+	console.log("#interval-button"+intVal)
 	$(".interval-button").removeClass("active")
 	$("#interval-button"+intVal).addClass("active")
 }
@@ -548,11 +560,12 @@ function editTask(taskID,ev) {
 		var hexColor = colourNameToHex(myColor);
 		if (hexColor[0]=="#") { document.getElementById("colorpicker2").value = hexColor }
 	}
-	$("#rowpicker").val(lines[currentTask][col_row]);
-	$("#namepicker").val(lines[currentTask][col_task]);
+	checkColor();
+
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
-	$(".interval-button").removeClass("active");
-	$("#interval-button"+lines[currentTask][col_increment]).addClass("active")
+	checkInterval();
+
+	$("#namepicker").val(lines[currentTask][col_task]);
 	
 	if (makingNewTask==1) var myTitle = "Create New Task"
 	else var myTitle = "Edit Task"
@@ -561,7 +574,7 @@ function editTask(taskID,ev) {
 	var opt = {
         autoOpen: false,
         modal: true, resizable: false,
-        height:370, width: 370,
+        height:400, width: 400,
         title: myTitle,
 		buttons: { 
 			Save: function() {
@@ -697,6 +710,7 @@ function colorpicked() {
 }
 
 function colortyped() {
+	checkColor();
 	var newColor = $("#colorpicker").val();
 	if (newColor=="") newColor = "LemonChiffon";
 	var hexColor = colourNameToHex(newColor);
