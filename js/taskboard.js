@@ -96,11 +96,19 @@ function initToolSelector () {
 
 function initDialogs() {
 	var opt = { autoOpen: false	};
+ 
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
 	$("#deleteDialog").dialog(opt).dialog("close");
+
+	/*$('#completeDialog').keypress(function(e) {
+		if (e.keyCode == $.ui.keyCode.ENTER) {
+			console.log($("#completeDialog"));
+		}
+	});*/
+	
 	$(".my-dialog").show();	
 }
 
@@ -122,6 +130,47 @@ function initKeys() {
 			currentTask = "";
 			return false;
 		}
+	});	
+
+	$(document).on('keydown keyup',  function (e) {
+		if ($('#completeDialog').is(':visible')) {
+			var key = e.which;
+			if (key == 13) {
+				lines[currentTask][10]="Yes";
+				if (lines[currentTask][11].length>0) newTaskCopy();
+				$("#completeDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+			}
+			else if (key == 27) {
+				$("#completeDialog").dialog("close");
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+			}
+		}
+		if ($('#deleteDialog').is(':visible')) {
+			var key = e.which;
+			if (key == 13) {
+				lines.splice(currentTask,1);
+				$("#deleteDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+			}
+			else if (key == 27) {
+				$("#deleteDialog").dialog("close");
+			}
+		}
+		e.stopPropagation();
 	});	
 }
 
@@ -371,7 +420,8 @@ function completeTask(wasDropped) {
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
 			}
-		}
+		},
+		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
     };
 	if (wasDropped) opt.position = {my: "top right", at: "top right", of: "#finish-area", collision: "fit", within: "body"};
 	var taskName = lines[currentTask][1];
@@ -406,7 +456,8 @@ function deleteTask() {
 			No: function () {
 				$("#deleteDialog").dialog("close");
 			}
-		}
+		},
+		open: function() { $("#deleteDialog").find('button:nth-child(1)').focus(); }
     };
 	var taskName = lines[currentTask][1];
 	$("#deleteTaskName").text(taskName);
@@ -529,7 +580,7 @@ function editTask(taskID,ev) {
 
 	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
-	$("#editDialog").find('button:nth-child(0)').focus();
+	$("#editDialog").find('textarea').focus();
 }
 
 
