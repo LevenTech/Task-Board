@@ -12,6 +12,7 @@ var dateSliderActive = 0;
 
 var today = new Date();
 var one_day=1000*60*60*24;
+var one_hour=1000*60*60;
 
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
@@ -31,6 +32,8 @@ var	col_color = 8;
 var	col_row = 9;
 var col_complete = 10;
 var	col_increment = 11;
+var	col_starttime = 12;
+var	col_duetime = 13;
 
 var dragcounter = 0;
 var draggingNew = 0;
@@ -63,7 +66,6 @@ $(document).ready(function() {
 	
 $(window).scroll(function(){
     
-	console.log("scrolling to "+$(window).scrollTop())
 	if ($(window).scrollTop() > 66) {
 		$("#taskboard-toolbar").removeClass("moving-toolbar");
 		$("#taskboard-toolbar").addClass("stuck-toolbar");
@@ -133,6 +135,8 @@ function initDialogs() {
 function initKeys() {
 	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
 	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-due").keypress( function (e) { return editDialogKeypress(e); });
 	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
 	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
 	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
@@ -246,7 +250,7 @@ function initFontSlider() {
 	
 function initDateSlider() {
 	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
 	$("#todays-date").val(todaysDateStr);
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
@@ -255,7 +259,7 @@ function initDateSlider() {
 		step: 1,
 		behavior: "tap-drag",
 		connect: true,
-		range: { 'min': 0, 'max': 7 }
+		range: { 'min': 0, 'max': 178 }
 	});
 
 	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
@@ -303,7 +307,7 @@ function initContextMenu(button) {
 			},
 			items: {
                 "Delay": {
-					name: "Delay", icon: "fa-bell-slash-o",
+					name: "Snooze", icon: "fa-bell-slash-o",
 					callback: function(key, options) {	delayTask(currentTask);	},
 			        visible: function(key, opt){        
 						if (lines[currentTask][col_dueday] < 1) return false;
@@ -342,11 +346,11 @@ function initContextMenu(button) {
 
 // INPUT FUNCTIONS
 
-function makeDateIncremented(numDays) {
+function makeDateIncremented(numHours) {
 	today = new Date();
-	today = new Date(today.getTime()+numDays*one_day);
+	today = new Date(today.getTime()+numHours*one_hour);
 	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
 	$("#todays-date").val(todaysDateStr);
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
@@ -419,7 +423,6 @@ function changeInterval(intVal) {
 function checkInterval() {
 	var intVal = $('#incrementpicker').val();
 	if (!intVal) intVal=0;
-	console.log("#interval-button"+intVal)
 	$(".interval-button").removeClass("active")
 	$("#interval-button"+intVal).addClass("active")
 }
@@ -538,6 +541,8 @@ function editTask(taskID,ev) {
 	}
 	else $("#datepicker-start").val("");
 
+	$("#timepicker-start").val(lines[currentTask][col_starttime]);
+
 	var dueDay = lines[currentTask][col_dueday];
 	if (dueDay>0) {
 		if (dueDay.toString().length==1) dueDay = "0" + dueDay
@@ -551,6 +556,8 @@ function editTask(taskID,ev) {
 		$("#datepicker-due").val(dueDateStr);
 	}
 	else $("#datepicker-due").val("");
+
+	$("#timepicker-due").val(lines[currentTask][col_duetime]);
 	
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
@@ -650,6 +657,11 @@ function updateTask() {
 		if (newStringParts[col_startyear]==today.getYear()+1900) newStringParts[col_startyear]="";
 	}
 
+	var newStartTime = $("#timepicker-start").val();
+	newStringParts[col_starttime]=newStartTime;
+	var newDueTime = $("#timepicker-due").val();
+	newStringParts[col_duetime]=newDueTime;
+	
 	var newDueDate = $("#datepicker-due").val();
 	var newDueDateParts = newDueDate.split("-")
 	if (newDueDate==null) {
@@ -889,7 +901,7 @@ function newFile() {
 		showSaveDialog();
 	}
 	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval"];
+		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
 		lines = [line];
 		newTask("","Misc Task");
 		newTask("Group","Grouped Task");
@@ -996,6 +1008,10 @@ function drawOutput(lines){
 		var dueDay=lines[i][col_dueday];
 		var days_until_start = "";
 		var days_until_due = "";
+		var startOfToday = new Date(today.getTime());
+		startOfToday.setHours(0,0,0,0);
+		var now_mseconds = today.getTime()-startOfToday.getTime();
+
 		if (startDay>0) {
 			var startDate = getStartDate(i);
 			var startDateStr = startDate.toDateString();
@@ -1028,7 +1044,16 @@ function drawOutput(lines){
 			else {
 				taskBlock.appendChild(createBR());				
 				if (days_until_start<1) {
-					if (days_until_start==0) startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+					if (days_until_start==0) {
+						if (lines[i][col_starttime]) {
+							var timeParts = lines[i][col_starttime].split(":")
+							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+							var time_until_start = start_mseconds-now_mseconds;
+							if (time_until_start>0) startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
+							else startDatePhrase.innerHTML = "<b>Started Earlier Today</b>";
+						}
+						else startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+					}
 					taskBlock.className += " now-task";
 				}
 				else {
@@ -1059,15 +1084,47 @@ function drawOutput(lines){
 			dueDatePhrase.className = "task-details"
 			taskBlock.appendChild(createBR());		
 
-			if (days_until_due==0) {
+			var time_until_due=0;
+			if (lines[i][col_duetime]) {
+				var timeParts = lines[i][col_duetime].split(":")
+				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+				time_until_due = due_mseconds-now_mseconds;
+			}
+						
+			if (days_until_due==0 && time_until_due==0) {
 				dueDatePhrase.style.fontWeight = "bold"
-				dueDatePhrase.innerHTML = "Due TODAY";
+				dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
+				taskBlock.appendChild(dueDatePhrase);
+				
+				var alertIcon = document.createElement("div");
+				alertIcon.className = "alert-icon alert-indent";
+				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);				
+			}
+			else if (days_until_due==0 && time_until_due>0) {
+				dueDatePhrase.style.fontWeight = "bold"
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+lines[i][col_duetime]+"</b>";
 				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
 				alertIcon.className = "alert-icon alert-indent";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
+			}
+			else if (days_until_due==0 && time_until_due<0) {
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+lines[i][col_duetime]+"</b>";
+				taskBlock.appendChild(dueDatePhrase);
+
+				var alertIcon = document.createElement("div");
+				alertIcon.className = "alert-icon";
+				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+
+				var overDue = document.createElement("b");
+				overDue.className = "task-details"
+				overDue.innerHTML = "!!! OVERDUE !!!"
+				taskBlock.appendChild(createBR());		
+				taskBlock.appendChild(overDue);
 			}
 			else if (days_until_due<0) {
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
@@ -1086,9 +1143,9 @@ function drawOutput(lines){
 			}
 			else {
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr
+				taskBlock.appendChild(dueDatePhrase)
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
-					taskBlock.appendChild(dueDatePhrase)
 					taskBlock.appendChild(createCountdownIcon(days_until_due));
 				}
 			}
