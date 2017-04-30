@@ -47,10 +47,8 @@ $(document).ready(function() {
 	initDateSlider();
 
 	initContextMenu("right")
-	if (isMobile()) { 
-		initRightClickMode()
-		initToolSelector()
-	}
+	if (isMobile()) { initRightClickMode() }
+	if (isMobile()) { initToolSelector() }
 
 	
 	loadCookieFile();
@@ -91,7 +89,12 @@ function initToolSelector () {
 		$("#"+alreadySelected).show();
 		document.getElementById(alreadySelected).style.fontSize = "22px";
 	}
-	else $("#tool-selector").val("")	
+	else $("#tool-selector").val("")
+	
+	document.getElementById("taskboard-toolbar").style.position="fixed"
+	$("#taskboard-toolbar").addClass("padded-toolbar");
+	document.getElementById("app-header").style.position="fixed"
+	$("#output").addClass("padded-output");
 }
 
 function initDialogs() {

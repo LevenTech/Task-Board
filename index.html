@@ -32,15 +32,9 @@
 	
 	<link rel="stylesheet" href="css/taskboard.css"></style>
 
-	<style type="text/css">
-		body {
-			font-family: arial;
-			background: darkgrey;
-		}
-	</style>
 </head>
-<body id="myBody" ondrop="newRow(event)" ondragover="allowDrop(event)" style="min-height:90%;" draggable="false">
-    <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
+<body id="myBody" ondrop="newRow(event)" ondragover="allowDrop(event)" draggable="false">
+    <h1 style="margin-left:20px;width:100%;" class="app-header" id="app-header">Task Board by LevenTech</h1>
 	<div id="taskboard-toolbar">
 		<div id="left-buttons">
 			<div class="toolbar-selection" id="new-open-file" style="float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
