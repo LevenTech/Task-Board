@@ -150,6 +150,9 @@ body {
 #editDialog table tr td:first-child {
 	padding-left:0.3em;
 }
+#editDialog table tr td:last-child {
+	padding-right:0.3em;
+}
 
 .circle {
 	border-radius: 50%;
