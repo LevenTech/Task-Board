@@ -36,7 +36,7 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask;
 
-var simulateMobile = 1;
+var simulateMobile = 0;
 
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
@@ -50,7 +50,7 @@ $(document).ready(function() {
 
 	initContextMenu("right")
 	if (isMobile()) { initRightClickMode() }
-	if (isMobile()!==simulateMobile) { initToolSelector() }
+	if (isMobile()) { initToolSelector() }
 	
 	loadCookieFile();
 
