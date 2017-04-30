@@ -34,23 +34,26 @@
 
 </head>
 <body id="myBody" ondrop="newRow(event)" ondragover="allowDrop(event)" draggable="false">
-    <h1 style="margin-left:20px;width:100%;" class="app-header" id="app-header">Task Board by LevenTech</h1>
+    <div style="width:100%;">
+		<h1 style="float:left;margin-left:20px;" class="app-header" id="app-header">Task Board by LevenTech</h1>
+		<div id="right-click-mode-indicator" style="float:left;text-align:center;margin:1em;margin-left:24em;font-size:20px;color:white;font-weight:bold;">** IN RIGHT CLICK MODE **</div>
+	</div>
 	<div id="taskboard-toolbar">
 		<div id="left-buttons">
 			<div class="toolbar-selection" id="new-open-file" style="float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
-				<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;">
-					<div>
-						<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="margin:10px;margin-left:0px;margin-bottom:0px;">
-							<i class="fa fa-file-code-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>New File
+				<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;margin-bottom:0px;">
+					<div style="text-align:left;margin-left:10px;">
+						<button id="newfile-button" class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="margin:10px;margin-left:0px;margin-bottom:0px;">
+							<i class="fa fa-file-code-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i><span id="newfile-button-label">New File</span>
 						</button>
-						<span class="btn btn-default btn-file" style="margin:10px;margin-left:0px;margin-bottom:0px;">
+						<span id="openfile-button" class="btn btn-default btn-file" style="margin:10px;margin-left:0px;margin-bottom:0px;">
 							<i class="fa fa-folder-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>
-							<span>Open File</span>
+							<span id="openfile-button-label">Open File</span>
 							<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
 						</span>
 					</div>
-					<div style="margin-top:10px;>
-						<span style="margin-left:0px;"><strong>Current File:</strong></span>
+					<div style="margin-top:10px;">
+						<strong>Current File:</strong>
 						<span class="fileinput-filename"></span>
 						<span class="fileinput-new">No file chosen</span>
 						<span id="unsaved-changes" title="You have changes that haven't been saved to a file yet." style="display:none;">
@@ -70,9 +73,8 @@
 		<div id="middle-buttons" style="diplay:none;user-select:none;">
 			<div style="width:100%;">
 			<div id="tool-select-control" style="font-size:24px;float:left;display:none;padding-left:1em;margin-top:1em;padding-right:1em;">
-				Control:<br/>
-				<select id="tool-selector" class="dropdown tool-selector">
-					<option disabled value=""></option>
+				<b>Control:</b><br/>
+				<select id="tool-selector" class="dropdown tool-selector" style="height:3em;">
 					<option value="new-open-file">New File / Open File</option>
 					<option value="draggables">New Task / Finish Task</option>
 					<option value="size-shape">Task Shape / Task Size</option>
@@ -82,30 +84,29 @@
 			<div class="toolbar-selection" id="size-shape" style="float:left;">
 					<div class="middle-button" style="top:-0.5em;">
 						<label for="task-shape">Shape</label><br/>
-						<div class="btn-group-vertical" role="group">
-							<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()">
-								<div style="height:1em;width:1.2em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
+						<div class="btn-group" role="group" style="height:2em;">
+							<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()" style="height:4em;">
+								<div style="height:1.2em;width:1.6em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
 							</button>
-							<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()">
+							<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()" style="height:4em;">
 								<div style="height:0.8em;width:2em;background-color:black;border:2px solid black;"></div>
 							</button>
 						</div>
 					</div>
 					<div class="middle-button" style="top:-2em;">
 					  <label for="font-size">Task size:</label>
-					  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
-					  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
+					  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:8em;border:0; color:#000000; font-weight:bold;">
+					  <div id="font-size-slider" style="margin-top:10px;width:13em;"></div>
 					</div>
 				</div>
 				<div class="toolbar-selection" id="future-peek" style="float:left;">
-					<div class="middle-button" style="top:1em;">
+					<div class="middle-button" style="top:0em;">
 					  <label for="date-select">Show for:</label>
-					  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
-					  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
+					  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:8em;px;border:0; color:#000000; font-weight:bold;">
+					  <div id="todays-date-slider" style="margin-top:10px;width:15em;"></div>
 					</div>
 				</div>
 			</div>			
-			<div id="right-click-mode-indicator" style="display:none;text-align:center;width:100%;font-size:20px;color:white;font-weight:bold;">** IN RIGHT CLICK MODE **</div>
 		</div>
 		<div id="right-buttons">
 			<div class="toolbar-selection" id="draggables">

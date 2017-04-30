@@ -36,6 +36,8 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask;
 
+var simulateMobile = 1;
+
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
@@ -48,8 +50,7 @@ $(document).ready(function() {
 
 	initContextMenu("right")
 	if (isMobile()) { initRightClickMode() }
-	if (isMobile()==0) { initToolSelector() }
-
+	if (isMobile()!==simulateMobile) { initToolSelector() }
 	
 	loadCookieFile();
 
@@ -83,26 +84,33 @@ function initToolSelector () {
 	$("#tool-select-control").show();
 	$("#middle-buttons").show();
 	document.getElementById("left-buttons").style.flexBasis = "1em";
+	document.getElementById("left-buttons").style.flexGrow = "0";
+	document.getElementById("left-buttons").style.flexShrink = "0";
 	document.getElementById("middle-buttons").style.flexBasis = "8em";
-	document.getElementById("new-task-drag").innerHTML = "New Task";
+	document.getElementById("new-task-drag").style.marginTop = "0.4em";
+	document.getElementById("new-task-drag").style.paddingTop = "1em";
+	document.getElementById("new-task-drag").innerHTML = "New";
 	$("#right-buttons").show();
 	$("#tool-selector").change(function(){
 		createCookie("selected-tool",this.value)
 		$(".toolbar-selection").hide();
 		$("#right-buttons").append($("#"+this.value))
 		$("#"+this.value).show();
-		document.getElementById(this.value).style.fontSize = "22px";
+		document.getElementById(this.value).style.fontSize = "25px";
 	});
 	
 	var alreadySelected = readCookie("selected-tool");
-	if (alreadySelected) {
-		$("#tool-selector").val(alreadySelected)
-		$(".toolbar-selection").hide();
-		$("#right-buttons").append($("#"+alreadySelected))
-		$("#"+alreadySelected).show();
-		document.getElementById(alreadySelected).style.fontSize = "22px";
-	}
-	else $("#tool-selector").val("")
+	if (!alreadySelected) alreadySelected = "new-open-file"
+	$("#tool-selector").val(alreadySelected)
+	$(".toolbar-selection").hide();
+	$("#right-buttons").append($("#"+alreadySelected))
+	$("#"+alreadySelected).show();
+	document.getElementById(alreadySelected).style.fontSize = "25px";
+	$(".newfile-button")
+	document.getElementById("newfile-button").style.fontSize = "20px"
+	document.getElementById("newfile-button-label").innerHTML = "New"
+	document.getElementById("openfile-button").style.fontSize = "20px"
+	document.getElementById("openfile-button-label").innerHTML = "Open"
 	
 	$("#taskboard-toolbar").addClass("padded-toolbar");
 	$("#taskboard-toolbar").addClass("moving-toolbar");
@@ -232,7 +240,7 @@ function initFontSlider() {
 		start: [sliderValue],
 		step: 1,
 		connect: true,
-		range: { 'min': 8, 'max': 24 }
+		range: { 'min': 8, 'max': 36 }
 	});
 
 	myFontSizeSlider.noUiSlider.on('slide', function(){

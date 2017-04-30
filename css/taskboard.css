@@ -105,6 +105,9 @@ body {
 #taskboard-toolbar {
 	display:flex;
 }
+#right-click-mode-indicator {
+	/*display:none;*/
+}
 #left-buttons {
 	flex-grow: 1;
 	flex-shrink: 99;
@@ -114,7 +117,7 @@ body {
 #middle-buttons {
 	flex-grow: 0;
 	flex-shrink: 1;
-	flex-basis: 40em;
+	flex-basis: 50em;
 	/*flex: 0 1 430px;*/
 	text-align:center;
 	display:none;
@@ -247,7 +250,9 @@ body {
 	float:left;
 }
 
-
+.new-task-drag {
+	margin-top:0.8em;
+}
 #output {
 	width:100%;
 }
