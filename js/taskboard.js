@@ -604,6 +604,7 @@ function editTask(taskID,ev) {
 		open: function(event, ui) 
 		{ 
             $('#dialog-toolbar').prependTo('.ui-dialog-titlebar');
+			$('#dialog-toolbar').show();
 			$('.ui-widget-overlay').bind('click', function()
 			{ 
 				$("#editDialog").dialog('close'); 
