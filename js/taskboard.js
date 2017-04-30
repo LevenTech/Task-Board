@@ -581,7 +581,7 @@ function editTask(taskID,ev) {
 	var opt = {
         autoOpen: false,
         modal: true, resizable: false,
-        height:400, width: 400,
+        height:360, width: 380,
         title: myTitle,
 		buttons: { 
 			Save: function() {
@@ -603,6 +603,7 @@ function editTask(taskID,ev) {
 		},	
 		open: function(event, ui) 
 		{ 
+            $('#dialog-toolbar').prependTo('.ui-dialog-titlebar');
 			$('.ui-widget-overlay').bind('click', function()
 			{ 
 				$("#editDialog").dialog('close'); 
@@ -616,7 +617,7 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
-		}			
+		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
 
