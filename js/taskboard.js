@@ -475,6 +475,7 @@ function editTask(taskID,ev) {
 	$("#rowpicker").val(lines[currentTask][col_row]);
 	$("#namepicker").val(lines[currentTask][col_task]);
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
+	$(".interval-button").removeClass("active");
 	$("#interval-button"+lines[currentTask][col_increment]).addClass("active")
 	
 	if (makingNewTask==1) var myTitle = "Create New Task"
