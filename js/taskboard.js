@@ -581,7 +581,7 @@ function editTask(taskID,ev) {
 	var opt = {
         autoOpen: false,
         modal: true, resizable: false,
-        height:360, width: 380,
+        height:380, width: 380,
         title: myTitle,
 		buttons: { 
 			Save: function() {
