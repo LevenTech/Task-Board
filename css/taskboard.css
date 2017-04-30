@@ -85,7 +85,9 @@
 	display:flex;
 }
 #left-buttons {
-	flex: 1 99 600px;
+	flex-grow: 1;
+	flex-shrink: 99;
+	flex-basis: 600px;
 	text-align:left;
 }
 #middle-buttons {
@@ -97,7 +99,7 @@
 	display:none;
 }
 .middle-button {
-	top:-2em;
+	top:1em;
 	position:relative;
 	margin-top:30px;
 	margin-left:30px;

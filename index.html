@@ -43,7 +43,7 @@
     <h1 style="margin-left:20px;" class="app-header">Task Board by LevenTech</h1>
 	<div id="taskboard-toolbar">
 		<div id="left-buttons">
-			<div style="float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
+			<div class="toolbar-selection" id="new-open-file" style="float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
 				<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;">
 					<div>
 						<button class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="margin:10px;margin-left:0px;margin-bottom:0px;">
@@ -74,39 +74,55 @@
 			</div>
 		</div>
 		<div id="middle-buttons" style="diplay:none;user-select:none;">
-			<div style="width:100%;">
-			<div class="middle-button" style="top:-0.5em;">
-				<label for="task-shape">Shape</label><br/>
-				<div class="btn-group-vertical" role="group">
-					<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()">
-						<div style="height:1em;width:1.2em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
-					</button>
-					<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()">
-						<div style="height:0.8em;width:2em;background-color:black;border:2px solid black;"></div>
-					</button>
+			<div style="width:100%;font-size:24px;">
+			<div id="tool-select-control" style="float:left;display:none;padding-left:1em;margin-top:1em;padding-right:1em;">
+				Control:<br/>
+				<select id="tool-selector" class="dropdown tool-selector">
+					<option disabled selected value></option>
+					<option value="new-open-file">New/Open File</option>
+					<option value="size-shape">Size/Shape</option>
+					<option value="future-peek">Future Peek</option>
+					<option value="draggables">Draggables</option>
+				</select><br/>
+			</div>
+			<div class="toolbar-selection" id="size-shape" style="float:left;">
+					<div class="middle-button" style="top:-0.5em;">
+						<label for="task-shape">Shape</label><br/>
+						<div class="btn-group-vertical" role="group">
+							<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()">
+								<div style="height:1em;width:1.2em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
+							</button>
+							<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()">
+								<div style="height:0.8em;width:2em;background-color:black;border:2px solid black;"></div>
+							</button>
+						</div>
+					</div>
+					<div class="middle-button" style="top:-2em;">
+					  <label for="font-size">Task size:</label>
+					  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
+					  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
+					</div>
 				</div>
-			</div>
-			<div class="middle-button">
-			  <label for="font-size">Task size:</label>
-			  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:80px;border:0; color:#000000; font-weight:bold;">
-			  <div id="font-size-slider" style="margin-top:10px;width:150px;"></div>
-			</div>
-			<div class="middle-button" ">
-			  <label for="date-select">Show for:</label>
-			  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
-			  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
-			</div>
+				<div class="toolbar-selection" id="future-peek" style="float:left;">
+					<div class="middle-button" style="top:1em;">
+					  <label for="date-select">Show for:</label>
+					  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:120px;border:0; color:#000000; font-weight:bold;">
+					  <div id="todays-date-slider" style="margin-top:10px;width:220px;"></div>
+					</div>
+				</div>
 			</div>			
 			<div id="right-click-mode-indicator" style="display:none;text-align:center;width:100%;font-size:20px;color:white;font-weight:bold;">** IN RIGHT CLICK MODE **</div>
 		</div>
 		<div id="right-buttons">
-			<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
-					<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
-					<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
-					<span id="finished-list" style="pointer-events: none;"></span>
-			</div>
-			<div id="new-task-drag" class="new-task-drag task-block" draggable="true" style="text-align:center;margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;box-shadow:0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)" ondragstart="dragNew(event)" >
-				<br/>Drag for new task
+			<div class="toolbar-selection" id="draggables">
+				<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
+						<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
+						<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
+						<span id="finished-list" style="pointer-events: none;"></span>
+				</div>
+				<div id="new-task-drag" class="new-task-drag task-block" draggable="true" style="padding-top:1.5em;text-align:center;margin-right:30px;float:right;width:100px;height:100px;background-color:LemonChiffon;vertical-align:center;box-shadow:0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24)" ondragstart="dragNew(event)" >
+					Drag for new task
+				</div>
 			</div>
 		</div>
 	</div>

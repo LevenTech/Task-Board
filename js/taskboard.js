@@ -47,7 +47,22 @@ $(document).ready(function() {
 	initDateSlider();
 
 	initContextMenu("right")
-	if (isMobile()) { initRightClickMode() }
+	if (isMobile()) { 
+		//initRightClickMode()
+		$(".toolbar-selection").hide();
+		$("#tool-select-control").show();
+		$("#middle-buttons").show();
+		document.getElementById("left-buttons").style.flexBasis = "1em";
+		document.getElementById("middle-buttons").style.flexBasis = "8em";
+		$("#right-buttons").show();
+		$("#tool-selector").change(function(){
+			$(".toolbar-selection").hide();
+			$("#right-buttons").append($("#"+this.value))
+			$("#"+this.value).show();
+			document.getElementById(this.value).style.fontSize = "22px";
+		});
+	}
+
 	
 	loadCookieFile();
 
@@ -56,7 +71,7 @@ $(document).ready(function() {
 	$(document).on('mousedown', '.task-block', function (e){ 
 		myClickEvent = e
 		return true; 
-	}); 
+	});
 	
 });
 
