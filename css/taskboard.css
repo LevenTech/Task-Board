@@ -105,8 +105,8 @@ body {
 #taskboard-toolbar {
 	display:flex;
 }
-#right-click-mode-indicator {
-	/*display:none;*/
+.right-click-mode-indicator {
+	display:none;
 }
 #left-buttons {
 	flex-grow: 1;

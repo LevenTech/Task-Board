@@ -238,7 +238,7 @@ function initFontSlider() {
 	var myFontSizeSlider = document.getElementById('font-size-slider');
 	noUiSlider.create(myFontSizeSlider, {
 		start: [sliderValue],
-		step: 1,
+		step: 2,
 		connect: true,
 		range: { 'min': 8, 'max': 36 }
 	});
