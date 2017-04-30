@@ -7,6 +7,15 @@ body {
 	background:darkgrey;
 	height:10em;
 	z-index:10;
+	width:100%;
+}
+.stuck-toolbar {
+	position:fixed;
+	margin-top:0em;
+}
+.moving-toolbar {
+	position:absolute;
+	margin-top:4.5em;
 }
 
 
@@ -242,11 +251,12 @@ body {
 #output {
 	width:100%;
 }
+.padded-app-header {
+	position:absolute;
+	top:0em;
+}
 .padded-output {
 	margin-top:13.5em;
-}
-.padded-toolbar {
-	margin-top:4.5em;
 }
 
 .left-side{
@@ -274,7 +284,6 @@ body {
 	display:table;
 }	
 .app-header {
-	z-index:10;
 	background:darkgrey;
 	color: #fff;
 	text-shadow: -1px -1px 0 #000,1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;  

@@ -60,6 +60,19 @@ $(document).ready(function() {
 		return true; 
 	});
 	
+$(window).scroll(function(){
+    
+	console.log("scrolling to "+$(window).scrollTop())
+	if ($(window).scrollTop() > 66) {
+		$("#taskboard-toolbar").removeClass("moving-toolbar");
+		$("#taskboard-toolbar").addClass("stuck-toolbar");
+	} else {
+		$("#taskboard-toolbar").removeClass("stuck-toolbar");
+		$("#taskboard-toolbar").addClass("moving-toolbar");
+	}
+  
+});	
+	
 });
 
 // INIT FUNCTIONS
@@ -91,10 +104,11 @@ function initToolSelector () {
 	}
 	else $("#tool-selector").val("")
 	
-	document.getElementById("taskboard-toolbar").style.position="fixed"
 	$("#taskboard-toolbar").addClass("padded-toolbar");
-	document.getElementById("app-header").style.position="fixed"
+	$("#taskboard-toolbar").addClass("moving-toolbar");
+	//document.getElementById("app-header").style.position="fixed"
 	$("#output").addClass("padded-output");
+	$("#app-header").addClass("padded-app-header");
 }
 
 function initDialogs() {
