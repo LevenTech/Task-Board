@@ -48,19 +48,8 @@ $(document).ready(function() {
 
 	initContextMenu("right")
 	if (isMobile()) { 
-		//initRightClickMode()
-		$(".toolbar-selection").hide();
-		$("#tool-select-control").show();
-		$("#middle-buttons").show();
-		document.getElementById("left-buttons").style.flexBasis = "1em";
-		document.getElementById("middle-buttons").style.flexBasis = "8em";
-		$("#right-buttons").show();
-		$("#tool-selector").change(function(){
-			$(".toolbar-selection").hide();
-			$("#right-buttons").append($("#"+this.value))
-			$("#"+this.value).show();
-			document.getElementById(this.value).style.fontSize = "22px";
-		});
+		initRightClickMode()
+		initToolSelector()
 	}
 
 	
@@ -76,6 +65,34 @@ $(document).ready(function() {
 });
 
 // INIT FUNCTIONS
+
+function initToolSelector () {
+
+	$(".toolbar-selection").hide();
+	$("#tool-select-control").show();
+	$("#middle-buttons").show();
+	document.getElementById("left-buttons").style.flexBasis = "1em";
+	document.getElementById("middle-buttons").style.flexBasis = "8em";
+	document.getElementById("new-task-drag").innerHTML = "New Task";
+	$("#right-buttons").show();
+	$("#tool-selector").change(function(){
+		createCookie("selected-tool",this.value)
+		$(".toolbar-selection").hide();
+		$("#right-buttons").append($("#"+this.value))
+		$("#"+this.value).show();
+		document.getElementById(this.value).style.fontSize = "22px";
+	});
+	
+	var alreadySelected = readCookie("selected-tool");
+	if (alreadySelected) {
+		$("#tool-selector").val(alreadySelected)
+		$(".toolbar-selection").hide();
+		$("#right-buttons").append($("#"+alreadySelected))
+		$("#"+alreadySelected).show();
+		document.getElementById(alreadySelected).style.fontSize = "22px";
+	}
+	else $("#tool-selector").val("")	
+}
 
 function initDialogs() {
 	var opt = { autoOpen: false	};
