@@ -340,7 +340,7 @@ function checkInterval() {
 
 // EDIT TASK FUNCTIONS
 
-function completeTask() {
+function completeTask(wasDropped) {
 
 	$("#deleteDialog").dialog("close");
 	
@@ -350,7 +350,7 @@ function completeTask() {
         width: 350,
         height:350,
         title: 'Finish Task',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
 		buttons: { 
 			Yes: function() {
 				lines[currentTask][10]="Yes";
@@ -373,6 +373,7 @@ function completeTask() {
 			}
 		}
     };
+	if (wasDropped) opt.position = {my: "top right", at: "top right", of: "#finish-area", collision: "fit", within: "body"};
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
 	$("#completeDialog").dialog(opt).dialog("open");
@@ -391,7 +392,7 @@ function deleteTask() {
         width: 350,
         height:350,
         title: 'Delete Task',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
 		buttons: { 
 			Yes: function() {
 				lines.splice(currentTask,1);
@@ -749,7 +750,7 @@ function dropFinish(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
-	completeTask();
+	completeTask(1);
 	ev.stopPropagation();
 }
 
@@ -767,7 +768,7 @@ function newRow(ev) {
         width: 300,
         height:200,
         title: 'Move Task to New Group',
-		position: {my: "center center", at: "center center", of: window},
+		position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"},
 		buttons: { 
 			OK: function() {
 				var rowName = $("#newRowName").val();
