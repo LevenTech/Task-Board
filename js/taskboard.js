@@ -48,7 +48,7 @@ $(document).ready(function() {
 
 	initContextMenu("right")
 	if (isMobile()) { initRightClickMode() }
-	if (isMobile()) { initToolSelector() }
+	if (isMobile()==0) { initToolSelector() }
 
 	
 	loadCookieFile();
