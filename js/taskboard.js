@@ -248,12 +248,19 @@ function initFontSlider() {
 	})
 }
 	
-function initDateSlider() {
+function makeTodaysDateStr() {
 	var todaysDateStr = today.toDateString()
+	var hoursStr = today.getHours();
 	var minutesStr = today.getMinutes();
 	if (minutesStr<10) minutesStr = "0"+minutesStr
-	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + minutesStr;
-	$("#todays-date").val(todaysDateStr);
+	if (hoursStr>12) todaysDateStr = todaysDateStr.slice(0,-4)+" "+(hoursStr-12) + ":" + minutesStr + " pm";
+	else todaysDateStr = todaysDateStr.slice(0,-4)+" "+hoursStr + ":" + minutesStr + " am";
+	return todaysDateStr
+}
+
+	
+function initDateSlider() {
+	$("#todays-date").val(makeTodaysDateStr());
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
 	noUiSlider.create(myTodaysDateSlider, {
@@ -351,11 +358,7 @@ function initContextMenu(button) {
 function makeDateIncremented(numHours) {
 	today = new Date();
 	today = new Date(today.getTime()+numHours*one_hour);
-	var todaysDateStr = today.toDateString()
-	var minutesStr = today.getMinutes();
-	if (minutesStr<10) minutesStr = "0"+minutesStr
-	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + minutesStr;
-	$("#todays-date").val(todaysDateStr);
+	$("#todays-date").val(makeTodaysDateStr());
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
 	$("#today-button").addClass("active");
