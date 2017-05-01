@@ -250,7 +250,9 @@ function initFontSlider() {
 	
 function initDateSlider() {
 	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
+	var minutesStr = today.getMinutes();
+	if (minutesStr<10) minutesStr = "0"+minutesStr
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + minutesStr;
 	$("#todays-date").val(todaysDateStr);
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
@@ -350,7 +352,9 @@ function makeDateIncremented(numHours) {
 	today = new Date();
 	today = new Date(today.getTime()+numHours*one_hour);
 	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
+	var minutesStr = today.getMinutes();
+	if (minutesStr<10) minutesStr = "0"+minutesStr
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + minutesStr;
 	$("#todays-date").val(todaysDateStr);
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
