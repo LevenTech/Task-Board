@@ -317,14 +317,59 @@ function initContextMenu(button) {
 				}
 			},
 			items: {
-                "Delay": {
-					name: "Snooze", icon: "fa-bell-slash-o",
-					callback: function(key, options) {	delayTask(currentTask);	},
+                "SnoozeDay": {
+					name: "Snooze 1 day", icon: "fa-bell-slash-o",
+					callback: function(key, options) {	delayTask(24);	},
 			        visible: function(key, opt){        
-						if (lines[currentTask][col_dueday] < 1) return false;
+						if (lines[currentTask][col_duetime]!==null && lines[currentTask][col_duetime]!=="") return false;
+						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
 						var dueDate = getDueDate(currentTask);
 						var days_until_due = getDateDifference(today,dueDate)
-						if (days_until_due<0 || days_until_due==0 ) return true;
+						if (days_until_due<0 || days_until_due==0 ) {
+							if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
+							else {
+								var startDate = getStartDate(currentTask)
+								var days_until_start = getDateDifference(today,startDate)
+								if (days_until_start==0) {
+									var startOfToday = new Date(today.getTime());
+									startOfToday.setHours(0,0,0,0);
+									var now_mseconds = today.getTime()-startOfToday.getTime();
+									var timeParts = lines[currentTask][col_starttime].split(":")
+									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+									var time_until_start = start_mseconds-now_mseconds;
+									if (time_until_start>0) return false;
+									else return true;
+								}
+							}
+						}
+						return false;
+					}
+				},
+                "SnoozeHour": {
+					name: "Snooze 1 hour", icon: "fa-bell-slash-o",
+					callback: function(key, options) {	delayTask(1);	},
+			        visible: function(key, opt){        
+						if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false;
+						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
+						var dueDate = getDueDate(currentTask);
+						var days_until_due = getDateDifference(today,dueDate)
+						if (days_until_due<0 || days_until_due==0 ) {
+							if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
+							else {
+								var startDate = getStartDate(currentTask)
+								var days_until_start = getDateDifference(today,startDate)
+								if (days_until_start==0) {
+									var startOfToday = new Date(today.getTime());
+									startOfToday.setHours(0,0,0,0);
+									var now_mseconds = today.getTime()-startOfToday.getTime();
+									var timeParts = lines[currentTask][col_starttime].split(":")
+									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+									var time_until_start = start_mseconds-now_mseconds;
+									if (time_until_start>0) return false;
+									else return true;
+								}
+							}
+						}
 						return false;
 					}
 				},
@@ -332,10 +377,26 @@ function initContextMenu(button) {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {	completeTask();	},
 			        visible: function(key, opt){        
-						if (lines[currentTask][col_startday] < 1) return true;
+						if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
 						var startDate = getStartDate(currentTask)
 						var days_until_start = getDateDifference(today,startDate)
-						if (days_until_start<0 || days_until_start==0 ) return true;
+						if (days_until_start<0 || days_until_start==0 ) {
+							if (lines[currentTask][col_startday] < 1) return true;
+							else {
+								var startDate = getStartDate(currentTask)
+								var days_until_start = getDateDifference(today,startDate)
+								if (days_until_start==0) {
+									var startOfToday = new Date(today.getTime());
+									startOfToday.setHours(0,0,0,0);
+									var now_mseconds = today.getTime()-startOfToday.getTime();
+									var timeParts = lines[currentTask][col_starttime].split(":")
+									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+									var time_until_start = start_mseconds-now_mseconds;
+									if (time_until_start>0) return false;
+									else return true;
+								}
+							}
+						}
 						return false;
 					}					
 				},
@@ -708,7 +769,7 @@ function updateTask() {
 	saveFileCookie();
 }
 
-function delayTask() {
+function delayTask(numHours) {
 
 	if (lines[currentTask][col_increment]>0 && lines[currentTask][col_startday]>0) {
 		newTaskCopy()
@@ -727,7 +788,7 @@ function delayTask() {
 	var difference_ms = date2_ms - date1_ms;
 	var days_until_due = Math.ceil(difference_ms/one_day);
 
-	var newDueDate = new Date(today.getTime() + one_day)
+	var newDueDate = new Date(today.getTime() + one_hour*numHours)
 	
 	lines[currentTask][col_dueday] = newDueDate.getDate();
 	lines[currentTask][col_duemonth] = newDueDate.getMonth()+1;

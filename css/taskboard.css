@@ -292,6 +292,11 @@ body {
 	float:left;
 }
 
+.my-context-menu 
+{
+   width: 150px !important; 
+}
+
 .new-task-drag {
 	margin-top:0.8em;
 }
