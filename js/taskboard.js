@@ -654,7 +654,7 @@ function editTask(taskID,ev) {
 
 	$("#namepicker").val(lines[currentTask][col_task]);
 	
-	if (makingNewTask==1) var myTitle = "Create New Task"
+	if (makingNewTask==1) var myTitle = "New Task"
 	else var myTitle = "Edit Task"
 	
 	var taskBlockID = "#taskBlock"+taskID;
@@ -698,6 +698,7 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
+			$('#dialog-toolbar').hide();
 		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
