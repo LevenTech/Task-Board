@@ -89,7 +89,7 @@ function makeDateStr(myDate) {
 	return dateStr
 }
 
-function makeTimeStr(myDate) {
+function makeTimeStrFromDate(myDate) {
 	var hours = myDate.getHours();
 	if (hours<1) var hoursStr = "12"
 	else if (hours>12) var hoursStr = hours-12

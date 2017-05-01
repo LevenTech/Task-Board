@@ -309,7 +309,7 @@ function initFontSlider() {
 
 	
 function initDateSlider() {
-	$("#todays-date").val(makeDateStr(today)+","+makeTimeStr(today));
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
 	noUiSlider.create(myTodaysDateSlider, {
@@ -470,7 +470,7 @@ function initContextMenu(button) {
 function makeDateIncremented(numHours) {
 	today = new Date();
 	today = new Date(today.getTime()+numHours*one_hour);
-	$("#todays-date").val(makeDateStr(today)+","+makeTimeStr(today));
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
 	$("#today-button").addClass("active");
@@ -1164,25 +1164,25 @@ function drawOutput(lines){
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
 	
-	for (var i = 1; i < lines.length; i++) {
-		var taskNum = parseInt(lines[i][col_ID]);
+	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
+		var taskNum = parseInt(lines[currentTask][col_ID]);
 		if (isNaN(taskNum)) { continue; }
-		if (lines[i][col_complete]=="Yes") { continue; }
+		if (lines[currentTask][col_complete]=="Yes") { continue; }
 		
 		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isPastTask = 0;
 		
-		var taskBlock = createTaskBlock(i,lines[i][col_color])
+		var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
 		
-		var myName = lines[i][col_task].replace("%44;",",");
+		var myName = lines[currentTask][col_task].replace("%44;",",");
 		var name = document.createElement("div");
 		name.className = "task-name"
 		name.innerHTML = "<b>"+myName+"</b>";
 		taskBlock.appendChild(name)
 		
-		var startDay=lines[i][col_startday];
-		var dueDay=lines[i][col_dueday];
+		var startDay=lines[currentTask][col_startday];
+		var dueDay=lines[currentTask][col_dueday];
 		var days_until_start = "";
 		var days_until_due = "";
 		var startOfToday = new Date(today.getTime());
@@ -1191,8 +1191,8 @@ function drawOutput(lines){
 
 		var startDate="";
 		var dueDate="";
-		if (startDay>0) { startDate = getStartDate(i) }
-		if (dueDay>0) { dueDate = getDueDate(i) }
+		if (startDay>0) { startDate = getStartDate(currentTask) }
+		if (dueDay>0) { dueDate = getDueDate(currentTask) }
 		var sameTime=0;
 
 		if (startDate!=="" && dueDate!=="") {
@@ -1218,7 +1218,7 @@ function drawOutput(lines){
 
 				var iconSpan = document.createElement("span")
 				iconSpan.className = "icon-span"
-				if (lines[i][col_increment]>0) iconSpan.className += " icon-margin"
+				if (lines[currentTask][col_increment]>0) iconSpan.className += " icon-margin"
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
@@ -1231,8 +1231,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(createBR());				
 				if (days_until_start<1) {
 					if (days_until_start==0) {
-						if (lines[i][col_starttime]) {
-							var timeParts = lines[i][col_starttime].split(":")
+						if (lines[currentTask][col_starttime]) {
+							var timeParts = lines[currentTask][col_starttime].split(":")
 							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 							var time_until_start = start_mseconds-now_mseconds;
 							if (time_until_start>0) {
@@ -1284,7 +1284,7 @@ function drawOutput(lines){
 		}
 		
 		if (dueDate) {
-			if (lines[i][col_duetime]) var dueDateStr = makeDateStr(dueDate)
+			if (lines[currentTask][col_duetime]) var dueDateStr = makeDateStr(dueDate)
 			else var dueDateStr = makeDateStr(dueDate);
 			var days_until_due = getDateDifference(today,dueDate)
 
@@ -1294,10 +1294,13 @@ function drawOutput(lines){
 
 			var time_until_due=0;
 			var dueTimeStr = ""
-			if (lines[i][col_duetime]) {
-				var timeParts = lines[i][col_duetime].split(":")
-				if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]+" pm"
-				else dueTimeStr = lines[i][col_duetime]+" am"
+			if (lines[currentTask][col_duetime]) {
+				var timeParts = lines[currentTask][col_duetime].split(":")
+				if (timeParts[0]==0) dueTimeStr = "12:"+timeParts[1]
+				else if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]
+				else dueTimeStr = lines[currentTask][col_duetime]
+				if (timeParts[0]>12 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
+				else dueTimeStr += " am"
 				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 				time_until_due = due_mseconds-now_mseconds;
 			}
@@ -1367,12 +1370,12 @@ function drawOutput(lines){
 			}
 		}
 
-		if (lines[i][col_increment].length>0) {
-			var repeatIcon = createRepeatIcon(i,isPastTask)
+		if (lines[currentTask][col_increment].length>0) {
+			var repeatIcon = createRepeatIcon(currentTask,isPastTask)
 			taskBlock.appendChild(repeatIcon);
 		};
 
-		var rowName = lines[i][col_row];
+		var rowName = lines[currentTask][col_row];
 		if (rowName == "") rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
 
@@ -1389,7 +1392,7 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		var myTaskName = lines[i][col_task]
+		var myTaskName = lines[currentTask][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
