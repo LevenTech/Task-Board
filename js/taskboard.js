@@ -64,17 +64,18 @@ $(document).ready(function() {
 		return true; 
 	});
 	
-$(window).scroll(function(){
-    
-	if ($(window).scrollTop() > 66) {
-		$("#taskboard-toolbar").removeClass("moving-toolbar");
-		$("#taskboard-toolbar").addClass("stuck-toolbar");
-	} else {
-		$("#taskboard-toolbar").removeClass("stuck-toolbar");
-		$("#taskboard-toolbar").addClass("moving-toolbar");
-	}
-  
-});	
+	$(window).scroll(function(){
+		if ($(window).scrollTop() > 66) {
+			$("#taskboard-toolbar").removeClass("moving-toolbar");
+			$("#taskboard-toolbar").addClass("stuck-toolbar");
+		}
+		else {
+			$("#taskboard-toolbar").removeClass("stuck-toolbar");
+			$("#taskboard-toolbar").addClass("moving-toolbar");
+		}
+	});	
+	
+	setInterval(checkTime,60000)
 	
 });
 
@@ -92,6 +93,7 @@ function initToolSelector () {
 	document.getElementById("new-task-drag").style.marginTop = "0.4em";
 	document.getElementById("new-task-drag").style.paddingTop = "1em";
 	document.getElementById("new-task-drag").innerHTML = "New";
+	document.getElementById("output").marginTop = "30px";
 	$("#right-buttons").show();
 	$("#tool-selector").change(function(){
 		createCookie("selected-tool",this.value)
@@ -116,7 +118,7 @@ function initToolSelector () {
 	
 	$("#taskboard-toolbar").addClass("padded-toolbar");
 	$("#taskboard-toolbar").addClass("moving-toolbar");
-	$("#output").addClass("padded-output");
+	//$("#output").addClass("padded-output");
 	$("#app-header").addClass("padded-app-header");
 }
 
@@ -200,7 +202,7 @@ function initRightClickMode() {
 	var miscBlock = document.getElementById('myBody');
 	var fingers = new Fingers(miscBlock);
 	new Fingers(miscBlock)
-	.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
+	.addGesture(Fingers.gesture.Tap, { nbFingers: 2})
 	.addHandler(function(eventType, data, fingerList) {
 		if (inRightClickMode == 0) {
 			inRightClickMode = 1
@@ -362,6 +364,14 @@ function makeDateIncremented(numHours) {
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
 	$("#today-button").addClass("active");
+}
+
+function checkTime() {
+	now = new Date();
+	if (now.getTime()-today.getTime()>60000) {
+		today=new Date();
+		makeDateIncremented(0)
+	}
 }
 
 function makeShapeDefault() {
