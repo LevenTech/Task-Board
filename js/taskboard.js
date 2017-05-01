@@ -992,6 +992,13 @@ function newTask(rowName,taskName,openMe) {
 	}
 }
 
+function eliminateLeadingZeros(string) {
+	var stringParts = string.split(" ")
+	if (stringParts[2][0]=="0") stringParts[2]=stringParts[2][1]
+	return stringParts.join(" ")
+}
+
+
 // MAIN BUILD FUNCTION
 
 function drawOutput(lines){
@@ -1029,7 +1036,7 @@ function drawOutput(lines){
 			var startDate = getStartDate(i);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
-			startDateStr = startDateStr.replace("0","")
+			startDateStr = eliminateLeadingZeros(startDateStr)
 			var days_until_start = getDateDifference(today,startDate)
 			var startDatePhrase = document.createElement("span");
 			startDatePhrase.className = "task-details start-date"
@@ -1090,7 +1097,7 @@ function drawOutput(lines){
 			var dueDate = getDueDate(i)
 			var dueDateStr = dueDate.toDateString();
 			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-			dueDateStr = dueDateStr.replace("0","")
+			dueDateStr = eliminateLeadingZeros(dueDateStr)
 			var days_until_due = getDateDifference(today,dueDate)
 
 			var dueDatePhrase = document.createElement("div")
