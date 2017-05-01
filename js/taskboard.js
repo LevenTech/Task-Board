@@ -1091,8 +1091,11 @@ function drawOutput(lines){
 			taskBlock.appendChild(createBR());		
 
 			var time_until_due=0;
+			var dueTimeStr = ""
 			if (lines[i][col_duetime]) {
 				var timeParts = lines[i][col_duetime].split(":")
+				if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]+" pm"
+				else dueTimeStr = lines[i][col_duetime]+" am"
 				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 				time_until_due = due_mseconds-now_mseconds;
 			}
@@ -1109,7 +1112,7 @@ function drawOutput(lines){
 			}
 			else if (days_until_due==0 && time_until_due>0) {
 				dueDatePhrase.style.fontWeight = "bold"
-				dueDatePhrase.innerHTML = "<b>Due TODAY at "+lines[i][col_duetime]+"</b>";
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
 				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
@@ -1118,7 +1121,7 @@ function drawOutput(lines){
 				taskBlock.appendChild(alertIcon);
 			}
 			else if (days_until_due==0 && time_until_due<0) {
-				dueDatePhrase.innerHTML = "<b>Due TODAY at "+lines[i][col_duetime]+"</b>";
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
 				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
