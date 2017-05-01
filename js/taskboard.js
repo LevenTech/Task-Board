@@ -17,6 +17,7 @@ var one_hour=1000*60*60;
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
 var currentTask = 0;
+var currentTaskDateSync = 0;
 var currentRowName = "";
 var lastTaskID = 0;
 
@@ -45,6 +46,7 @@ document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
 	initDialogs();
+	initDateSyncing();
 	initKeys();
 
 	initShapePicker();
@@ -133,6 +135,59 @@ function initDialogs() {
 
 	$(".my-dialog").show();	
 }
+
+function initDateSyncing() {
+	$("#datepicker-start").change(function() {
+		if (currentTaskDateSync) $("#datepicker-due").val($("#datepicker-start").val());
+		if (areDatesBad()) { copyDateTimeFromStart(); }
+	});
+	$("#datepicker-due").change(function() {
+		if (currentTaskDateSync) $("#datepicker-start").val($("#datepicker-due").val());
+		if (areDatesBad()) { copyDateTimeFromDue(); }
+	});
+	$("#timepicker-start").change(function() {
+		if (currentTaskDateSync) $("#timepicker-due").val($("#timepicker-start").val());
+		if (areDatesBad()) { copyDateTimeFromStart(); }
+	});
+	$("#timepicker-due").change(function() {
+		if (currentTaskDateSync) $("#timepicker-start").val($("#timepicker-due").val());
+		if (areDatesBad()) { copyDateTimeFromDue(); }
+	});
+}
+
+function copyDateTimeFromStart() {
+	$("#datepicker-due").val($("#datepicker-start").val())
+	$("#timepicker-due").val($("#timepicker-start").val())
+}
+
+function copyDateTimeFromDue() {
+	$("#datepicker-start").val($("#datepicker-due").val())
+	$("#timepicker-start").val($("#timepicker-due").val())
+}
+
+function areDatesBad() {
+	if ($("#datepicker-start").val()=="" || $("#datepicker-due").val()=="") return 0;
+
+	var startDateVal = $("#datepicker-start").val();
+	var startDateParts = startDateVal.split("-")
+	var startDate = new Date(startDateParts[2],startDateParts[0],startDateParts[1]);
+
+	var dueDateVal = $("#datepicker-start").val();
+	var dueDateParts = dueDateVal.split("-")
+	var dueDate = new Date(dueDateParts[2],dueDateParts[0],dueDateParts[1]);
+
+	var startTime = $("#timepicker-start").val();
+	var dueTime = $("#timepicker-due").val();
+
+	if (dueDate.getTime()<startDate.getTime()) return 0
+	if (dueDate.getTime()==startDate.getTime()) {
+		if (startTime=="" || dueTime=="") return 0;
+		if (dueTime<startTime) return 1
+		else return 0
+	}
+	return 0
+}
+
 
 function initKeys() {
 	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
@@ -597,6 +652,32 @@ function cornerClick(ev) {
 }
 
 
+function syncDatesStart() {
+	var meta_isSynced = 0;
+	if (currentTaskDateSync) {
+		currentTaskDateSync=0;
+		$(".sync-button").removeClass("active")
+	}
+	else {
+		currentTaskDateSync = 1
+		copyDateTimeFromStart();
+		$(".sync-button").addClass("active")
+	}
+}
+
+function syncDatesDue() {
+	var meta_isSynced = 0;
+	if (currentTaskDateSync) {
+		currentTaskDateSync=0;
+		$(".sync-button").removeClass("active")
+	}
+	else {
+		currentTaskDateSync= 1
+		copyDateTimeFromDue();
+		$(".sync-button").addClass("active")
+	}
+}
+
 	
 function editTask(taskID,ev) {
 	var startDay = lines[currentTask][col_startday];
@@ -631,6 +712,16 @@ function editTask(taskID,ev) {
 
 	$("#timepicker-due").val(lines[currentTask][col_duetime]);
 	
+	currentTaskDateSync = 0;
+	if (startDate && dueDate) {
+		if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
+			currentTaskDateSync = 1;
+		}
+	}
+
+	if (currentTaskDateSync) $(".sync-button").addClass("active")
+	else $(".sync-button").removeClass("active")
+		
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
 	if (myColor=="") { document.getElementById("colorpicker2").value = colourNameToHex("LemonChiffon") }
@@ -1097,12 +1188,18 @@ function drawOutput(lines){
 		var startOfToday = new Date(today.getTime());
 		startOfToday.setHours(0,0,0,0);
 		var now_mseconds = today.getTime()-startOfToday.getTime();
-		var sameTime;
 
 		var startDate="";
 		var dueDate="";
 		if (startDay>0) { startDate = getStartDate(i) }
 		if (dueDay>0) { dueDate = getDueDate(i) }
+		var sameTime=0;
+
+		if (startDate!=="" && dueDate!=="") {
+			if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
+				sameTime = 1;
+			}
+		}
 		
 		if (startDate!=="") {
 			var startDateStr = makeDateStr(startDate)
@@ -1139,9 +1236,6 @@ function drawOutput(lines){
 							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 							var time_until_start = start_mseconds-now_mseconds;
 							if (time_until_start>0) {
-								if (dueDate!=="") {
-									if (startDate.getTime()==dueDate.getTime() && lines[i][col_starttime]==lines[i][col_duetime]) sameTime = 1;
-								}
 								if (sameTime) {
 									startDatePhrase.innerHTML = "<b></b>";
 									if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
@@ -1153,8 +1247,15 @@ function drawOutput(lines){
 								}
 							}
 							else {
-								startDatePhrase.innerHTML = "<b>Started TODAY</b>";
-								taskBlock.className += " now-task";
+								if (sameTime) {
+									startDatePhrase.innerHTML = "<b></b>";
+									if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
+									else taskBlock.className += " later-task"
+								}
+								else {
+									startDatePhrase.innerHTML = "<b>Started TODAY</b>";
+									taskBlock.className += " now-task";
+								}
 							}
 						}
 						else {
@@ -1165,7 +1266,8 @@ function drawOutput(lines){
 					taskBlock.className += " now-task";
 				}
 				else {
-					startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+					if (sameTime) startDatePhrase.innerHTML = ""
+					else startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
 					taskBlock.className += " later-task";
 				}
 				taskBlock.appendChild(startDatePhrase);
@@ -1222,7 +1324,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(alertIcon);
 			}
 			else if (days_until_due==0 && time_until_due<0) {
-				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+				if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
+				else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
 				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
@@ -1237,7 +1340,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(overDue);
 			}
 			else if (days_until_due<0) {
-				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+				if (sameTime) dueDatePhrase.innerHTML = dueDateStr+", "+dueTimeStr+" ("+(-days_until_due)+" passed)";
+				else dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
 				taskBlock.appendChild(dueDatePhrase);
 
 				var alertIcon = document.createElement("div");
@@ -1252,7 +1356,9 @@ function drawOutput(lines){
 				taskBlock.appendChild(overDue);
 			}
 			else {
-				dueDatePhrase.innerHTML = "Due: "+dueDateStr
+				if (sameTime) dueDatePhrase.innerHTML = "Due: "+dueDateStr
+				else dueDatePhrase.innerHTML = dueDateStr
+				if (dueTimeStr!=="") dueDatePhrase.innerHTML += (", "+dueTimeStr)
 				taskBlock.appendChild(dueDatePhrase)
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
