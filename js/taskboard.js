@@ -1,5 +1,5 @@
 
-var myRightClickEvent;
+var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
@@ -10,10 +10,9 @@ var shape = "";
 var inRightClickMode = 0;
 var dateSliderActive = 0;
 
-var maxLength = 0;
-
 var today = new Date();
 var one_day=1000*60*60*24;
+var one_hour=1000*60*60;
 
 var currentFileName = "newTaskFile.csv";
 var isSaved = 1;
@@ -33,24 +32,111 @@ var	col_color = 8;
 var	col_row = 9;
 var col_complete = 10;
 var	col_increment = 11;
+var	col_starttime = 12;
+var	col_duetime = 13;
 
 var dragcounter = 0;
 var draggingNew = 0;
-var makingNewTask
+var makingNewTask;
+
+var simulateMobile = 0;
 
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
+	initDialogs();
+	initKeys();
+
+	initShapePicker();
+	initFontSlider();
+	initDateSlider();
+
+	initContextMenu("right")
+	if (isMobile()) { initRightClickMode() }
+	if (isMobile()) { initToolSelector() }
+	
+	loadCookieFile();
+
+	$.ui.dialog.prototype._focusTabbable = function(){};
+	
+	$(document).on('mousedown', '.task-block', function (e){ 
+		myClickEvent = e
+		return true; 
+	});
+	
+$(window).scroll(function(){
+    
+	if ($(window).scrollTop() > 66) {
+		$("#taskboard-toolbar").removeClass("moving-toolbar");
+		$("#taskboard-toolbar").addClass("stuck-toolbar");
+	} else {
+		$("#taskboard-toolbar").removeClass("stuck-toolbar");
+		$("#taskboard-toolbar").addClass("moving-toolbar");
+	}
+  
+});	
+	
+});
+
+// INIT FUNCTIONS
+
+function initToolSelector () {
+
+	$(".toolbar-selection").hide();
+	$("#tool-select-control").show();
+	$("#middle-buttons").show();
+	document.getElementById("left-buttons").style.flexBasis = "1em";
+	document.getElementById("left-buttons").style.flexGrow = "0";
+	document.getElementById("left-buttons").style.flexShrink = "0";
+	document.getElementById("middle-buttons").style.flexBasis = "8em";
+	document.getElementById("new-task-drag").style.marginTop = "0.4em";
+	document.getElementById("new-task-drag").style.paddingTop = "1em";
+	document.getElementById("new-task-drag").innerHTML = "New";
+	$("#right-buttons").show();
+	$("#tool-selector").change(function(){
+		createCookie("selected-tool",this.value)
+		$(".toolbar-selection").hide();
+		$("#right-buttons").append($("#"+this.value))
+		$("#"+this.value).show();
+		document.getElementById(this.value).style.fontSize = "25px";
+	});
+	
+	var alreadySelected = readCookie("selected-tool");
+	if (!alreadySelected) alreadySelected = "new-open-file"
+	$("#tool-selector").val(alreadySelected)
+	$(".toolbar-selection").hide();
+	$("#right-buttons").append($("#"+alreadySelected))
+	$("#"+alreadySelected).show();
+	document.getElementById(alreadySelected).style.fontSize = "25px";
+	$(".newfile-button")
+	document.getElementById("newfile-button").style.fontSize = "20px"
+	document.getElementById("newfile-button-label").innerHTML = "New"
+	document.getElementById("openfile-button").style.fontSize = "20px"
+	document.getElementById("openfile-button-label").innerHTML = "Open"
+	
+	$("#taskboard-toolbar").addClass("padded-toolbar");
+	$("#taskboard-toolbar").addClass("moving-toolbar");
+	$("#output").addClass("padded-output");
+	$("#app-header").addClass("padded-app-header");
+}
+
+function initDialogs() {
 	var opt = { autoOpen: false	};
+ 
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
 	$("#deleteDialog").dialog(opt).dialog("close");
-	$(".my-dialog").show();
-	
+
+	$(".my-dialog").show();	
+}
+
+function initKeys() {
 	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
 	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-due").keypress( function (e) { return editDialogKeypress(e); });
 	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
 	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
 	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
@@ -66,8 +152,70 @@ $(document).ready(function() {
 			currentTask = "";
 			return false;
 		}
-	});
+	});	
 
+	$(document).on('keydown keyup',  function (e) {
+		if ($('#completeDialog').is(':visible')) {
+			var key = e.which;
+			if (key == 13) {
+				lines[currentTask][10]="Yes";
+				if (lines[currentTask][11].length>0) newTaskCopy();
+				$("#completeDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+			}
+			else if (key == 27) {
+				$("#completeDialog").dialog("close");
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+			}
+		}
+		if ($('#deleteDialog').is(':visible')) {
+			var key = e.which;
+			if (key == 13) {
+				lines.splice(currentTask,1);
+				$("#deleteDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+			}
+			else if (key == 27) {
+				$("#deleteDialog").dialog("close");
+			}
+		}
+		e.stopPropagation();
+	});	
+}
+
+function initRightClickMode() {
+	var miscBlock = document.getElementById('myBody');
+	var fingers = new Fingers(miscBlock);
+	new Fingers(miscBlock)
+	.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
+	.addHandler(function(eventType, data, fingerList) {
+		if (inRightClickMode == 0) {
+			inRightClickMode = 1
+			$("#right-click-mode-indicator").show();
+			initContextMenu("left")
+		}
+		else {
+			inRightClickMode = 0
+			$("#right-click-mode-indicator").hide();
+			initContextMenu("right")
+		}
+	})
+}
+
+function initShapePicker() {
 	var shapeCookie = readCookie('shapeCookie');
 	if (shapeCookie=="wide") {
 		$("#shape-button-wide").addClass("active")
@@ -75,50 +223,10 @@ $(document).ready(function() {
 	}
 	else {
 		$("#shape-button-default").addClass("active")
-	}
+	}	
+}
 
-	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
-	$("#todays-date").val(todaysDateStr);
-
-	initSliders()
-	initContextMenu("right")
-	
-	loadCookieFile();
-
-	$.ui.dialog.prototype._focusTabbable = function(){};
-	
-	$(document).on('mousedown', '.task-block', function (e){ 
-		myClickEvent = e
-		return true; 
-	}); 
-
-	if (isMobile()) {
-		var miscBlock = document.getElementById('myBody');
-		var fingers = new Fingers(miscBlock);
-		new Fingers(miscBlock)
-		.addGesture(Fingers.gesture.Tap, { nbFingers: 2} )
-		.addHandler(function(eventType, data, fingerList) {
-			if (inRightClickMode == 0) {
-				inRightClickMode = 1
-				$("#right-click-mode-indicator").show();
-				initContextMenu("left")
-			}
-			else {
-				inRightClickMode = 0
-				$("#right-click-mode-indicator").hide();
-				initContextMenu("right")
-			}
-		})
-	}
-	
-});  // END OF DOC.READY
-	
-	
-
-// INIT FUNCTIONS
-
-function initSliders() {
+function initFontSlider() {
 	var cookieVal = readCookie('zoomCookie');
 	if (cookieVal) {	var sliderValue = cookieVal;	}
 	else { 				var sliderValue = 14; 			}
@@ -127,9 +235,9 @@ function initSliders() {
 	var myFontSizeSlider = document.getElementById('font-size-slider');
 	noUiSlider.create(myFontSizeSlider, {
 		start: [sliderValue],
-		step: 1,
+		step: 2,
 		connect: true,
-		range: { 'min': 8, 'max': 24 }
+		range: { 'min': 8, 'max': 36 }
 	});
 
 	myFontSizeSlider.noUiSlider.on('slide', function(){
@@ -138,6 +246,12 @@ function initSliders() {
 		$( "#font-size" ).val(sliderValue);
 		document.getElementById("output").style = "font-size:"+sliderValue+"px;"
 	})
+}
+	
+function initDateSlider() {
+	var todaysDateStr = today.toDateString()
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
+	$("#todays-date").val(todaysDateStr);
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
 	noUiSlider.create(myTodaysDateSlider, {
@@ -145,7 +259,7 @@ function initSliders() {
 		step: 1,
 		behavior: "tap-drag",
 		connect: true,
-		range: { 'min': 0, 'max': 7 }
+		range: { 'min': 0, 'max': 178 }
 	});
 
 	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
@@ -193,7 +307,7 @@ function initContextMenu(button) {
 			},
 			items: {
                 "Delay": {
-					name: "Delay", icon: "fa-bell-slash-o",
+					name: "Snooze", icon: "fa-bell-slash-o",
 					callback: function(key, options) {	delayTask(currentTask);	},
 			        visible: function(key, opt){        
 						if (lines[currentTask][col_dueday] < 1) return false;
@@ -232,11 +346,11 @@ function initContextMenu(button) {
 
 // INPUT FUNCTIONS
 
-function makeDateIncremented(numDays) {
+function makeDateIncremented(numHours) {
 	today = new Date();
-	today = new Date(today.getTime()+numDays*one_day);
+	today = new Date(today.getTime()+numHours*one_hour);
 	var todaysDateStr = today.toDateString()
-	todaysDateStr = todaysDateStr.slice(0,-4)
+	todaysDateStr = todaysDateStr.slice(0,-4)+" "+today.getHours() + ":" + today.getMinutes();
 	$("#todays-date").val(todaysDateStr);
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
@@ -249,7 +363,6 @@ function makeShapeDefault() {
 	$("#shape-button-default").addClass("active")
 	$("#shape-button-wide").removeClass("active")
 	$(".task-details").show()
-	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (17.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("wide-row-name")
 	$(".row-name").addClass("default-row-name")
 	$(".now-task").removeClass("wide-task")
@@ -264,7 +377,6 @@ function makeShapeWide() {
 	$("#shape-button-wide").addClass("active")
 	$("#shape-button-default").removeClass("active")
 	$(".task-details").hide()
-	if (document.getElementById("left-side")) document.getElementById("left-side").style.flexBasis = (21.6*maxLength+5.5)+"em"
 	$(".row-name").removeClass("default-row-name")
 	$(".row-name").addClass("wide-row-name")
 	$(".now-task").removeClass("default-task")
@@ -285,21 +397,39 @@ function editDialogKeypress(e) {
 	}
 }
 
+function changeColor(color) {
+	$(".color-button").removeClass("active")
+	$("#color-button-"+color).addClass("active")
+	if (color=="LemonChiffon") $('#colorpicker').val("")
+	else $('#colorpicker').val(color)
+	colortyped();
+}
+
+function checkColor() {
+	var color = $('#colorpicker').val()
+	if (!color) color="LemonChiffon"
+	$(".color-button").removeClass("active")
+	$("#color-button-"+color).addClass("active")
+}
+
+
 function changeInterval(intVal) {
-	$('#incrementpicker').val(intVal)
 	$(".interval-button").removeClass("active")
 	$("#interval-button"+intVal).addClass("active")
+	if (intVal==0) $('#incrementpicker').val("")
+	else $('#incrementpicker').val(intVal)
 }
 
 function checkInterval() {
 	var intVal = $('#incrementpicker').val();
+	if (!intVal) intVal=0;
 	$(".interval-button").removeClass("active")
 	$("#interval-button"+intVal).addClass("active")
 }
 
 // EDIT TASK FUNCTIONS
 
-function completeTask() {
+function completeTask(wasDropped) {
 
 	$("#deleteDialog").dialog("close");
 	
@@ -309,7 +439,7 @@ function completeTask() {
         width: 350,
         height:350,
         title: 'Finish Task',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
 		buttons: { 
 			Yes: function() {
 				lines[currentTask][10]="Yes";
@@ -330,8 +460,10 @@ function completeTask() {
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
 			}
-		}
+		},
+		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
     };
+	if (wasDropped) opt.position = {my: "top right", at: "top right", of: "#finish-area", collision: "fit", within: "body"};
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
 	$("#completeDialog").dialog(opt).dialog("open");
@@ -350,7 +482,7 @@ function deleteTask() {
         width: 350,
         height:350,
         title: 'Delete Task',
-		position: {my: "center center", at: "center center", of: "body"},
+		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
 		buttons: { 
 			Yes: function() {
 				lines.splice(currentTask,1);
@@ -364,7 +496,8 @@ function deleteTask() {
 			No: function () {
 				$("#deleteDialog").dialog("close");
 			}
-		}
+		},
+		open: function() { $("#deleteDialog").find('button:nth-child(1)').focus(); }
     };
 	var taskName = lines[currentTask][1];
 	$("#deleteTaskName").text(taskName);
@@ -408,6 +541,8 @@ function editTask(taskID,ev) {
 	}
 	else $("#datepicker-start").val("");
 
+	$("#timepicker-start").val(lines[currentTask][col_starttime]);
+
 	var dueDay = lines[currentTask][col_dueday];
 	if (dueDay>0) {
 		if (dueDay.toString().length==1) dueDay = "0" + dueDay
@@ -421,6 +556,8 @@ function editTask(taskID,ev) {
 		$("#datepicker-due").val(dueDateStr);
 	}
 	else $("#datepicker-due").val("");
+
+	$("#timepicker-due").val(lines[currentTask][col_duetime]);
 	
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
@@ -430,10 +567,12 @@ function editTask(taskID,ev) {
 		var hexColor = colourNameToHex(myColor);
 		if (hexColor[0]=="#") { document.getElementById("colorpicker2").value = hexColor }
 	}
-	$("#rowpicker").val(lines[currentTask][col_row]);
-	$("#namepicker").val(lines[currentTask][col_task]);
+	checkColor();
+
 	$("#incrementpicker").val(lines[currentTask][col_increment]);
-	$("#interval-button"+lines[currentTask][col_increment]).addClass("active")
+	checkInterval();
+
+	$("#namepicker").val(lines[currentTask][col_task]);
 	
 	if (makingNewTask==1) var myTitle = "Create New Task"
 	else var myTitle = "Edit Task"
@@ -442,7 +581,7 @@ function editTask(taskID,ev) {
 	var opt = {
         autoOpen: false,
         modal: true, resizable: false,
-        height:370, width: 370,
+        height:380, width: 380,
         title: myTitle,
 		buttons: { 
 			Save: function() {
@@ -464,6 +603,8 @@ function editTask(taskID,ev) {
 		},	
 		open: function(event, ui) 
 		{ 
+            $('#dialog-toolbar').prependTo('.ui-dialog-titlebar');
+			$('#dialog-toolbar').show();
 			$('.ui-widget-overlay').bind('click', function()
 			{ 
 				$("#editDialog").dialog('close'); 
@@ -477,7 +618,7 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
-		}			
+		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
 
@@ -486,7 +627,7 @@ function editTask(taskID,ev) {
 
 	$("#editDialog").dialog(opt);
 	$("#editDialog").dialog("open");
-	$("#editDialog").find('button:nth-child(0)').focus();
+	$("#editDialog").find('textarea').focus();
 }
 
 
@@ -518,6 +659,11 @@ function updateTask() {
 		if (newStringParts[col_startyear]==today.getYear()+1900) newStringParts[col_startyear]="";
 	}
 
+	var newStartTime = $("#timepicker-start").val();
+	newStringParts[col_starttime]=newStartTime;
+	var newDueTime = $("#timepicker-due").val();
+	newStringParts[col_duetime]=newDueTime;
+	
 	var newDueDate = $("#datepicker-due").val();
 	var newDueDateParts = newDueDate.split("-")
 	if (newDueDate==null) {
@@ -547,6 +693,10 @@ function updateTask() {
 
 function delayTask() {
 
+	if (lines[currentTask][col_increment]>0 && lines[currentTask][col_startday]>0) {
+		newTaskCopy()
+		lines[currentTask][col_increment]="";
+	}
 
 	var dueDay = lines[currentTask][col_dueday];
 	var dueMonth=lines[currentTask][col_duemonth];
@@ -578,6 +728,7 @@ function colorpicked() {
 }
 
 function colortyped() {
+	checkColor();
 	var newColor = $("#colorpicker").val();
 	if (newColor=="") newColor = "LemonChiffon";
 	var hexColor = colourNameToHex(newColor);
@@ -686,16 +837,16 @@ function drop(ev) {
 	dragcounter = 0;
     ev.preventDefault();
 	ev.stopPropagation();
-    var rowName = currentRowName;
+    var newRowName = currentRowName;
 	if(draggingNew==1) {
-		newTask(rowName,"",1);
+		newTask(newRowName,"",1);
 		saveFileCookie();
 		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row].toUpperCase()!==rowName.toUpperCase()) {
-			lines[taskID][col_row]=rowName;
+		if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
+			lines[taskID][col_row]=newRowName;
 			isSaved = 0;
 			$("#unsaved-changes").show();
 			saveFileCookie();
@@ -708,7 +859,7 @@ function dropFinish(ev) {
     ev.preventDefault();
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
-	completeTask();
+	completeTask(1);
 	ev.stopPropagation();
 }
 
@@ -726,7 +877,7 @@ function newRow(ev) {
         width: 300,
         height:200,
         title: 'Move Task to New Group',
-		position: {my: "center center", at: "center center", of: window},
+		position: {my: "center center", at: "center center", of: ev, collision: "fit", within: "body"},
 		buttons: { 
 			OK: function() {
 				var rowName = $("#newRowName").val();
@@ -756,7 +907,7 @@ function newFile() {
 		showSaveDialog();
 	}
 	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval"];
+		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
 		lines = [line];
 		newTask("","Misc Task");
 		newTask("Group","Grouped Task");
@@ -806,13 +957,6 @@ function newTaskCopy() {
 		newTask[col_duemonth] = new_duedate.getMonth()+1;
 		newTask[col_dueday] = new_duedate.getDate();
 		newTask[col_dueyear] = new_duedate.getYear()+1900;
-
-		if (startDate) {
-			var new_startdate = new Date(new_duedate.getTime() - start_offset);
-			newTask[col_startmonth] = new_startdate.getMonth()+1;
-			newTask[col_startday] = new_startdate.getDate();
-			newTask[col_startyear] = new_startdate.getYear()+1900;
-		}
 	}
 
 	lines.push(newTask);
@@ -823,7 +967,7 @@ function newTaskCopy() {
 }
 
 function newTask(rowName,taskName,openMe) {
-	var newTask = [ "" , "" ,"","","","","","","","","",""];
+	var newTask = ["","","","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
 	newTask[col_ID] = lastTaskID;
@@ -845,20 +989,9 @@ function newTask(rowName,taskName,openMe) {
 
 function drawOutput(lines){
 	if (typeof lines[0] =="undefined") {return;}
-	//Clear previous data
-	document.getElementById("output").innerHTML = "";
-	var table = document.createElement("div");
+
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
-	var myMonth;
-	var myDay;
-	var myYear;
-	var clockIconVal;
-	var noStartDay;
-	var noDueDay;
-	maxLength = 0
-	
-	var myFontSize = $( "#font-size" ).val();
 	
 	for (var i = 1; i < lines.length; i++) {
 		var taskNum = parseInt(lines[i][col_ID]);
@@ -869,169 +1002,140 @@ function drawOutput(lines){
 
 		var isPastTask = 0;
 		
-		//Create and Style Task Block
-		var taskBlock = document.createElement('div');
-		taskBlock.className = "task-block"
-		//taskBlock.style.fontSize = myFontSize+"px";
-		taskBlock.setAttribute("draggable","true");
-		taskBlock.setAttribute("ondragstart","drag(event)");
-		taskBlock.setAttribute("onmousedown","currentTask="+i+";");
-		taskBlock.setAttribute("data-taskid",i);
-		taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
-		var colorName = lines[i][col_color];
-		if (colorName=="") colorName = "LemonChiffon";
-		taskBlock.style.backgroundColor = colorName;
-		
-		if (colorName.substr(0,1)=="#") var myHexColor = colorName
-		else var myHexColor = colourNameToHex(colorName)
-
-		if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
-		else myTextColor = "black"
-		
-		taskBlock.style.color = myTextColor
+		var taskBlock = createTaskBlock(i,lines[i][col_color])
 		
 		var myName = lines[i][col_task].replace("%44;",",");
 		var name = document.createElement("div");
+		name.className = "task-name"
 		name.innerHTML = "<b>"+myName+"</b>";
-		
+		taskBlock.appendChild(name)
 		
 		var startDay=lines[i][col_startday];
 		var dueDay=lines[i][col_dueday];
-		
 		var days_until_start = "";
 		var days_until_due = "";
+		var startOfToday = new Date(today.getTime());
+		startOfToday.setHours(0,0,0,0);
+		var now_mseconds = today.getTime()-startOfToday.getTime();
 
-		clockIconVal = 0;
-		noStartDay = 0;
-		
-		var cornerButton = document.createElement("div")
-		cornerButton.style = "float:right;position:absolute;right:0;"
-		cornerButton.className = "corner-button"
-		cornerButton.setAttribute("onclick","cornerClick(event)")
-		cornerButton.innerHTML = '<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>';
-		//taskBlock.appendChild(cornerButton)
-		
 		if (startDay>0) {
 			var startDate = getStartDate(i);
 			var startDateStr = startDate.toDateString();
 			startDateStr = startDateStr.substring(0,startDateStr.length-4);
+			startDateStr = startDateStr.replace("0","")
 			var days_until_start = getDateDifference(today,startDate)
-			if (days_until_start==0) {
-				taskRow = document.createElement("span");
-				taskRow.innerHTML = "<b>Starts TODAY</b>";
-				taskRow.className = "task-details"
-				name.setAttribute("style","height:1.5em;width:14em;text-align:center;")
-				taskBlock.appendChild(name);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);				
-				taskBlock.appendChild(taskRow);
-				taskBlock.className += " now-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-			}
-			else if (startDate>today) {
-				var startDatePhrase = document.createElement("span")
-				startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
-				startDatePhrase.className = "task-details"
-				name.setAttribute("style","height:1.5em;width:15em;text-align:center;")
-				taskBlock.appendChild(name);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);				
-				taskBlock.appendChild(startDatePhrase);
-				taskBlock.className += " later-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-			}
-			else if (startDate<today && !dueDay>0) {
+			var startDatePhrase = document.createElement("span");
+			startDatePhrase.className = "task-details start-date"
+			if (startDate<today && !dueDay>0) {
 				isPastTask = 1;
+				taskBlock.className += " past-task";
 
-				name.setAttribute("style","height:1.2em;display:inline-block;")
-				taskBlock.appendChild(name);
-
-				var justDate = document.createElement("span");
-				justDate.className = "task-details"
-				justDate.innerHTML = startDateStr;
-				justDate.setAttribute("style","display:inline-block;margin-left:1em;")
-				taskBlock.appendChild(justDate);
+				startDatePhrase.innerHTML = startDateStr;
+				taskBlock.appendChild(startDatePhrase);
 
 				var myOpacity = (-days_until_start)*0.1;
 				if (myOpacity>1) myOpacity = 1;
-				
-				taskBlock.className += " past-task";
 
 				var iconSpan = document.createElement("span")
-				if (lines[i][col_increment]>0) iconSpan.setAttribute("style","display:inline-block;margin-left:1em;margin-right:1.5em;")
-				else iconSpan.setAttribute("style","display:inline-block;margin-left:1em;")
+				iconSpan.className = "icon-span"
+				if (lines[i][col_increment]>0) iconSpan.className += " icon-margin"
 				for(var k=0;k<(-days_until_start);k++) {
 					var clockIcon = document.createElement("div");
 					clockIcon.className = "clock-icon"
-					//clockIcon.setAttribute("style","opacity:"+myOpacity+";")
-					clockIcon.setAttribute("style","display:inline-block;margin:1px;");
 					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
 					iconSpan.appendChild(clockIcon);
 				}
 				taskBlock.appendChild(iconSpan)
 			}
 			else {
-				taskBlock.className += " now-task";
-				if (shape=="wide") taskBlock.className += " wide-task";
-				else taskBlock.className += " default-task";
-				name.setAttribute("style","height:1.5em;")
-				taskBlock.appendChild(name);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
+				taskBlock.appendChild(createBR());				
+				if (days_until_start<1) {
+					if (days_until_start==0) {
+						if (lines[i][col_starttime]) {
+							var timeParts = lines[i][col_starttime].split(":")
+							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+							var time_until_start = start_mseconds-now_mseconds;
+							if (time_until_start>0) startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
+							else startDatePhrase.innerHTML = "<b>Started Earlier Today</b>";
+						}
+						else startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+					}
+					taskBlock.className += " now-task";
+				}
+				else {
+					startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+					taskBlock.className += " later-task";
+				}
+				taskBlock.appendChild(startDatePhrase);
 			}
 		}
 		else {
-			noStartDay = 1;
 			taskBlock.className += " now-task";
+			taskBlock.appendChild(createBR());		
+		}
+
+		if (isPastTask==0) {
 			if (shape=="wide") taskBlock.className += " wide-task";
 			else taskBlock.className += " default-task";
-			name.setAttribute("style","height:1.5em;")
-			taskBlock.appendChild(name);
-			var BR = document.createElement("br");
-			taskBlock.appendChild(BR);		
 		}
-		var BR = document.createElement("br");
-		taskBlock.appendChild(BR);		
-
-		noDueDay = 0;
 		
 		if (dueDay > 0) {
-			var dueMonth=lines[i][col_duemonth]-1;
-			var dueYear=lines[i][col_dueyear];
-			if (dueYear.length==2) dueYear = "20"+dueYear;
-			if (dueYear.length==0) dueYear = today.getYear()+1900;
-			var dueDate = new Date(dueYear,dueMonth,dueDay);
+			var dueDate = getDueDate(i)
 			var dueDateStr = dueDate.toDateString();
 			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-			var date1_ms = today.getTime();
-			var date2_ms = dueDate.getTime();
-			var difference_ms = date2_ms - date1_ms;
-			var days_until_due = Math.ceil(difference_ms/one_day);
+			dueDateStr = dueDateStr.replace("0","")
+			var days_until_due = getDateDifference(today,dueDate)
 
-			if (days_until_due==0) {
-				taskRow = document.createElement("b");
-				taskRow.appendChild(document.createTextNode("Due TODAY"));
-				taskRow.className = "task-details"
-				taskBlock.appendChild(taskRow);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
+			var dueDatePhrase = document.createElement("div")
+			dueDatePhrase.className = "task-details"
+			taskBlock.appendChild(createBR());		
+
+			var time_until_due=0;
+			var dueTimeStr = ""
+			if (lines[i][col_duetime]) {
+				var timeParts = lines[i][col_duetime].split(":")
+				if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]+" pm"
+				else dueTimeStr = lines[i][col_duetime]+" am"
+				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+				time_until_due = due_mseconds-now_mseconds;
+			}
+						
+			if (days_until_due==0 && time_until_due==0) {
+				dueDatePhrase.style.fontWeight = "bold"
+				dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
+				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
-				alertIcon.className = " alert-icon";
-				alertIcon.setAttribute("style","margin-left:0.3em;")
+				alertIcon.className = "alert-icon alert-indent";
+				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);				
+			}
+			else if (days_until_due==0 && time_until_due>0) {
+				dueDatePhrase.style.fontWeight = "bold"
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+				taskBlock.appendChild(dueDatePhrase);
+				
+				var alertIcon = document.createElement("div");
+				alertIcon.className = "alert-icon alert-indent";
 				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
-				
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
+			}
+			else if (days_until_due==0 && time_until_due<0) {
+				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+				taskBlock.appendChild(dueDatePhrase);
+
+				var alertIcon = document.createElement("div");
+				alertIcon.className = "alert-icon";
+				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
+				taskBlock.appendChild(alertIcon);
+
+				var overDue = document.createElement("b");
+				overDue.className = "task-details"
+				overDue.innerHTML = "!!! OVERDUE !!!"
+				taskBlock.appendChild(createBR());		
+				taskBlock.appendChild(overDue);
 			}
 			else if (days_until_due<0) {
-				var dueDatePhrase = document.createElement("div")
-				dueDatePhrase.setAttribute("class","task-details")
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
 				taskBlock.appendChild(dueDatePhrase);
 
@@ -1040,34 +1144,21 @@ function drawOutput(lines){
 				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
 				taskBlock.appendChild(alertIcon);
 
-				taskRow = document.createElement("b");
-				taskRow.className = "task-details"
-				taskRow.innerHTML = "!!! OVERDUE !!!"
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
-				taskBlock.appendChild(taskRow);
-
-
+				var overDue = document.createElement("b");
+				overDue.className = "task-details"
+				overDue.innerHTML = "!!! OVERDUE !!!"
+				taskBlock.appendChild(createBR());		
+				taskBlock.appendChild(overDue);
 			}
 			else {
-				var dueDatePhrase = document.createElement("div");
-				dueDatePhrase.setAttribute("class","task-details")
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr
+				taskBlock.appendChild(dueDatePhrase)
 				if (!startDay>0 || startDate<=today) {
 					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
-					taskBlock.appendChild(dueDatePhrase)
-					var countdownIcon = createCountdownIcon(days_until_due)
-					taskBlock.appendChild(countdownIcon);
+					taskBlock.appendChild(createCountdownIcon(days_until_due));
 				}
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);		
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
-				var BR = document.createElement("br");
-				taskBlock.appendChild(BR);
 			}
 		}
-		else { noDueDay = 1; }
 
 		if (lines[i][col_increment].length>0) {
 			var repeatIcon = createRepeatIcon(i,isPastTask)
@@ -1091,131 +1182,20 @@ function drawOutput(lines){
 			tableRows.push(rowWithMeta);
 		}
 
-		//if (startDay>0 && !dueDay>0) { days_until_due = days_until_start; }
-
 		var myTaskName = lines[i][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
-		var taskBlockID = "taskBlock"+i;
-		taskBlock.id = taskBlockID;
-		
-		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , isPastTask ];
+		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
 		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
-
-	for (row = 1 ; row<tableRows.length ; row++) {
-		if (tableRows[row][0]) {
-			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (current tasks)")
-			tableRows[row][0].sort(mySortFunction);
-		}
-		if (tableRows[row][2]) {
-			if (sortDebug) console.log("Sorting Row "+tableRows[row][1]+" (past tasks)")
-			tableRows[row][2].sort(mySortFunction);
-		}
-	}
-
-	if (sortDebug) console.log("Sorting Rows")
-	tableRows.sort(myRowSortFunction);
-	
-	for (row = 1 ; row<tableRows.length ; row++) {
-		
-		
-		var tableRow = document.createElement("div");
-		tableRow.className = "task-row normal-row";
-		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
-		tableRow.setAttribute("draggable","false");
-		tableRow.setAttribute("ondrop","drop(event)");
-		tableRow.setAttribute("ondragenter","highlightRow(event)");
-		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
-		
-		var thisRowName = document.createElement("div");
-		var justTheName = document.createElement("div");
-		justTheName.innerHTML = tableRows[row][1];
-		justTheName.className = "vertical-text";
-
-
-		thisRowName.append(justTheName);
-		thisRowName.className = "row-name";
-		if (shape=="wide") thisRowName.className += " wide-row-name";
-		else thisRowName.className += " default-row-name";
-		
-
-		var tableBar = document.createElement("div");
-		tableBar.setAttribute("class","table-bar")
-		tableBar.setAttribute("style","margin:0px;")
-		var tableContents = document.createElement("div");
-		tableContents.setAttribute("class","table-contents")
-		
-		if (tableRows[row][2].length>0) {
-			for (n = 0 ; n<tableRows[row][2].length ; n++) {
-				hasTableBar = 1;
-				tableBar.append(tableRows[row][2][n][3]);
-			}		
-			tableRow.append(tableBar);
-		}
-		
-		tableRow.append(thisRowName);
-		tableRow.setAttribute("data-rowname",tableRows[row][1])
-
-		if (tableRows[row][0].length>0) {
-			for (n = 0 ; n<tableRows[row][0].length ; n++) {
-				tableContents.append(tableRows[row][0][n][3]);
-			}
-			tableRow.append(tableContents);
-		}
-
-		if (tableRows[row][0].length>maxLength) { maxLength=tableRows[row][0].length; }
-	
-		table.append(tableRow);
-	}
-		
-	table.className = "left-side";
-	table.id = "left-side";
-	table.setAttribute("draggable","false")
-	if (shape=="wide") table.style.flexBasis = 21.6*maxLength+5.5+"em";
-	else table.style.flexBasis = 17.6*maxLength+5.5+"em";
-	
-	tableRows[0][0].sort(mySortFunction);
-
-	var miscBar = document.createElement("div");
-	miscBar.setAttribute("class","table-bar")
-	var miscContents = document.createElement("div");
-	miscContents.setAttribute("class","table-contents")
-
-	var hasTableBar = 0;
-	for (n = 0 ; n<tableRows[0][2].length ; n++) {
-		hasTableBar = 1;
-		miscBar.append(tableRows[0][2][n][3]);
-	}	
-	
-	var miscTasks = document.createElement("div");
-	if (hasTableBar) {
-		miscTasks.append(miscBar);
-	}
-
-	for (n = 0 ; n<tableRows[0][0].length ; n++) {
-		miscContents.append(tableRows[0][0][n][3]);
-	}		
-	
-	miscTasks.append(miscContents);
-	
-	miscTasks.className = "misc-block normal-row";
-	miscTasks.id = "misc-block";
-	miscTasks.setAttribute("draggable","false")
-
-	miscTasks.setAttribute("data-rowname","")
-	miscTasks.setAttribute("ondrop","drop(event)");
-	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
-	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
-	
-	document.getElementById("output").append(table);
-	document.getElementById("output").append(miscTasks);
+	document.getElementById("output").innerHTML = "";
+	document.getElementById("output").append(createTable(tableRows));
+	document.getElementById("output").append(createMiscBlock(tableRows));
+	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
 	if (shape=="wide") $(".task-details").hide();
-
-	document.getElementById("output").style =	"font-size:"+myFontSize+"px;"
 	
 	$(".task-row").dblclick( function (){
 		var rowName = this.getAttribute("data-rowname");
@@ -1238,6 +1218,102 @@ function drawOutput(lines){
 		newTask(rowName);
 		return false;
 	});
+}
+
+// ELEMENT CREATION FUNCTIONS
+
+function createTaskBlock(taskID,myColor) {
+	var taskBlock = document.createElement('div');
+	taskBlock.id = "taskBlock"+taskID;
+	taskBlock.className = "task-block"
+	taskBlock.setAttribute("draggable","true");
+	taskBlock.setAttribute("ondragstart","drag(event)");
+	taskBlock.setAttribute("onmousedown","currentTask="+taskID+";");
+	taskBlock.setAttribute("data-taskid",taskID);
+	taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
+
+	var colorName = myColor;
+	if (colorName=="") colorName = "LemonChiffon";
+	taskBlock.style.backgroundColor = colorName;
+	
+	if (colorName.substr(0,1)=="#") var myHexColor = colorName
+	else var myHexColor = colourNameToHex(colorName)
+	if (myHexColor) var myTextColor = getContrastYIQ(myHexColor)
+	else myTextColor = "black"
+	taskBlock.style.color = myTextColor	
+	return taskBlock;
+}
+
+function createTable(tableRows) {
+	var table = document.createElement("div");
+	table.className = "left-side";
+	table.id = "left-side";
+	table.setAttribute("draggable","false")
+
+	if (sortDebug) console.log("Sorting Rows")
+	tableRows.sort(myRowSortFunction);
+	
+	for (row = 1 ; row<tableRows.length ; row++) {
+		var tableRow = document.createElement("div");
+		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
+		tableRow.className = "task-row normal-row";
+		tableRow.setAttribute("data-rowname",tableRows[row][1])
+		tableRow.setAttribute("draggable","false");
+		tableRow.setAttribute("ondrop","drop(event)");
+		tableRow.setAttribute("ondragenter","highlightRow(event)");
+		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
+		tableRow.append(createRowContents(tableRows[row],tableRows[row][1]));
+		table.append(tableRow);
+	}
+	return table;
+}
+	
+function createMiscBlock(tableRows) {	
+	var miscTasks = document.createElement("div")
+	miscTasks.id = "misc-block";
+	miscTasks.className = "misc-block normal-row";
+	miscTasks.setAttribute("data-rowname","")
+	miscTasks.setAttribute("draggable","false")
+	miscTasks.setAttribute("ondrop","drop(event)");
+	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
+	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
+	miscTasks.append(createRowContents(tableRows[0]));
+	return miscTasks;
+}
+
+function createRowContents(myRowArray,myRowName) {
+	myRowArray[0].sort(mySortFunction);
+	myRowArray[2].sort(mySortFunction);
+
+	var myContents = document.createElement("div");
+
+	var myBar = document.createElement("div");
+	myBar.setAttribute("class","table-bar")
+	for (n = 0 ; n<myRowArray[2].length ; n++) {
+		myBar.append(myRowArray[2][n][3]);
+	}	
+	myContents.append(myBar);
+
+	if (myRowName) {
+		var thisRowName = document.createElement("div");
+		var justTheName = document.createElement("div");
+		justTheName.innerHTML = myRowName;
+		justTheName.className = "vertical-text";
+		thisRowName.append(justTheName);
+		thisRowName.className = "row-name";
+		if (shape=="wide") thisRowName.className += " wide-row-name";
+		else thisRowName.className += " default-row-name";
+		myContents.append(thisRowName);
+	}
+
+	var myTasks = document.createElement("div");
+	myTasks.setAttribute("class","table-contents")
+	for (n = 0 ; n<myRowArray[0].length ; n++) {
+		myTasks.append(myRowArray[0][n][3]);
+	}		
+	myContents.append(myTasks);
+
+	return myContents;
 }
 
 function createRepeatIcon(taskID,isPastTask) {
@@ -1275,8 +1351,7 @@ function createCountdownIcon(days_until_due) {
 
 	var clockIconNum = document.createElement("div");
 	clockIconNum.className = "countdown-label"
-	if (clockIconLabel.length==1) clockIconNum.setAttribute("style","margin-left:2px;opacity:"+myOpacity+";")
-	else clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
+	clockIconNum.setAttribute("style","opacity:"+myOpacity+";")
 	clockIconNum.innerHTML = clockIconLabel;
 	countdownIcon.appendChild(clockIconNum);	
 	
