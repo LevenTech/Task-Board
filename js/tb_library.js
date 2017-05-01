@@ -75,14 +75,6 @@ function getDueDate(myTaskID) {
 }
 
 function makeDateStr(myDate) {
-	var hours = myDate.getHours();
-	if (hours<1) var hoursStr = "12"
-	else if (hours>12) var hoursStr = hours-12
-	else var hoursStr = hours
-
-	var minutesStr = myDate.getMinutes();
-	if (minutesStr<10) minutesStr = "0"+minutesStr
-
 	var dateStr = myDate.toDateString()
 	dateStr = dateStr.slice(0,-5)
 	dateStr = eliminateLeadingZeros(dateStr)

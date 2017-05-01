@@ -1359,8 +1359,8 @@ function drawOutput(lines){
 				taskBlock.appendChild(overDue);
 			}
 			else {
-				if (sameTime) dueDatePhrase.innerHTML = "Due: "+dueDateStr
-				else dueDatePhrase.innerHTML = dueDateStr
+				if (sameTime) dueDatePhrase.innerHTML = dueDateStr
+				else dueDatePhrase.innerHTML = "Due: "+dueDateStr
 				if (dueTimeStr!=="") dueDatePhrase.innerHTML += (", "+dueTimeStr)
 				taskBlock.appendChild(dueDatePhrase)
 				if (!startDay>0 || startDate<=today) {
