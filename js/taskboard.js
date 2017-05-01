@@ -1079,10 +1079,19 @@ function drawOutput(lines){
 							var timeParts = lines[i][col_starttime].split(":")
 							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 							var time_until_start = start_mseconds-now_mseconds;
-							if (time_until_start>0) startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
-							else startDatePhrase.innerHTML = "<b>Started Earlier Today</b>";
+							if (time_until_start>0) {
+								startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
+								taskBlock.className += " later-task";
+							}
+							else {
+								startDatePhrase.innerHTML = "<b>Started Earlier Today</b>";
+								taskBlock.className += " now-task";
+							}
 						}
-						else startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+						else {
+							startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+							taskBlock.className += " now-task";
+						}							
 					}
 					taskBlock.className += " now-task";
 				}
