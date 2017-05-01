@@ -386,6 +386,7 @@ function initContextMenu(button) {
 							else {
 								var startDate = getStartDate(currentTask)
 								var days_until_start = getDateDifference(today,startDate)
+								if (days_until_start<0) return true;
 								if (days_until_start==0) {
 									var startOfToday = new Date(today.getTime());
 									startOfToday.setHours(0,0,0,0);
