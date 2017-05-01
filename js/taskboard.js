@@ -693,6 +693,10 @@ function updateTask() {
 
 function delayTask() {
 
+	if (lines[currentTask][col_increment]>0 && lines[currentTask][col_startday]>0) {
+		newTaskCopy()
+		lines[currentTask][col_increment]=0;
+	}
 
 	var dueDay = lines[currentTask][col_dueday];
 	var dueMonth=lines[currentTask][col_duemonth];
