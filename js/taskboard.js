@@ -1097,14 +1097,19 @@ function drawOutput(lines){
 		var startOfToday = new Date(today.getTime());
 		startOfToday.setHours(0,0,0,0);
 		var now_mseconds = today.getTime()-startOfToday.getTime();
+		var sameTime;
 
-		if (startDay>0) {
-			var startDate = getStartDate(i);
+		var startDate="";
+		var dueDate="";
+		if (startDay>0) { startDate = getStartDate(i) }
+		if (dueDay>0) { dueDate = getDueDate(i) }
+		
+		if (startDate!=="") {
 			var startDateStr = makeDateStr(startDate)
 			var days_until_start = getDateDifference(today,startDate)
 			var startDatePhrase = document.createElement("span");
 			startDatePhrase.className = "task-details start-date"
-			if (startDate<today && !dueDay>0) {
+			if (startDate<today && !dueDate) {
 				isPastTask = 1;
 				taskBlock.className += " past-task";
 
@@ -1134,11 +1139,21 @@ function drawOutput(lines){
 							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 							var time_until_start = start_mseconds-now_mseconds;
 							if (time_until_start>0) {
-								startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
-								taskBlock.className += " later-task";
+								if (dueDate!=="") {
+									if (startDate.getTime()==dueDate.getTime() && lines[i][col_starttime]==lines[i][col_duetime]) sameTime = 1;
+								}
+								if (sameTime) {
+									startDatePhrase.innerHTML = "<b></b>";
+									if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
+									else taskBlock.className += " later-task"
+								}
+								else {
+									taskBlock.className += " later-task";
+									startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
+								}
 							}
 							else {
-								startDatePhrase.innerHTML = "<b>Started Earlier Today</b>";
+								startDatePhrase.innerHTML = "<b>Started TODAY</b>";
 								taskBlock.className += " now-task";
 							}
 						}
@@ -1166,8 +1181,7 @@ function drawOutput(lines){
 			else taskBlock.className += " default-task";
 		}
 		
-		if (dueDay > 0) {
-			var dueDate = getDueDate(i)
+		if (dueDate) {
 			if (lines[i][col_duetime]) var dueDateStr = makeDateStr(dueDate)
 			else var dueDateStr = makeDateStr(dueDate);
 			var days_until_due = getDateDifference(today,dueDate)
@@ -1198,7 +1212,8 @@ function drawOutput(lines){
 			}
 			else if (days_until_due==0 && time_until_due>0) {
 				dueDatePhrase.style.fontWeight = "bold"
-				dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+				if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
+				else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
 				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
