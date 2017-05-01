@@ -1,7 +1,7 @@
 
 var myClickEvent;
 
-var sortDebug = 0;
+var sortDebug = 1;
 var editDebug = 0;
 
 var lines = [];
@@ -1347,6 +1347,11 @@ function createTable(tableRows) {
 	table.id = "left-side";
 	table.setAttribute("draggable","false")
 
+	for (row = 0 ; row<tableRows.length ; row++) {
+		tableRows[row][0].sort(mySortFunction);
+		tableRows[row][2].sort(mySortFunction);
+	}
+
 	if (sortDebug) console.log("Sorting Rows")
 	tableRows.sort(myRowSortFunction);
 	
@@ -1379,8 +1384,6 @@ function createMiscBlock(tableRows) {
 }
 
 function createRowContents(myRowArray,myRowName) {
-	myRowArray[0].sort(mySortFunction);
-	myRowArray[2].sort(mySortFunction);
 
 	var myContents = document.createElement("div");
 
