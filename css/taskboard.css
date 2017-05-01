@@ -297,6 +297,8 @@ body {
 }
 #output {
 	width:100%;
+	top:220px;
+	position:absolute;
 }
 .padded-app-header {
 	position:absolute;
@@ -313,6 +315,7 @@ body {
 	}
 .misc-block {
 	margin:0.5em;
+	margin-top:0em;
 	padding: 0.5em;
 	padding-left:1em;
 	padding-right:1em;
