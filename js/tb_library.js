@@ -74,6 +74,37 @@ function getDueDate(myTaskID) {
 	return new Date(dueYear,lines[myTaskID][col_duemonth]-1,lines[myTaskID][col_dueday]);
 }
 
+function makeDateStr(myDate) {
+	var hours = myDate.getHours();
+	if (hours<1) var hoursStr = "12"
+	else if (hours>12) var hoursStr = hours-12
+	else var hoursStr = hours
+
+	var minutesStr = myDate.getMinutes();
+	if (minutesStr<10) minutesStr = "0"+minutesStr
+
+	var dateStr = myDate.toDateString()
+	dateStr = dateStr.slice(0,-5)
+	dateStr = eliminateLeadingZeros(dateStr)
+	return dateStr
+}
+
+function makeTimeStr(myDate) {
+	var hours = myDate.getHours();
+	if (hours<1) var hoursStr = "12"
+	else if (hours>12) var hoursStr = hours-12
+	else var hoursStr = hours
+
+	var minutesStr = myDate.getMinutes();
+	if (minutesStr<10) minutesStr = "0"+minutesStr
+
+	var timeStr = ""
+	timeStr += (" "+(hoursStr) + ":" + minutesStr);
+	if (hours>11) timeStr += " pm";
+	else timeStr += " am";
+	return timeStr
+}
+
 function getDateDifference(date_1,date_2) {
 	return Math.ceil((date_2.getTime() - date_1.getTime())/one_day);
 }

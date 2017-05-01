@@ -1,7 +1,7 @@
 
 var myClickEvent;
 
-var sortDebug = 1;
+var sortDebug = 0;
 var editDebug = 0;
 
 var lines = [];
@@ -250,19 +250,11 @@ function initFontSlider() {
 	})
 }
 	
-function makeTodaysDateStr() {
-	var todaysDateStr = today.toDateString()
-	var hoursStr = today.getHours();
-	var minutesStr = today.getMinutes();
-	if (minutesStr<10) minutesStr = "0"+minutesStr
-	if (hoursStr>12) todaysDateStr = todaysDateStr.slice(0,-4)+" "+(hoursStr-12) + ":" + minutesStr + " pm";
-	else todaysDateStr = todaysDateStr.slice(0,-4)+" "+hoursStr + ":" + minutesStr + " am";
-	return todaysDateStr
-}
+
 
 	
 function initDateSlider() {
-	$("#todays-date").val(makeTodaysDateStr());
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStr(today));
 	
 	var myTodaysDateSlider = document.getElementById('todays-date-slider');
 	noUiSlider.create(myTodaysDateSlider, {
@@ -423,7 +415,7 @@ function initContextMenu(button) {
 function makeDateIncremented(numHours) {
 	today = new Date();
 	today = new Date(today.getTime()+numHours*one_hour);
-	$("#todays-date").val(makeTodaysDateStr());
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStr(today));
 	drawOutput(lines);
 	$(".date-button").removeClass("active")
 	$("#today-button").addClass("active");
@@ -1108,9 +1100,7 @@ function drawOutput(lines){
 
 		if (startDay>0) {
 			var startDate = getStartDate(i);
-			var startDateStr = startDate.toDateString();
-			startDateStr = startDateStr.substring(0,startDateStr.length-4);
-			startDateStr = eliminateLeadingZeros(startDateStr)
+			var startDateStr = makeDateStr(startDate)
 			var days_until_start = getDateDifference(today,startDate)
 			var startDatePhrase = document.createElement("span");
 			startDatePhrase.className = "task-details start-date"
@@ -1178,9 +1168,8 @@ function drawOutput(lines){
 		
 		if (dueDay > 0) {
 			var dueDate = getDueDate(i)
-			var dueDateStr = dueDate.toDateString();
-			dueDateStr = dueDateStr.substring(0,dueDateStr.length-4);
-			dueDateStr = eliminateLeadingZeros(dueDateStr)
+			if (lines[i][col_duetime]) var dueDateStr = makeDateStr(dueDate)
+			else var dueDateStr = makeDateStr(dueDate);
 			var days_until_due = getDateDifference(today,dueDate)
 
 			var dueDatePhrase = document.createElement("div")
