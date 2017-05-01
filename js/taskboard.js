@@ -695,7 +695,7 @@ function delayTask() {
 
 	if (lines[currentTask][col_increment]>0 && lines[currentTask][col_startday]>0) {
 		newTaskCopy()
-		lines[currentTask][col_increment]=0;
+		lines[currentTask][col_increment]="";
 	}
 
 	var dueDay = lines[currentTask][col_dueday];
