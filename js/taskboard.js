@@ -1751,7 +1751,7 @@ function makeTestDatesSavable() {
 
 function saveFile() {
 
-	makeTestDatesSavable();
+	if (isTestFile) makeTestDatesSavable();
 
 	if (currentFileName.indexOf("_")>0) {
 		var fileNameParts = currentFileName.split("_")
@@ -1787,7 +1787,8 @@ function saveFile() {
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
-	makeTestDatesDisplayable();
+	
+	if (isTestFile) makeTestDatesDisplayable();
 }
 
 function errorHandler(evt) {
