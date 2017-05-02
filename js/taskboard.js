@@ -1190,34 +1190,13 @@ function drawOutput(lines){
 		startOfToday.setHours(0,0,0,0);
 		var now_mseconds = today.getTime()-startOfToday.getTime();
 
-		if (currentFileName.indexOf("leventest")>-1) {
-			var fileCreationDate = new Date(2017,4,1)
-			var actualToday = new Date()
-			var actualStartOfToday = new Date(actualToday.getTime());
-			actualStartOfToday.setHours(0,0,0,0);
-			var date_diff = getDateDifference(fileCreationDate,actualStartOfToday)
-			isTestFile=1;
-		}
-
 		var startDate="";
 		var dueDate="";
 		if (startDay>0) { 
 			startDate = getStartDate(currentTask)
-			if (isTestFile) {
-				startDate = new Date(startDate.getTime()+date_diff*one_day)
-				lines[currentTask][col_startday]=startDate.getDate()
-				lines[currentTask][col_startmonth]=startDate.getMonth()+1
-				lines[currentTask][col_startyear]=startDate.getYear()+1900
-			}
 		}
 		if (dueDay>0) {
 			dueDate = getDueDate(currentTask)
-			if (isTestFile) {
-				dueDate = new Date(dueDate.getTime()+date_diff*one_day)
-				lines[currentTask][col_dueday]=dueDate.getDate()
-				lines[currentTask][col_duemonth]=dueDate.getMonth()+1
-				lines[currentTask][col_dueyear]=dueDate.getYear()+1900
-			}
 		}
 		var sameTime=0;
 
@@ -1659,19 +1638,27 @@ function loadCookieFile() {
 }
 
 function processData(csv,fileName) {
+	var fullPath = document.getElementById('csvFileInput').value;
+	if (!fileName) {
+		var fileName = fullPath.split("\\");
+		currentFileName = fileName[fileName.length-1];
+		createCookie("fileName",currentFileName);
+	}
 	if (currentFileName.indexOf("leventest")>-1) {
 		var fileCreationDate = new Date(2017,4,1)
-		var actualToday = new Date()
-		var date_diff = getDateDifference(actualToday,fileCreationDate)
+		var actualStartOfToday = new Date()
+		actualStartOfToday.setHours(0,0,0,0);
+		var date_diff = getDateDifference(fileCreationDate,actualStartOfToday)
 		console.log("Been "+date_diff+" days since testfile created.")
 		isTestFile=1;
 	}
-
+	
     var allTextLines = csv.split(/\r\n|\n/);
 	lines = [];
     while (allTextLines.length) {
         lines.push(allTextLines.shift().split(','));
-    }
+	}
+	
 	for (var j = 0; j < lines[0].length; j++) {
 		if (lines[0][j]=="TaskNum") col_ID = j;
 		if (lines[0][j]=="Task") col_task = j;
@@ -1686,12 +1673,33 @@ function processData(csv,fileName) {
 		if (lines[0][j]=="Complete?") col_complete = j;
 		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
 	}
-	var fullPath = document.getElementById('csvFileInput').value;
-	if (!fileName) {
-		var fileName = fullPath.split("\\");
-		currentFileName = fileName[fileName.length-1];
-		createCookie("fileName",currentFileName);
+	
+	if (isTestFile) {
+		for (var i=0; i< lines.length; i++) {
+			console.log(lines[i])
+			if (lines[i][col_startday]>0) { 
+				var startDate = getStartDate(i)
+				if (isTestFile) {
+					startDate = new Date(startDate.getTime()+date_diff*one_day)
+					lines[i][col_startday]=startDate.getDate()
+					lines[i][col_startmonth]=startDate.getMonth()+1
+					lines[i][col_startyear]=startDate.getYear()+1900
+				}
+			}
+			if (lines[i][col_dueday]>0) {
+				var dueDate = getDueDate(i)
+				if (isTestFile) {
+					dueDate = new Date(dueDate.getTime()+date_diff*one_day)
+					lines[i][col_dueday]=dueDate.getDate()
+					lines[i][col_duemonth]=dueDate.getMonth()+1
+					lines[i][col_dueyear]=dueDate.getYear()+1900
+				}
+			}   
+			console.log(lines[i])
+		}
 	}
+	
+
 	$(".savefile-button").removeAttr('disabled');
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
