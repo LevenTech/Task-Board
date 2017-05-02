@@ -2,7 +2,7 @@
 var myClickEvent;
 
 var sortDebug = 0;
-var editDebug = 1;
+var editDebug = 0;
 
 var lines = [];
 
@@ -845,10 +845,7 @@ function updateTask() {
 	newStringParts[col_task]=$("#namepicker").val();
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
-	console.log(lines[currentTask])
-	console.log(newStringParts)
 	lines[currentTask] = newStringParts;
-	console.log(lines[currentTask])
 	drawOutput(lines);
 	clearEditDialog();
 	isSaved = 0;
@@ -1393,7 +1390,7 @@ function drawOutput(lines){
 		var myTaskName = lines[currentTask][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
-		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock ];
+		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , lines[currentTask][col_duetime]];
 		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
@@ -1753,8 +1750,8 @@ function mySortFunction(a,b) {
 	if (a[0]>0 && a[1].length==0) a[1]=a[0];
 	if (b[0]>0 && b[1].length==0) b[1]=b[0];
 	
-	/*if (a[0]<0 && a[1].length==0) a[1]=-a[0]+0.1;
-	if (b[0]<0 && b[1].length==0) b[1]=-b[0]+0.1;*/
+	if (a[4]=="" || a[4]==null) a[4]="23:59";
+	if (b[4]=="" || b[4]==null) b[4]="23:59";
 
 	if (a[0].length==0) a[0]=-999;
 	if (b[0].length==0) b[0]=-999;
@@ -1765,7 +1762,12 @@ function mySortFunction(a,b) {
 	{
 		if (a[0]==b[0]) 
 		{
-			returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
+			if (a[4]==b[4]) {
+				returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
+			}
+			else {
+				returnVal = (a[4] < b[4]) ? -1 : (a[4] > b[4]) ? 1 : 0 
+			}
 		}
 		else
 		{
