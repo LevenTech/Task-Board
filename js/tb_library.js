@@ -56,6 +56,18 @@ function eraseCookie(name) {
     createCookie(name,"",-1);
 }
 
+function eliminateLeadingZeros(string) {
+	var stringParts = string.split(" ")
+	if (stringParts[2][0]=="0") stringParts[2]=stringParts[2][1]
+	return stringParts.join(" ")
+}
+
+function eliminateLeadingZeros2(string) {
+	var stringParts = string.split(":")
+	if (stringParts[0][0]=="0") stringParts[0]=stringParts[0][1]
+	return stringParts.join(":")
+}
+
 // DATE FUNCTIONS
 
 function getStartDate(myTaskID) {

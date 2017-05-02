@@ -21,6 +21,7 @@ var currentTaskDateSync = 0;
 var currentRowName = "";
 var lastTaskID = 0;
 var isTestFile = 0;
+var testFileDateDiff;
 
 var	col_ID = 0;
 var	col_task = 1;
@@ -1070,7 +1071,7 @@ function newFile() {
 		showSaveDialog();
 	}
 	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Day","Start-Month","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
+		var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
 		lines = [line];
 		newTask("","Misc Task");
 		newTask("Group","Grouped Task");
@@ -1149,11 +1150,6 @@ function newTask(rowName,taskName,openMe) {
 	}
 }
 
-function eliminateLeadingZeros(string) {
-	var stringParts = string.split(" ")
-	if (stringParts[2][0]=="0") stringParts[2]=stringParts[2][1]
-	return stringParts.join(" ")
-}
 
 
 // MAIN BUILD FUNCTION
@@ -1192,14 +1188,10 @@ function drawOutput(lines){
 
 		var startDate="";
 		var dueDate="";
-		if (startDay>0) { 
-			startDate = getStartDate(currentTask)
-		}
-		if (dueDay>0) {
-			dueDate = getDueDate(currentTask)
-		}
-		var sameTime=0;
+		if (startDay>0) startDate = getStartDate(currentTask)
+		if (dueDay>0) dueDate = getDueDate(currentTask)
 
+		var sameTime=0;
 		if (startDate!=="" && dueDate!=="") {
 			if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
 				sameTime = 1;
@@ -1303,7 +1295,7 @@ function drawOutput(lines){
 				var timeParts = lines[currentTask][col_duetime].split(":")
 				if (timeParts[0]==0) dueTimeStr = "12:"+timeParts[1]
 				else if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]
-				else dueTimeStr = lines[currentTask][col_duetime]
+				else dueTimeStr = eliminateLeadingZeros2(lines[currentTask][col_duetime])
 				if (timeParts[0]>11 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
 				else dueTimeStr += " am"
 				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
@@ -1648,7 +1640,7 @@ function processData(csv,fileName) {
 		var fileCreationDate = new Date(2017,4,1)
 		var actualStartOfToday = new Date()
 		actualStartOfToday.setHours(0,0,0,0);
-		var date_diff = getDateDifference(fileCreationDate,actualStartOfToday)
+		testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
 		isTestFile=1;
 	}
 	
@@ -1673,29 +1665,7 @@ function processData(csv,fileName) {
 		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
 	}
 	
-	if (isTestFile) {
-		for (var i=0; i< lines.length; i++) {
-			if (lines[i][col_startday]>0) { 
-				var startDate = getStartDate(i)
-				if (isTestFile) {
-					startDate = new Date(startDate.getTime()+date_diff*one_day)
-					lines[i][col_startday]=startDate.getDate()
-					lines[i][col_startmonth]=startDate.getMonth()+1
-					lines[i][col_startyear]=startDate.getYear()+1900
-				}
-			}
-			if (lines[i][col_dueday]>0) {
-				var dueDate = getDueDate(i)
-				if (isTestFile) {
-					dueDate = new Date(dueDate.getTime()+date_diff*one_day)
-					lines[i][col_dueday]=dueDate.getDate()
-					lines[i][col_duemonth]=dueDate.getMonth()+1
-					lines[i][col_dueyear]=dueDate.getYear()+1900
-				}
-			}   
-		}
-	}
-	
+	if (isTestFile) makeTestDatesDisplayable();
 
 	$(".savefile-button").removeAttr('disabled');
 	$("#middle-buttons").show();
@@ -1732,7 +1702,56 @@ function showSaveDialog(fileToOpen) {
 	$("#saveDialog").dialog(opt).dialog("open");
 }
 
+function makeTestDatesDisplayable() {
+	for (var i=0; i< lines.length; i++) {
+		if (lines[i][col_startday]>0) { 
+			var startDate = getStartDate(i)
+			if (isTestFile) {
+				startDate = new Date(startDate.getTime()+testFileDateDiff*one_day)
+				lines[i][col_startday]=startDate.getDate()
+				lines[i][col_startmonth]=startDate.getMonth()+1
+				lines[i][col_startyear]=startDate.getYear()+1900
+			}
+		}
+		if (lines[i][col_dueday]>0) {
+			var dueDate = getDueDate(i)
+			if (isTestFile) {
+				dueDate = new Date(dueDate.getTime()+testFileDateDiff*one_day)
+				lines[i][col_dueday]=dueDate.getDate()
+				lines[i][col_duemonth]=dueDate.getMonth()+1
+				lines[i][col_dueyear]=dueDate.getYear()+1900
+			}
+		}   
+	}
+}
+
+function makeTestDatesSavable() {
+	for (var i=0; i< lines.length; i++) {
+		if (lines[i][col_startday]>0) { 
+			var startDate = getStartDate(i)
+			if (isTestFile) {
+				startDate = new Date(startDate.getTime()-testFileDateDiff*one_day)
+				lines[i][col_startday]=startDate.getDate()
+				lines[i][col_startmonth]=startDate.getMonth()+1
+				lines[i][col_startyear]=startDate.getYear()+1900
+			}
+		}
+		if (lines[i][col_dueday]>0) {
+			var dueDate = getDueDate(i)
+			if (isTestFile) {
+				dueDate = new Date(dueDate.getTime()-testFileDateDiff*one_day)
+				lines[i][col_dueday]=dueDate.getDate()
+				lines[i][col_duemonth]=dueDate.getMonth()+1
+				lines[i][col_dueyear]=dueDate.getYear()+1900
+			}
+		}   
+	}
+}
+
+
 function saveFile() {
+
+	makeTestDatesSavable();
 
 	if (currentFileName.indexOf("_")>0) {
 		var fileNameParts = currentFileName.split("_")
@@ -1768,6 +1787,7 @@ function saveFile() {
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
+	makeTestDatesDisplayable();
 }
 
 function errorHandler(evt) {
