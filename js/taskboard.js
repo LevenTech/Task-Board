@@ -874,6 +874,11 @@ function delayTask(numHours) {
 	if (newDueDate.getYear()==today.getYear()) lines[currentTask][col_dueyear]="";
 	else lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
 
+	if (lines[currentTask][col_duetime]) {
+		lines[currentTask][col_duetime] = newDueDate.getHours()+":"+newDueDate.getMinutes();
+		console.log(lines[currentTask][col_duetime])
+	}
+	
 	drawOutput(lines);
 	isSaved = 0;
 	$("#unsaved-changes").show();
@@ -1294,7 +1299,7 @@ function drawOutput(lines){
 				if (timeParts[0]==0) dueTimeStr = "12:"+timeParts[1]
 				else if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]
 				else dueTimeStr = lines[currentTask][col_duetime]
-				if (timeParts[0]>12 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
+				if (timeParts[0]>11 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
 				else dueTimeStr += " am"
 				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
 				time_until_due = due_mseconds-now_mseconds;
