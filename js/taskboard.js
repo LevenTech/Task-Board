@@ -20,6 +20,7 @@ var currentTask = 0;
 var currentTaskDateSync = 0;
 var currentRowName = "";
 var lastTaskID = 0;
+var isTestFile = 0;
 
 var	col_ID = 0;
 var	col_task = 1;
@@ -1189,10 +1190,35 @@ function drawOutput(lines){
 		startOfToday.setHours(0,0,0,0);
 		var now_mseconds = today.getTime()-startOfToday.getTime();
 
+		if (currentFileName.indexOf("leventest")>-1) {
+			var fileCreationDate = new Date(2017,4,1)
+			var actualToday = new Date()
+			var actualStartOfToday = new Date(actualToday.getTime());
+			actualStartOfToday.setHours(0,0,0,0);
+			var date_diff = getDateDifference(fileCreationDate,actualStartOfToday)
+			isTestFile=1;
+		}
+
 		var startDate="";
 		var dueDate="";
-		if (startDay>0) { startDate = getStartDate(currentTask) }
-		if (dueDay>0) { dueDate = getDueDate(currentTask) }
+		if (startDay>0) { 
+			startDate = getStartDate(currentTask)
+			if (isTestFile) {
+				startDate = new Date(startDate.getTime()+date_diff*one_day)
+				lines[currentTask][col_startday]=startDate.getDate()
+				lines[currentTask][col_startmonth]=startDate.getMonth()+1
+				lines[currentTask][col_startyear]=startDate.getYear()+1900
+			}
+		}
+		if (dueDay>0) {
+			dueDate = getDueDate(currentTask)
+			if (isTestFile) {
+				dueDate = new Date(dueDate.getTime()+date_diff*one_day)
+				lines[currentTask][col_dueday]=dueDate.getDate()
+				lines[currentTask][col_duemonth]=dueDate.getMonth()+1
+				lines[currentTask][col_dueyear]=dueDate.getYear()+1900
+			}
+		}
 		var sameTime=0;
 
 		if (startDate!=="" && dueDate!=="") {
@@ -1633,6 +1659,14 @@ function loadCookieFile() {
 }
 
 function processData(csv,fileName) {
+	if (currentFileName.indexOf("leventest")>-1) {
+		var fileCreationDate = new Date(2017,4,1)
+		var actualToday = new Date()
+		var date_diff = getDateDifference(actualToday,fileCreationDate)
+		console.log("Been "+date_diff+" days since testfile created.")
+		isTestFile=1;
+	}
+
     var allTextLines = csv.split(/\r\n|\n/);
 	lines = [];
     while (allTextLines.length) {
@@ -1652,7 +1686,6 @@ function processData(csv,fileName) {
 		if (lines[0][j]=="Complete?") col_complete = j;
 		if (lines[0][j]=="Increment" || lines[0][j]=="Interval") col_increment = j;
 	}
-	drawOutput(lines);
 	var fullPath = document.getElementById('csvFileInput').value;
 	if (!fileName) {
 		var fileName = fullPath.split("\\");
@@ -1662,6 +1695,7 @@ function processData(csv,fileName) {
 	$(".savefile-button").removeAttr('disabled');
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
+	drawOutput(lines);
 }
 
 function showSaveDialog(fileToOpen) {

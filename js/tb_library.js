@@ -63,7 +63,8 @@ function getStartDate(myTaskID) {
 	var startYear=lines[myTaskID][col_startyear];
 	if (startYear.length==2) startYear = "20"+startYear;
 	if (startYear.length==0) startYear = today.getYear()+1900;
-	return new Date(startYear,lines[myTaskID][col_startmonth]-1,lines[myTaskID][col_startday]);
+	var startDate = new Date(startYear,lines[myTaskID][col_startmonth]-1,lines[myTaskID][col_startday]);
+	return startDate
 }
 
 function getDueDate(myTaskID) {
@@ -71,7 +72,8 @@ function getDueDate(myTaskID) {
 	var dueYear=lines[myTaskID][col_dueyear];
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
-	return new Date(dueYear,lines[myTaskID][col_duemonth]-1,lines[myTaskID][col_dueday]);
+	var dueDate = new Date(dueYear,lines[myTaskID][col_duemonth]-1,lines[myTaskID][col_dueday]);
+	return dueDate
 }
 
 function makeDateStr(myDate) {
