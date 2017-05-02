@@ -2,7 +2,7 @@
 var myClickEvent;
 
 var sortDebug = 0;
-var editDebug = 0;
+var editDebug = 1;
 
 var lines = [];
 
@@ -516,10 +516,8 @@ function editDialogKeypress(e) {
 	if (e.which==13) {
 		e.preventDefault();
 		updateTask(currentTask);
-		$("#editDialog").dialog("close");
 		makingNewTask = 0;
-		isSaved = 0;
-		$("#unsaved-changes").show();
+		$("#editDialog").dialog("close");
 		return false;
 	}
 }
@@ -847,7 +845,10 @@ function updateTask() {
 	newStringParts[col_task]=$("#namepicker").val();
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
 	
+	console.log(lines[currentTask])
+	console.log(newStringParts)
 	lines[currentTask] = newStringParts;
+	console.log(lines[currentTask])
 	drawOutput(lines);
 	clearEditDialog();
 	isSaved = 0;
@@ -868,11 +869,6 @@ function delayTask(numHours) {
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
 	var dueDate = new Date(dueYear,dueMonth,dueDay);
-
-	var date1_ms = today.getTime();
-	var date2_ms = dueDate.getTime();
-	var difference_ms = date2_ms - date1_ms;
-	var days_until_due = Math.ceil(difference_ms/one_day);
 
 	var newDueDate = new Date(today.getTime() + one_hour*numHours)
 	
@@ -1131,7 +1127,7 @@ function newTaskCopy() {
 }
 
 function newTask(rowName,taskName,openMe) {
-	var newTask = ["","","","","","","","","","","",""];
+	var newTask = ["","","","","","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
 	newTask[col_ID] = lastTaskID;
@@ -1142,6 +1138,7 @@ function newTask(rowName,taskName,openMe) {
 	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
+		currentTask = lines.length-1
 		var myTaskID = lines.length-1
 		if (editDebug) console.log("opening new task "+myTaskID+" for editing")
 		$("#taskBlock"+myTaskID).click();
@@ -1165,6 +1162,7 @@ function drawOutput(lines){
 	var tableRows = [rowWithMeta];
 	
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
+		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
 		if (isNaN(taskNum)) { continue; }
 		if (lines[currentTask][col_complete]=="Yes") { continue; }
