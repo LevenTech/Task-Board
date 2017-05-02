@@ -1649,7 +1649,6 @@ function processData(csv,fileName) {
 		var actualStartOfToday = new Date()
 		actualStartOfToday.setHours(0,0,0,0);
 		var date_diff = getDateDifference(fileCreationDate,actualStartOfToday)
-		console.log("Been "+date_diff+" days since testfile created.")
 		isTestFile=1;
 	}
 	
@@ -1676,7 +1675,6 @@ function processData(csv,fileName) {
 	
 	if (isTestFile) {
 		for (var i=0; i< lines.length; i++) {
-			console.log(lines[i])
 			if (lines[i][col_startday]>0) { 
 				var startDate = getStartDate(i)
 				if (isTestFile) {
@@ -1695,7 +1693,6 @@ function processData(csv,fileName) {
 					lines[i][col_dueyear]=dueDate.getYear()+1900
 				}
 			}   
-			console.log(lines[i])
 		}
 	}
 	
