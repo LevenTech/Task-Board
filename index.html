@@ -138,8 +138,21 @@
 					<textarea type="text" cols="21" rows="2" id="namepicker" style="width:100%;margin-bottom:5px;resize:none;text-align:center;"></textarea>
 				</td>
 			</tr>
-			<tr style="height:2em;"><td>Start:</td><td><input type="date" id="datepicker-start" style="width:60%;"><input type="time" id="timepicker-start" style="width:40%;"></td></tr>
-			<tr><td>Due:</td><td><input type="date" id="datepicker-due" style="width:60%;"><input type="time" id="timepicker-due" style="width:40%;"></td></tr>
+			<tr style="height:2em;">
+				<td rowspan="2">
+					Start:<br/>
+					<button id="sync-from-start" class="btn btn-default sync-button" style="font-size:10px;padding:2px;padding-left:5px;padding-right:5px;" onclick="syncDatesStart();">
+						<i class="fa fa-arrow-down" aria-hidden="true"></i>
+					</button>
+					<button id="sync-from-due" class="btn btn-default sync-button" style="font-size:10px;padding:2px;padding-left:5px;padding-right:5px;" onclick="syncDatesDue();">
+						<i class="fa fa-arrow-up" aria-hidden="true"></i>
+					</button>
+					<br/>
+					Due:
+				</td>
+				<td><input type="date" id="datepicker-start" style="width:60%;"><input type="time" id="timepicker-start" style="width:40%;"></td>
+			</tr>
+			<tr><td><input type="date" id="datepicker-due" style="width:60%;"><input type="time" id="timepicker-due" style="width:40%;"></td></tr>
 		</table>
 		<table style="float:left;width:100%;text-align:center;">
 			<tr style="height:0em;"></tr>

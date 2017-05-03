@@ -56,6 +56,18 @@ function eraseCookie(name) {
     createCookie(name,"",-1);
 }
 
+function eliminateLeadingZeros(string) {
+	var stringParts = string.split(" ")
+	if (stringParts[2][0]=="0") stringParts[2]=stringParts[2][1]
+	return stringParts.join(" ")
+}
+
+function eliminateLeadingZeros2(string) {
+	var stringParts = string.split(":")
+	if (stringParts[0][0]=="0") stringParts[0]=stringParts[0][1]
+	return stringParts.join(":")
+}
+
 // DATE FUNCTIONS
 
 function getStartDate(myTaskID) {
@@ -63,7 +75,8 @@ function getStartDate(myTaskID) {
 	var startYear=lines[myTaskID][col_startyear];
 	if (startYear.length==2) startYear = "20"+startYear;
 	if (startYear.length==0) startYear = today.getYear()+1900;
-	return new Date(startYear,lines[myTaskID][col_startmonth]-1,lines[myTaskID][col_startday]);
+	var startDate = new Date(startYear,lines[myTaskID][col_startmonth]-1,lines[myTaskID][col_startday]);
+	return startDate
 }
 
 function getDueDate(myTaskID) {
@@ -71,7 +84,31 @@ function getDueDate(myTaskID) {
 	var dueYear=lines[myTaskID][col_dueyear];
 	if (dueYear.length==2) dueYear = "20"+dueYear;
 	if (dueYear.length==0) dueYear = today.getYear()+1900;
-	return new Date(dueYear,lines[myTaskID][col_duemonth]-1,lines[myTaskID][col_dueday]);
+	var dueDate = new Date(dueYear,lines[myTaskID][col_duemonth]-1,lines[myTaskID][col_dueday]);
+	return dueDate
+}
+
+function makeDateStr(myDate) {
+	var dateStr = myDate.toDateString()
+	dateStr = dateStr.slice(0,-5)
+	dateStr = eliminateLeadingZeros(dateStr)
+	return dateStr
+}
+
+function makeTimeStrFromDate(myDate) {
+	var hours = myDate.getHours();
+	if (hours<1) var hoursStr = "12"
+	else if (hours>12) var hoursStr = hours-12
+	else var hoursStr = hours
+
+	var minutesStr = myDate.getMinutes();
+	if (minutesStr<10) minutesStr = "0"+minutesStr
+
+	var timeStr = ""
+	timeStr += (" "+(hoursStr) + ":" + minutesStr);
+	if (hours>11) timeStr += " pm";
+	else timeStr += " am";
+	return timeStr
 }
 
 function getDateDifference(date_1,date_2) {

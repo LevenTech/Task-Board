@@ -147,10 +147,8 @@ body {
 }
 
 #editDialog {padding:0px;}
-#editDialog table tr td:first-child {
+#editDialog table {
 	padding-left:0.3em;
-}
-#editDialog table tr td:last-child {
 	padding-right:0.3em;
 }
 
@@ -290,6 +288,11 @@ body {
 }
 .table-contents {
 	float:left;
+}
+
+.my-context-menu 
+{
+   width: 150px !important; 
 }
 
 .new-task-drag {
