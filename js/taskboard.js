@@ -1610,7 +1610,7 @@ function saveFileCookie() {
 			csvContent += index < lines.length ? dataString+ "^" : dataString;
 		}
 	}); 
-	createCookie("myCSVFile",csvContent,999);
+	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
 }
 
