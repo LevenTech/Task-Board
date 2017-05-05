@@ -1470,10 +1470,10 @@ function createTable(tableRows) {
 		tableRow.setAttribute("id","task-row-"+tableRows[row][1]);
 		tableRow.className = "task-row normal-row";
 		tableRow.setAttribute("data-rowname",tableRows[row][1])
-		tableRow.setAttribute("draggable","false");
-		tableRow.setAttribute("ondrop","drop(event)");
 		tableRow.setAttribute("ondragenter","highlightRow(event)");
 		tableRow.setAttribute("ondragleave","unhighlightRow(event)");
+		tableRow.setAttribute("draggable","false");
+		tableRow.setAttribute("ondrop","drop(event)");
 		tableRow.append(createRowContents(tableRows[row],tableRows[row][1]));
 		table.append(tableRow);
 	}
