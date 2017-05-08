@@ -643,7 +643,7 @@ function completeTask(wasDropped) {
 
 	$("#deleteDialog").dialog("close");
 	
-	var opt = {
+	/*var opt = {
         autoOpen: false,
         modal: true,
         width: 350,
@@ -678,7 +678,22 @@ function completeTask(wasDropped) {
 	if (wasDropped) opt.position = {my: "top right", at: "top right", of: "#finish-area", collision: "fit", within: "body"};
 	var taskName = lines[currentTask][1];
 	$("#completeTaskName").text(taskName);
-	$("#completeDialog").dialog(opt).dialog("open");
+
+	$("#completeDialog").dialog(opt).dialog("open");*/
+
+	lines[currentTask][10]="Yes";
+	if (lines[currentTask][11].length>0) newTaskCopy();
+	$("#completeDialog").dialog("close");
+	$("#editDialog").dialog("close");
+	isSaved = 0;
+	$("#unsaved-changes").show();
+	saveFileCookie();
+	drawOutput(lines);
+	$("#finish-area").removeClass("hover-finish");
+	$("#finish-area").addClass("normal-finish");
+	$("#finish-instructions").hide();
+	$("#show-finished-toggle").show();	
+	
 }
 
 function uncompleteTask() {
