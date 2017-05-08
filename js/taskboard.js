@@ -5,6 +5,7 @@ var sortDebug = 0;
 var editDebug = 0;
 
 var lines = [];
+var showFinished = 0;
 
 var shape = "";
 var inRightClickMode = 0;
@@ -81,7 +82,69 @@ $(document).ready(function() {
 	
 	setInterval(checkTime,60000)
 	
+	$("#show-finished").change(function() {
+		if(this.checked) {
+			showFinished = 1;
+			drawOutput(lines)
+		}
+		else {
+			showFinished = 0;
+			drawOutput(lines)
+		}
+	});
+	
 });
+
+$(window).on('resize', function(){
+	width = $(this).width();
+});
+
+function toggleFinishedVisible() {
+	if ($('#show-finished').is(':checked')) {
+		document.getElementById("show-finished").checked = false;
+		$("#delete-finished-button").hide();
+		showFinished = 0;
+	}
+	else {
+		document.getElementById("show-finished").checked = true;
+		$("#delete-finished-button").show();
+		showFinished = 1;
+	}
+	drawOutput(lines)
+}
+
+function deleteAllFinished() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 300,
+        height:200,
+        title: 'Delete All Finished',
+		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+		buttons: { 
+			Yes: function() {
+				var toDelete = []
+				for (var currentTask = 0;currentTask<lines.length;currentTask++) {
+					if (lines[currentTask][col_complete]=="Yes") {
+						lines.splice(currentTask,1);
+						currentTask--;
+					}
+				}
+				$("#deleteFinishedDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				toggleFinishedVisible();
+				drawOutput(lines);
+			},
+			No: function () {
+				$("#deleteFinishedDialog").dialog("close");
+			}
+		},
+		open: function() { $("#deleteFinishedDialog").find('button:nth-child(1)').focus(); }
+    };
+	$("#deleteFinishedDialog").dialog(opt).dialog("open");	
+}
 
 // INIT FUNCTIONS
 
@@ -131,9 +194,11 @@ function initDialogs() {
  
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
+	$("#uncompleteDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
 	$("#deleteDialog").dialog(opt).dialog("close");
+	$("#deleteFinishedDialog").dialog(opt).dialog("close");
 
 	$(".my-dialog").show();	
 }
@@ -228,12 +293,14 @@ function initKeys() {
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
 			}
 			else if (key == 27) {
 				$("#completeDialog").dialog("close");
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
 			}
 		}
 		if ($('#deleteDialog').is(':visible')) {
@@ -370,6 +437,7 @@ function initContextMenu(button) {
 					name: "Snooze 1 day", icon: "fa-bell-slash-o",
 					callback: function(key, options) {	delayTask(24);	},
 			        visible: function(key, opt){        
+						if (lines[currentTask][col_complete] == "Yes") return false;
 						if (lines[currentTask][col_duetime]!==null && lines[currentTask][col_duetime]!=="") return false;
 						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
 						var dueDate = getDueDate(currentTask);
@@ -399,6 +467,7 @@ function initContextMenu(button) {
 					name: "Snooze 1 hour", icon: "fa-bell-slash-o",
 					callback: function(key, options) {	delayTask(1);	},
 			        visible: function(key, opt){        
+						if (lines[currentTask][col_complete] == "Yes") return false;
 						if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false;
 						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
 						var dueDate = getDueDate(currentTask);
@@ -427,6 +496,7 @@ function initContextMenu(button) {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {	completeTask();	},
 			        visible: function(key, opt){        
+						if (lines[currentTask][col_complete] == "Yes") return false;
 						if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
 						var startDate = getStartDate(currentTask)
 						var days_until_start = getDateDifference(today,startDate)
@@ -451,6 +521,14 @@ function initContextMenu(button) {
 						return false;
 					}					
 				},
+                "Un-Finish": {
+					name: "Un-Finish", icon: "fa-check-square-o",
+					callback: function(key, options) {	uncompleteTask();	},
+			        visible: function(key, opt){        
+						if (lines[currentTask][col_complete] == "Yes") return true;
+						else return false;
+					}					
+				},				
                 "Edit": {
 					name: "Edit", icon: "fa-edit",
 					callback: function(key, options) {	editTaskContextMenu();	}
@@ -556,6 +634,11 @@ function checkInterval() {
 
 // EDIT TASK FUNCTIONS
 
+function clickFinish() {
+	if (lines[currentTask][col_complete]=="Yes") uncompleteTask();
+	else completeTask();
+}
+
 function completeTask(wasDropped) {
 
 	$("#deleteDialog").dialog("close");
@@ -580,12 +663,14 @@ function completeTask(wasDropped) {
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
 			},
 			No: function () {
 				$("#completeDialog").dialog("close");
 				$("#finish-area").removeClass("hover-finish");
 				$("#finish-area").addClass("normal-finish");
 				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
 			}
 		},
 		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
@@ -596,12 +681,53 @@ function completeTask(wasDropped) {
 	$("#completeDialog").dialog(opt).dialog("open");
 }
 
+function uncompleteTask() {
+
+	$("#deleteDialog").dialog("close");
+	
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 350,
+        height:350,
+        title: 'Un-Finish Task',
+		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
+		buttons: { 
+			Yes: function() {
+				lines[currentTask][10]="";
+				$("#uncompleteDialog").dialog("close");
+				$("#editDialog").dialog("close");
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
+			},
+			No: function () {
+				$("#uncompleteDialog").dialog("close");
+				$("#finish-area").removeClass("hover-finish");
+				$("#finish-area").addClass("normal-finish");
+				$("#finish-instructions").hide();
+				$("#show-finished-toggle").show();
+			}
+		},
+		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
+    };
+	var taskName = lines[currentTask][1];
+	$("#uncompleteTaskName").text(taskName);
+	$("#uncompleteDialog").dialog(opt).dialog("open");
+}
+
 function deleteTask() {
 
 	$("#completeDialog").dialog("close");
 	$("#finish-area").removeClass("hover-finish");
 	$("#finish-area").addClass("normal-finish");
 	$("#finish-instructions").hide();
+	$("#show-finished-toggle").show();
 	
 	var opt = {
         autoOpen: false,
@@ -736,6 +862,12 @@ function editTask(taskID,ev) {
 	checkInterval();
 
 	$("#namepicker").val(lines[currentTask][col_task]);
+
+	if (lines[currentTask][col_complete]=="Yes") {
+		$("#edit-dialog-finish").addClass("active")
+		console.log("complete")
+	}
+	else $("#edit-dialog-finish").removeClass("active")
 	
 	if (makingNewTask==1) var myTitle = "New Task"
 	else var myTitle = "Edit Task"
@@ -976,6 +1108,7 @@ function highlightFinish(ev) {
 		$("#finish-area").removeClass("normal-finish");
 		$("#finish-area").addClass("hover-finish");
 		$("#finish-instructions").show();
+		$("#show-finished-toggle").hide();
 	}
 }
 function unhighlightFinish(ev) {
@@ -983,6 +1116,7 @@ function unhighlightFinish(ev) {
 	$("#finish-area").removeClass("hover-finish");
 	$("#finish-area").addClass("normal-finish");
 	$("#finish-instructions").hide();
+	$("#show-finished-toggle").show();
 }
 
 function drag(ev) {
@@ -1100,7 +1234,6 @@ function newTaskCopy() {
 
 	var startDate = getStartDate(currentTask)
 	var dueDate = getDueDate(currentTask)
-	var start_offset = dueDate.getTime() - startDate.getTime();
 		
 	if (startDate) {
 
@@ -1110,6 +1243,7 @@ function newTaskCopy() {
 		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
 		if(dueDate) {
+			var start_offset = dueDate.getTime() - startDate.getTime();
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
 			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
@@ -1164,11 +1298,12 @@ function drawOutput(lines){
 		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
 		if (isNaN(taskNum)) { continue; }
-		if (lines[currentTask][col_complete]=="Yes") { continue; }
+		if (showFinished==0 && lines[currentTask][col_complete]=="Yes") { continue; }
 		
 		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isPastTask = 0;
+		var isComplete = 0;
 		
 		var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
 		
@@ -1176,7 +1311,6 @@ function drawOutput(lines){
 		var name = document.createElement("div");
 		name.className = "task-name"
 		name.innerHTML = "<b>"+myName+"</b>";
-		taskBlock.appendChild(name)
 		
 		var startDay=lines[currentTask][col_startday];
 		var dueDay=lines[currentTask][col_dueday];
@@ -1188,8 +1322,19 @@ function drawOutput(lines){
 
 		var startDate="";
 		var dueDate="";
-		if (startDay>0) startDate = getStartDate(currentTask)
-		if (dueDay>0) dueDate = getDueDate(currentTask)
+		if (startDay>0) {
+			startDate = getStartDate(currentTask)
+			var startDateStr = makeDateStr(startDate)
+			var startDatePhrase = document.createElement("span");
+			startDatePhrase.className = "task-details start-date"
+			startDatePhrase.innerHTML = startDateStr;
+		}
+		if (dueDay>0) {
+			dueDate = getDueDate(currentTask)
+			var dueDateStr = makeDateStr(dueDate)
+			var dueDatePhrase = document.createElement("span")
+			dueDatePhrase.className = "task-details"
+		}
 
 		var sameTime=0;
 		if (startDate!=="" && dueDate!=="") {
@@ -1197,13 +1342,38 @@ function drawOutput(lines){
 				sameTime = 1;
 			}
 		}
+
+		if (lines[currentTask][col_complete]=="Yes") {
+			isComplete = 1;
+			taskBlock.className += " past-task";
+			name.setAttribute("style","text-decoration: line-through;")
+			taskBlock.appendChild(name)
+			if (startDate!=="" && dueDate!=="") {
+				startDatePhrase.innerHTML = startDateStr + " - "
+				startDatePhrase.setAttribute("style","text-decoration: line-through;")
+				taskBlock.appendChild(startDatePhrase);
+				dueDatePhrase.innerHTML = dueDateStr
+				dueDatePhrase.setAttribute("style","text-decoration: line-through;")
+				taskBlock.appendChild(dueDatePhrase);
+			}
+			else if (startDate!=="") {
+				startDatePhrase.innerHTML = "Start:"+startDateStr
+				startDatePhrase.setAttribute("style","text-decoration: line-through;")
+				taskBlock.appendChild(startDatePhrase);
+			}
+			else if (dueDate!=="") {
+				dueDatePhrase.innerHTML = "Due: "+dueDateStr
+				dueDatePhrase.setAttribute("style","margin-left:1em;text-decoration: line-through;")
+				taskBlock.appendChild(dueDatePhrase);
+			}
+		}
+		else {
+			taskBlock.appendChild(name)
+		}
 		
 		if (startDate!=="") {
-			var startDateStr = makeDateStr(startDate)
 			var days_until_start = getDateDifference(today,startDate)
-			var startDatePhrase = document.createElement("span");
-			startDatePhrase.className = "task-details start-date"
-			if (startDate<today && !dueDate) {
+			if (startDate<today && !dueDate && isComplete==0) {
 				isPastTask = 1;
 				taskBlock.className += " past-task";
 
@@ -1224,7 +1394,7 @@ function drawOutput(lines){
 				}
 				taskBlock.appendChild(iconSpan)
 			}
-			else {
+			else if (isComplete==0) {
 				taskBlock.appendChild(createBR());				
 				if (days_until_start<1) {
 					if (days_until_start==0) {
@@ -1260,6 +1430,9 @@ function drawOutput(lines){
 							taskBlock.className += " now-task";
 						}							
 					}
+					else {
+						startDatePhrase.innerHTML = "";
+					}
 					taskBlock.className += " now-task";
 				}
 				else {
@@ -1270,23 +1443,19 @@ function drawOutput(lines){
 				taskBlock.appendChild(startDatePhrase);
 			}
 		}
-		else {
+		else if (isComplete==0) {
 			taskBlock.className += " now-task";
 			taskBlock.appendChild(createBR());		
 		}
 
-		if (isPastTask==0) {
+		if (isPastTask==0 && isComplete==0) {
 			if (shape=="wide") taskBlock.className += " wide-task";
 			else taskBlock.className += " default-task";
 		}
 		
-		if (dueDate) {
-			if (lines[currentTask][col_duetime]) var dueDateStr = makeDateStr(dueDate)
-			else var dueDateStr = makeDateStr(dueDate);
-			var days_until_due = getDateDifference(today,dueDate)
+		if (dueDate) var days_until_due = getDateDifference(today,dueDate)
+		if (dueDate && isComplete==0) {
 
-			var dueDatePhrase = document.createElement("div")
-			dueDatePhrase.className = "task-details"
 			taskBlock.appendChild(createBR());		
 
 			var time_until_due=0;
@@ -1368,7 +1537,7 @@ function drawOutput(lines){
 		}
 
 		if (lines[currentTask][col_increment].length>0) {
-			var repeatIcon = createRepeatIcon(currentTask,isPastTask)
+			var repeatIcon = createRepeatIcon(currentTask,(isPastTask||isComplete))
 			taskBlock.appendChild(repeatIcon);
 		};
 
@@ -1393,7 +1562,7 @@ function drawOutput(lines){
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
 		
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , lines[currentTask][col_duetime]];
-		if (isPastTask) tableRows[rowNum][2].push(taskWithMeta);
+		if (isPastTask||isComplete) tableRows[rowNum][2].push(taskWithMeta);
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	

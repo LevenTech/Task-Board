@@ -242,6 +242,7 @@ body {
 
 
 .finish-area {
+	position:relative;	
 	height:100px;
 	width:200px;
 	margin:10px;
@@ -285,6 +286,7 @@ body {
 .table-bar {
 	float:left;
 	width:100%;
+	max-width:88em;
 	padding-right:1.6em;
 }
 .table-contents {
