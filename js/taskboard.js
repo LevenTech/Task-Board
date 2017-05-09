@@ -83,21 +83,8 @@ $(document).ready(function() {
 	setInterval(checkTime,60000)
 	
 	var showFinishedCookie = readCookie("showFinished")
-	if (showFinishedCookie==1) toggleFinishedVisible();
+	if (showFinishedCookie==1) toggleFinishedVisible()
 
-	$("#show-finished").change(function() {
-		if(this.checked) {
-			showFinished = 1;
-			createCookie("showFinished",showFinished)
-			drawOutput(lines)
-		}
-		else {
-			showFinished = 0;
-			drawOutput(lines)
-			createCookie("showFinished",showFinished)
-		}
-	});
-	
 });
 
 $(window).on('resize', function(){
@@ -109,11 +96,15 @@ function toggleFinishedVisible() {
 		document.getElementById("show-finished").checked = false;
 		$("#delete-finished-button").hide();
 		showFinished = 0;
+		console.log("saving showFinished=0")
+		createCookie("showFinished",0)
 	}
 	else {
 		document.getElementById("show-finished").checked = true;
 		$("#delete-finished-button").show();
 		showFinished = 1;
+		console.log("saving showFinished=1")
+		createCookie("showFinished",1)
 	}
 	drawOutput(lines)
 }
