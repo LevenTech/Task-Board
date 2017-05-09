@@ -200,6 +200,28 @@ body {
 	display:inline-block;margin-left:1em;
 }
 
+.completed-task {
+	width: 100%;
+	text-align: left;
+	padding: 0.8em;
+	opacity:0.5;
+}
+.completed-task .task-name {
+	text-decoration: line-through;
+	display:inline-block;
+	margin-left:1em;
+}
+.completed-task .start-date {
+	text-decoration: line-through;
+	display:inline-block;
+	margin-left:1em;
+}
+.completed-task .due-date {
+	text-decoration: line-through;
+	display:inline-block;
+	margin-left:1em;
+}
+
 .now-task {
 	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.24);
 	text-align: center;

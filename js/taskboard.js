@@ -82,14 +82,19 @@ $(document).ready(function() {
 	
 	setInterval(checkTime,60000)
 	
+	var showFinishedCookie = readCookie("showFinished")
+	if (showFinishedCookie==1) $("#show-finished").prop('checked', true);
+
 	$("#show-finished").change(function() {
 		if(this.checked) {
 			showFinished = 1;
+			createCookie("showFinished",showFinished)
 			drawOutput(lines)
 		}
 		else {
 			showFinished = 0;
 			drawOutput(lines)
+			createCookie("showFinished",showFinished)
 		}
 	});
 	
@@ -1348,7 +1353,7 @@ function drawOutput(lines){
 			dueDate = getDueDate(currentTask)
 			var dueDateStr = makeDateStr(dueDate)
 			var dueDatePhrase = document.createElement("span")
-			dueDatePhrase.className = "task-details"
+			dueDatePhrase.className = "task-details due-date"
 		}
 
 		var sameTime=0;
@@ -1360,25 +1365,18 @@ function drawOutput(lines){
 
 		if (lines[currentTask][col_complete]=="Yes") {
 			isComplete = 1;
-			taskBlock.className += " past-task";
-			name.setAttribute("style","text-decoration: line-through;")
+			taskBlock.className += " completed-task";
 			taskBlock.appendChild(name)
 			if (startDate!=="" && dueDate!=="") {
-				startDatePhrase.innerHTML = startDateStr + " - "
-				startDatePhrase.setAttribute("style","text-decoration: line-through;")
+				startDatePhrase.innerHTML = startDateStr + " - " + dueDateStr
 				taskBlock.appendChild(startDatePhrase);
-				dueDatePhrase.innerHTML = dueDateStr
-				dueDatePhrase.setAttribute("style","text-decoration: line-through;")
-				taskBlock.appendChild(dueDatePhrase);
 			}
 			else if (startDate!=="") {
 				startDatePhrase.innerHTML = "Start:"+startDateStr
-				startDatePhrase.setAttribute("style","text-decoration: line-through;")
 				taskBlock.appendChild(startDatePhrase);
 			}
 			else if (dueDate!=="") {
 				dueDatePhrase.innerHTML = "Due: "+dueDateStr
-				dueDatePhrase.setAttribute("style","margin-left:1em;text-decoration: line-through;")
 				taskBlock.appendChild(dueDatePhrase);
 			}
 		}
