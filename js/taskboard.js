@@ -130,7 +130,6 @@ function deleteAllFinished() {
 				isSaved = 0;
 				$("#unsaved-changes").show();
 				saveFileCookie();
-				toggleFinishedVisible();
 				drawOutput(lines);
 			},
 			No: function () {
