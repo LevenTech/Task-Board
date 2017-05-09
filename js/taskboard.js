@@ -799,12 +799,16 @@ function syncDatesStart() {
 	if (currentTaskDateSync) {
 		currentTaskDateSync=0;
 		$(".sync-button").removeClass("active")
+		$("#startpicker-row").attr('rowspan', 1)
+		$("#duepicker-row").show()
 	}
 	else {
 		currentTaskDateSync = 1
 		copyDateTimeFromStart();
 		$(".sync-button").addClass("active")
-	}
+		$("#startpicker-row").attr('rowspan', 2)
+		$("#duepicker-row").hide()
+  }
 }
 
 function syncDatesDue() {
@@ -812,11 +816,15 @@ function syncDatesDue() {
 	if (currentTaskDateSync) {
 		currentTaskDateSync=0;
 		$(".sync-button").removeClass("active")
+		$("#startpicker-row").attr('rowspan', 1)
+		$("#duepicker-row").show()
 	}
 	else {
 		currentTaskDateSync= 1
 		copyDateTimeFromDue();
 		$(".sync-button").addClass("active")
+		$("#startpicker-row").attr('rowspan', 2)
+		$("#duepicker-row").hide()
 	}
 }
 
