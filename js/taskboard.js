@@ -148,6 +148,12 @@ function deleteAllFinished() {
 		},
 		open: function() { $("#deleteFinishedDialog").find('button:nth-child(1)').focus(); }
     };
+	
+	var finishedCount = 0;
+	for (var currentTask = 0;currentTask<lines.length;currentTask++) {
+		if (lines[currentTask][col_complete]=="Yes") finishedCount++
+	}
+	$("#deleteFinishedCount").text(finishedCount);
 	$("#deleteFinishedDialog").dialog(opt).dialog("open");	
 }
 
