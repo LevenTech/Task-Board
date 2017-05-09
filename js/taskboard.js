@@ -869,8 +869,18 @@ function editTask(taskID,ev) {
 		}
 	}
 
-	if (currentTaskDateSync) $(".sync-button").addClass("active")
-	else $(".sync-button").removeClass("active")
+	if (currentTaskDateSync) {
+		$(".sync-button").addClass("active")
+		$("#startpicker-row").attr('rowspan', 2)
+		$("#duepicker-row").hide()
+	}
+	else
+	{
+		currentTaskDateSync=0;
+		$(".sync-button").removeClass("active")
+		$("#startpicker-row").attr('rowspan', 1)
+		$("#duepicker-row").show()
+	}
 		
 	var myColor = lines[currentTask][col_color];
 	$("#colorpicker").val(myColor);
