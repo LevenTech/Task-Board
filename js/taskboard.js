@@ -96,14 +96,12 @@ function toggleFinishedVisible() {
 		document.getElementById("show-finished").checked = false;
 		$("#delete-finished-button").hide();
 		showFinished = 0;
-		console.log("saving showFinished=0")
 		createCookie("showFinished",0)
 	}
 	else {
 		document.getElementById("show-finished").checked = true;
 		$("#delete-finished-button").show();
 		showFinished = 1;
-		console.log("saving showFinished=1")
 		createCookie("showFinished",1)
 	}
 	drawOutput(lines)
