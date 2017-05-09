@@ -83,7 +83,7 @@ $(document).ready(function() {
 	setInterval(checkTime,60000)
 	
 	var showFinishedCookie = readCookie("showFinished")
-	if (showFinishedCookie==1) $("#show-finished").prop('checked', true);
+	if (showFinishedCookie==1) toggleFinishedVisible();
 
 	$("#show-finished").change(function() {
 		if(this.checked) {
