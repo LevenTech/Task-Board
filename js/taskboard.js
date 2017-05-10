@@ -1377,6 +1377,7 @@ function drawOutput(lines){
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
 	
+	$("#delete-finished-button").attr("disabled",true)
 	
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
 		if (editDebug) console.log(lines[currentTask])
@@ -1428,6 +1429,7 @@ function drawOutput(lines){
 		}
 
 		if (lines[currentTask][col_complete]=="Yes") {
+			$("#delete-finished-button").attr("disabled",false)
 			isComplete = 1;
 			taskBlock.className += " completed-task";
 			taskBlock.appendChild(name)
@@ -1648,7 +1650,6 @@ function drawOutput(lines){
 	document.getElementById("output").append(createMiscBlock(tableRows));
 	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
-	console.log(lines.length)
 	if (lines.length==1) {
 		$("#myBody").addClass("body-with-help")
 		$("#misc-block").addClass("misc-with-help")
