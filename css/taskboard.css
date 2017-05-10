@@ -176,6 +176,23 @@ body {
 	cursor:pointer;
 }
 
+.instructions {
+	display:inline;
+}
+
+.misc-with-help:hover .misc-instructions{
+	display:block;
+}
+.misc-instructions {
+	display:none;
+}
+
+.body-with-help:hover .body-instructions{
+	display:block; 
+}
+.body-instructions {
+	display:none;
+}
 
 .task-block {
 	position:relative;

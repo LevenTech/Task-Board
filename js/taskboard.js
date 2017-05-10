@@ -532,6 +532,20 @@ function initContextMenu(button) {
 					name: "Edit", icon: "fa-edit",
 					callback: function(key, options) {	editTaskContextMenu();	}
 				},
+                "Put in Group": {
+					name: "Put in Group", icon: "fa-folder-o",
+					callback: function(key, options) {	newRowMenu();	},
+			        visible: function(key, opt){        
+						if (lines[currentTask][col_row] == "") return true;
+						else return false;
+					}						},				
+                "Change Group": {
+					name: "Change Group", icon: "fa-folder-o",
+					callback: function(key, options) {	newRowMenu();	},
+			        visible: function(key, opt){        
+						if (lines[currentTask][col_row] == "") return false;
+						else return true;
+					}						},				
                 "Delete": {
 					name: "Delete", icon: "fa-trash",
 					callback: function(key, options) {	deleteTask();	}
@@ -1232,6 +1246,39 @@ function newRow(ev) {
 	$("#newRowName").focus();
 }
 
+function newRowMenu() {
+	$("#newRowName").val("");
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 300,
+        height:200,
+        title: 'Move Task to New Group',
+		position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				var rowName = $("#newRowName").val();
+				if(draggingNew) {
+					newTask(rowName)
+				}
+				else {
+					lines[taskID][col_row]=rowName;
+				}
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#newRowDialog").dialog("close");
+			},
+			Cancel: function () {
+				$("#newRowDialog").dialog("close");
+			}
+		}
+    };
+	$("#newRowDialog").dialog(opt).dialog("open");
+	$("#newRowName").focus();
+}
+
 function newFile() {
 	if (parseInt(isSaved)==0) {
 		showSaveDialog();
@@ -1239,8 +1286,8 @@ function newFile() {
 	else {
 		var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
 		lines = [line];
-		newTask("","Misc Task");
-		newTask("Group","Grouped Task");
+		//newTask("","Misc Task");
+		//newTask("Group","Grouped Task");
 		drawOutput(lines);
 		var myMonth = today.getMonth()+1;
 		if (myMonth.toString().length==1) myMonth = "0"+myMonth
@@ -1249,8 +1296,9 @@ function newFile() {
 		$(".fileinput-filename").html(currentFileName);
 		createCookie("fileName",currentFileName);
 		$("span.fileinput-new").hide();
-		$(".savefile-button").removeAttr('disabled');
-		$("#middle-buttons").show();
+		$(".savefile-button").show();
+		$("#chosen-file-label").show()
+		$(".instructions").hide();
 		$("#right-buttons").show();
 		isSaved = 2;
 		$("#unsaved-changes").show();
@@ -1297,6 +1345,9 @@ function newTaskCopy() {
 }
 
 function newTask(rowName,taskName,openMe) {
+	
+	$("#middle-buttons").show();
+	
 	var newTask = ["","","","","","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
 	if (editDebug) console.log("making task "+lines.length+" (taskNum="+lastTaskID);
@@ -1325,6 +1376,7 @@ function drawOutput(lines){
 
 	var rowWithMeta = [[],"MISC",[]]
 	var tableRows = [rowWithMeta];
+	
 	
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
 		if (editDebug) console.log(lines[currentTask])
@@ -1596,6 +1648,12 @@ function drawOutput(lines){
 	document.getElementById("output").append(createMiscBlock(tableRows));
 	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
+	console.log(lines.length)
+	if (lines.length==1) {
+		$("#myBody").addClass("body-with-help")
+		$("#misc-block").addClass("misc-with-help")
+	}
+
 	if (shape=="wide") $(".task-details").hide();
 	
 	$(".task-row").dblclick( function (){
@@ -1683,6 +1741,11 @@ function createMiscBlock(tableRows) {
 	miscTasks.setAttribute("ondrop","drop(event)");
 	miscTasks.setAttribute("ondragenter","highlightMisc(event)");
 	miscTasks.setAttribute("ondragleave","unhighlightMisc(event)");
+	var miscInstructions = document.createElement("div")
+	miscInstructions.className = "misc-instructions"
+	miscInstructions.innerHTML = "Double-click in this area to create a new task"
+	miscInstructions.style = "position:absolute;left:20%;top:35%;font-size:2em;"
+	miscTasks.append(miscInstructions);
 	miscTasks.append(createRowContents(tableRows[0]));
 	return miscTasks;
 }
@@ -1861,7 +1924,9 @@ function processData(csv,fileName) {
 	
 	if (isTestFile) makeTestDatesDisplayable();
 
-	$(".savefile-button").removeAttr('disabled');
+	$(".savefile-button").show()
+	$("#chosen-file-label").show()
+	$(".instructions").hide();
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
 	drawOutput(lines);
