@@ -331,6 +331,11 @@ body {
 {
    width: 150px !important; 
 }
+.my-context-menu li ul.context-menu-list
+{
+   width: 120px !important; 
+   min-width: 120px !important;
+}
 
 .new-task-drag {
 	margin-top:0.8em;
