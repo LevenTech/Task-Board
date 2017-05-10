@@ -187,12 +187,6 @@ body {
 	display:none;
 }
 
-.body-with-help:hover .body-instructions{
-	display:block; 
-}
-.body-instructions {
-	display:none;
-}
 
 .task-block {
 	position:relative;
@@ -206,6 +200,7 @@ body {
 
 
 .past-task {
+	max-width:88em;
 	width: 100%;
 	text-align: left;
 	padding: 0.8em;
@@ -218,6 +213,7 @@ body {
 }
 
 .completed-task {
+	max-width:88em;
 	width: 100%;
 	text-align: left;
 	padding: 0.8em;
@@ -325,7 +321,6 @@ body {
 .table-bar {
 	float:left;
 	width:100%;
-	max-width:88em;
 	padding-right:1.6em;
 }
 .table-contents {

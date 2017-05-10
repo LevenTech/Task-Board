@@ -1476,8 +1476,11 @@ function drawOutput(lines){
 	var tableRows = [rowWithMeta];
 	
 	$("#delete-finished-button").attr("disabled",true)
+	var showBodyInstructions = 0;
+	if (lines.length>1) showBodyInstructions = 1
 	
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
+		
 		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
 		if (isNaN(taskNum)) { continue; }
@@ -1743,9 +1746,18 @@ function drawOutput(lines){
 		else tableRows[rowNum][0].push(taskWithMeta);
 	}
 	
+	if (tableRows.length>1) showBodyInstructions = 0;
+	
 	document.getElementById("output").innerHTML = "";
 	document.getElementById("output").append(createTable(tableRows));
 	document.getElementById("output").append(createMiscBlock(tableRows));
+	if (showBodyInstructions==1) {
+		var bodyInstructions = document.createElement("div")
+		bodyInstructions.setAttribute("id","body-instructions")
+		bodyInstructions.setAttribute("style","font-size:2em;width:100%;text-align:center;margin-top:1em;")
+		bodyInstructions.innerHTML = "Drag tasks out here to put them into a group"
+		document.getElementById("output").appendChild(bodyInstructions);
+	}
 	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
 	if (lines.length==1) {
