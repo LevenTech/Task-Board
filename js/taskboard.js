@@ -56,7 +56,10 @@ $(document).ready(function() {
 	initFontSlider();
 	initDateSlider();
 
+	$.contextMenu( 'destroy' );
+	initRowContextMenu()
 	initContextMenu("right")
+
 	if (isMobile()) { initRightClickMode() }
 	if (isMobile()) { initToolSelector() }
 	
@@ -65,6 +68,10 @@ $(document).ready(function() {
 	$.ui.dialog.prototype._focusTabbable = function(){};
 	
 	$(document).on('mousedown', '.task-block', function (e){ 
+		myClickEvent = e
+		return true; 
+	});
+	$(document).on('mousedown', '.task-row', function (e){ 
 		myClickEvent = e
 		return true; 
 	});
@@ -195,6 +202,7 @@ function initDialogs() {
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#uncompleteDialog").dialog(opt).dialog("close");
 	$("#newRowDialog").dialog(opt).dialog("close");
+	$("#renameRowDialog").dialog(opt).dialog("close");
 	$("#saveDialog").dialog(opt).dialog("close");
 	$("#deleteDialog").dialog(opt).dialog("close");
 	$("#deleteFinishedDialog").dialog(opt).dialog("close");
@@ -271,6 +279,25 @@ function initKeys() {
 			var rowName = $("#newRowName").val();
 			if (draggingNew) {	newTask(rowName)	}
 			else {				lines[currentTask][col_row]=rowName;	}
+			drawOutput(lines);
+			currentTask = "";
+			return false;
+		}
+	});
+	$("#renamedRowName").keypress( function (e) {
+		if(e.which == 13) {
+			$("#renameRowDialog").dialog("close");
+			e.preventDefault();
+			var oldRowName = document.getElementById("current-row-name").innerHTML
+			var newRowName = $("#renamedRowName").val();
+			for (var currentTask = 1; currentTask<lines.length; currentTask++) {
+				var currentRowName = lines[currentTask][col_row]
+				if (currentRowName) {
+					if (currentRowName.toUpperCase()==oldRowName) {
+						lines[currentTask][col_row]=newRowName;
+					}
+				}
+			}
 			drawOutput(lines);
 			currentTask = "";
 			return false;
@@ -420,15 +447,16 @@ function clearDateSlider() {
 }
 
 function initContextMenu(button) {
-	$.contextMenu( 'destroy' );
 	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
 			events: {
 				hide: function(opt) {
-					inRightClickMode = 0;
-					$("#right-click-mode-indicator").hide();
-					initContextMenu("right")
+					if (isMobile()) {
+						inRightClickMode = 0;
+						$("#right-click-mode-indicator").hide();
+						initContextMenu("right")
+					}
 				}
 			},
 			items: {
@@ -553,9 +581,79 @@ function initContextMenu(button) {
             }
         };
   
-	myOptions.selector = ".task-block"
 	myOptions.trigger = button
     $(function() { $.contextMenu(myOptions) });	
+}
+
+function initRowContextMenu() {
+	var myOptions = {
+            selector: '.task-row, .misc-block', 
+			className: 'my-row-context-menu',
+			events: {
+				hide: function(opt) {
+					if (isMobile()) {
+						inRightClickMode = 0;
+						$("#right-click-mode-indicator").hide();
+						initContextMenu("right")
+					}
+				}
+			},
+			items: {
+                "New Task": {
+					name: "New Task", icon: "fa-clone",
+					callback: function(key, options) {	newTask(options.$trigger.attr("data-rowname"),"",1);	},
+			        visible: function(key, opt){        
+						return true;
+					}
+				},
+                "Rename Row": {
+					name: "Rename Row", icon: "fa-edit",
+					callback: function(key, options) {	renameRow(options.$trigger.attr("data-rowname"),"",1);	},
+			        visible: function(key, opt){     
+						if (opt.$trigger) {
+							if (opt.$trigger.attr("data-rowname")=="") return false;
+						}
+						return true;
+					}
+				}
+            }
+        };
+    $(function() { $.contextMenu(myOptions) });	
+}
+
+function renameRow(rowName) {
+	document.getElementById("current-row-name").innerHTML = rowName
+	$("#renamedRowName").val("");
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 350,
+        height:200,
+        title: 'Rename Task Group',
+		position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				var newRowName = $("#renamedRowName").val();
+				for (var currentTask = 1; currentTask<lines.length; currentTask++) {
+					var currentRow = lines[currentTask][col_row]
+					if (currentRow) {
+						if (currentRow.toUpperCase()==rowName) lines[currentTask][col_row]=newRowName;
+					}
+				}
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#renameRowDialog").dialog("close");
+			},
+			Cancel: function () {
+				$("#renameRowDialog").dialog("close");
+			}
+		}
+    };
+	$("#renameRowDialog").dialog(opt).dialog("open");
+	$("#renamedRowName").focus();
+	
 }
 
 // INPUT FUNCTIONS
