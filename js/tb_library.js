@@ -114,3 +114,17 @@ function makeTimeStrFromDate(myDate) {
 function getDateDifference(date_1,date_2) {
 	return Math.ceil((date_2.getTime() - date_1.getTime())/one_day);
 }
+
+function isTaskSameTime(currentTask) {
+	var dueDate="";
+	dueDate = getDueDate(currentTask)
+	var startDate="";
+	startDate = getStartDate(currentTask)
+
+	if (startDate!=="" && dueDate!=="") {
+		if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
+			return true;
+		}
+	}
+	return false;
+}

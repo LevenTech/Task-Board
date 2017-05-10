@@ -460,7 +460,46 @@ function initContextMenu(button) {
 				}
 			},
 			items: {
-                "SnoozeDay": {
+                "SnoozeMenu": {
+					name: "Snooze", icon: "fa-bell-slash-o",
+					items: {
+						"snooze-key1": {"name":"1 hour", callback: function(key, options) {	delayTask(1);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
+						"snooze-key2": {"name":"2 hours", callback: function(key, options) {	delayTask(2);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
+						"snooze-key4": {"name":"4 hours", callback: function(key, options) {	delayTask(4);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
+						"snooze-key12": {"name":"12 hours", callback: function(key, options) {	delayTask(12);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
+						"snooze-key1d": {"name":"1 day", callback: function(key, options) {	delayTask(24);	}},
+						"snooze-key2d": {"name":"2 days", callback: function(key, options) {	delayTask(48);	}},
+						"snooze-key3d": {"name":"3 days", callback: function(key, options) {	delayTask(72);	}},
+						"snooze-key1w": {"name":"1 week", callback: function(key, options) {	delayTask(168);	}},
+					},
+					callback: function(key, options) {	delayTask(24);	},
+			        visible: function(key, opt){        
+						if (lines[currentTask][col_complete] == "Yes") return false;
+						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
+						var dueDate = getDueDate(currentTask);
+						var days_until_due = getDateDifference(today,dueDate)
+						if (days_until_due<0 || days_until_due==0 ) {
+							if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
+							else {
+								var startDate = getStartDate(currentTask)
+								var days_until_start = getDateDifference(today,startDate)
+								if (days_until_start<0) return true;
+								if (days_until_start==0) {
+									var startOfToday = new Date(today.getTime());
+									startOfToday.setHours(0,0,0,0);
+									var now_mseconds = today.getTime()-startOfToday.getTime();
+									var timeParts = lines[currentTask][col_starttime].split(":")
+									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+									var time_until_start = start_mseconds-now_mseconds;
+									if (time_until_start>60*60*1000) return false;
+									else return true;
+								}
+							}
+						}
+						return false;
+					}
+				},
+                /*"Snooze 1 Day": {
 					name: "Snooze 1 day", icon: "fa-bell-slash-o",
 					callback: function(key, options) {	delayTask(24);	},
 			        visible: function(key, opt){        
@@ -518,7 +557,7 @@ function initContextMenu(button) {
 						}
 						return false;
 					}
-				},
+				},*/
                 "Finish": {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {	completeTask();	},
@@ -1138,23 +1177,33 @@ function delayTask(numHours) {
 		lines[currentTask][col_increment]="";
 	}
 
-	var dueDay = lines[currentTask][col_dueday];
-	var dueMonth=lines[currentTask][col_duemonth];
-	var dueYear=lines[currentTask][col_dueyear];
-	if (dueYear.length==2) dueYear = "20"+dueYear;
-	if (dueYear.length==0) dueYear = today.getYear()+1900;
-	var dueDate = new Date(dueYear,dueMonth,dueDay);
-
-	var newDueDate = new Date(today.getTime() + one_hour*numHours)
+	var sameTime = isTaskSameTime(currentTask)
+	var dueDate = getDueDate(currentTask)
 	
+	var due_mseconds = 0
+	if (lines[currentTask][col_duetime]) {
+		var timeParts = lines[currentTask][col_duetime].split(":")
+		due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+	}
+	
+	var newDueDate = new Date(dueDate.getTime() + due_mseconds + one_hour*numHours)
+
 	lines[currentTask][col_dueday] = newDueDate.getDate();
 	lines[currentTask][col_duemonth] = newDueDate.getMonth()+1;
 	if (newDueDate.getYear()==today.getYear()) lines[currentTask][col_dueyear]="";
 	else lines[currentTask][col_dueyear] = newDueDate.getYear()+1900;
 
+	if (sameTime==1) {
+		lines[currentTask][col_startday] = lines[currentTask][col_dueday]
+		lines[currentTask][col_startmonth] = lines[currentTask][col_duemonth]
+		lines[currentTask][col_startyear] = lines[currentTask][col_dueyear]
+	}
+	
 	if (lines[currentTask][col_duetime]) {
-		lines[currentTask][col_duetime] = newDueDate.getHours()+":"+newDueDate.getMinutes();
-		console.log(lines[currentTask][col_duetime])
+		var myMinutes = newDueDate.getMinutes();
+		if (myMinutes<10) myMinutes = "0"+myMinutes.toString();
+		lines[currentTask][col_duetime] = newDueDate.getHours()+":"+myMinutes;
+		if (sameTime==1) lines[currentTask][col_starttime] = lines[currentTask][col_duetime]
 	}
 	
 	drawOutput(lines);
@@ -1606,8 +1655,11 @@ function drawOutput(lines){
 							}
 						}
 						else {
-							startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
-							taskBlock.className += " now-task";
+							if (sameTime==0) {
+								startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+								taskBlock.className += " now-task";
+							}
+							else startDatePhrase.innerHTML = "";
 						}							
 					}
 					else {
@@ -1653,7 +1705,8 @@ function drawOutput(lines){
 						
 			if (days_until_due==0 && time_until_due==0) {
 				dueDatePhrase.style.fontWeight = "bold"
-				dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
+				if (sameTime==0) dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
+				else dueDatePhrase.innerHTML = "<b>TODAY</b>";
 				taskBlock.appendChild(dueDatePhrase);
 				
 				var alertIcon = document.createElement("div");
