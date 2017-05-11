@@ -160,6 +160,7 @@ function initToolSelector () {
 function initDialogs() {
 	var opt = { autoOpen: false	};
  
+	initEditDialog();
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#uncompleteDialog").dialog(opt).dialog("close");

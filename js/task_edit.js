@@ -1,3 +1,86 @@
+function initEditDialog() {
+	var myDialog = document.createElement("div")
+	myDialog.id = "editDialog"
+	myDialog.className = "my-dialog"
+	myDialog.innerHTML += "\
+		<div id='dialog-toolbar'>\
+				<button id='edit-dialog-finish' type='button' class='btn btn-default dialog-toolbar-button' onclick='clickFinish();'>\
+					<i class='fa fa-check-square-o' aria-hidden='true' style='margin-right:5px;'></i>Finish\
+				</button>\
+				<button type='button' class='btn btn-default dialog-toolbar-button' onclick='deleteTask();'>\
+					<i class='fa fa-trash' aria-hidden='true' style='margin-right:5px;'></i>Delete\
+				</button>\
+		</div>";
+	myDialog.innerHTML += "\
+		<table style='float:left;width:100%;height:50%;'>\
+			<tr style='height:0.5em;'></tr>\
+			<tr style='vertical-align:top;'>\
+				<td colspan='3'><textarea type='text' cols='21' rows='2' id='namepicker' style='width:100%;margin-bottom:5px;resize:none;text-align:center;'></textarea></td>\
+			</tr>\
+			<tr style='height:2em;'>\
+				<td rowspan='2'>\
+					Start:<br/>\
+					<button id='sync-from-start' class='btn btn-default sync-button' onclick='syncDatesStart();'>\
+						<i class='fa fa-arrow-down' aria-hidden='true'></i>\
+					</button>\
+					<button id='sync-from-due' class='btn btn-default sync-button' onclick='syncDatesDue();'>\
+						<i class='fa fa-arrow-up' aria-hidden='true'></i>\
+					</button>\
+					<br/>\
+					Due:\
+				</td>\
+				<td id='startpicker-row'><input type='date' id='datepicker-start' style='width:60%;'><input type='time' id='timepicker-start' style='width:40%;'></td>\
+			</tr>\
+			<tr><td id='duepicker-row'><input type='date' id='datepicker-due' style='width:60%;'><input type='time' id='timepicker-due' style='width:40%;'></td></tr>\
+		</table>"
+	myDialog.innerHTML += "\
+		<table style='float:left;width:100%;text-align:center;'>\
+			<tr style='height:0em;'></tr>\
+			<tr style='height:2em;'>\
+				<td colspan='2' style='width:60%;'>Color</td>\
+				<td style='padding-right:0.3em;' style='width:40%;'>Interval</td>\
+			</tr>\
+			<tr style='vertical-align:top;'>\
+				<td style='width:40%;'>\
+					<div class='btn-group' role='group' style='float:right;'>" + 
+						makeColorButton("LemonChiffon") + makeColorButton("Aqua") + makeColorButton("Pink") + makeColorButton("PaleGreen") + makeColorButton("Silver") + 
+					"</div>\
+					<div class='btn-group' role='group' style='float:right;'>" + 
+						makeColorButton("Yellow") + makeColorButton("Orange") + makeColorButton("Red") + makeColorButton("Blue") + makeColorButton("Black") + 
+					"</div>\
+				</td>\
+				<td>\
+					<input style='float:left;width:3.4em;height:3.4em;' type='color' id='colorpicker2' onchange='colorpicked();' />\
+				</td>\
+				<td style='width:12em;'>\
+					<div class='btn-group' role='group'>" + 
+						  makeIntervalButton(0,"style='width:1.4em;'") + makeIntervalButton(1) + makeIntervalButton(2) + makeIntervalButton(3) + 
+					"</div>\
+					<div class='btn-group' role='group'>" + 
+						  makeIntervalButton(7) + makeIntervalButton(14) + makeIntervalButton(30) + 
+					"</div>\
+				</td>\
+			</tr>\
+			<tr>\
+				<td colspan='2'><input type='text' id='colorpicker' onchange='colortyped();' style='width:8em;margin-top:0.4em;text-align:center;' /></td>\
+				<td><input type='text' id='incrementpicker' onchange='checkInterval()' style='margin-top:0.4em;width:4em;text-align:center;' /></td>\
+			</tr>\
+			</table>";
+	document.getElementById("myBody").append(myDialog)
+}
+
+function makeColorButton(color) {
+	return "<button type='button' class='btn btn-default color-button' id='color-button-"+color+"' onclick='changeColor('"+color+"')'><div class='circle' style='background:"+color+";'></div></button>"
+}
+
+function makeIntervalButton(numDays,extraAttr) {
+	var numDaysStr = numDays
+	if (numDays==0) numDaysStr="-"
+	return "<button type='button' class='btn btn-default interval-button' id='interval-button"+numDays+"' onclick='changeInterval("+numDays+")' "+extraAttr+">"+numDaysStr+"</button>"
+}
+
+
+
 function editDialogKeypress(e) {
 	if (e.which==13) {
 		e.preventDefault();
