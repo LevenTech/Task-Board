@@ -1516,6 +1516,7 @@ function newTask(rowName,taskName,openMe) {
 
 
 
+
 // MAIN BUILD FUNCTION
 
 function drawOutput(lines){
@@ -1533,246 +1534,31 @@ function drawOutput(lines){
 		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
 		if (isNaN(taskNum)) { continue; }
-		if (showFinished==0 && lines[currentTask][col_complete]=="Yes") { continue; }
-		
 		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
-		var isPastTask = 0;
 		var isComplete = 0;
+		if (lines[currentTask][col_complete]=="Yes") isComplete = 1;
+		if (showFinished==0 && isComplete==1) { continue; }
 		
-		var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
-		
-		var myName = lines[currentTask][col_task].replace("%44;",",");
-		var name = document.createElement("div");
-		name.className = "task-name"
-		name.innerHTML = "<b>"+myName+"</b>";
-		
-		var startDay=lines[currentTask][col_startday];
-		var dueDay=lines[currentTask][col_dueday];
-		var days_until_start = "";
-		var days_until_due = "";
-		var startOfToday = new Date(today.getTime());
-		startOfToday.setHours(0,0,0,0);
-		var now_mseconds = today.getTime()-startOfToday.getTime();
-
 		var startDate="";
 		var dueDate="";
-		if (startDay>0) {
+		var days_until_start = ""
+		var days_until_due = ""
+		if (lines[currentTask][col_startday]>0) {
 			startDate = getStartDate(currentTask)
-			var startDateStr = makeDateStr(startDate)
-			var startDatePhrase = document.createElement("span");
-			startDatePhrase.className = "task-details start-date"
-			startDatePhrase.innerHTML = startDateStr;
+			days_until_start = getDateDifference(today,startDate)
 		}
-		if (dueDay>0) {
+		if (lines[currentTask][col_dueday]>0) {
 			dueDate = getDueDate(currentTask)
-			var dueDateStr = makeDateStr(dueDate)
-			var dueDatePhrase = document.createElement("span")
-			dueDatePhrase.className = "task-details due-date"
+			days_until_due = getDateDifference(today,dueDate)
 		}
 
-		var sameTime=0;
-		if (startDate!=="" && dueDate!=="") {
-			if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
-				sameTime = 1;
-			}
-		}
-
-		if (lines[currentTask][col_complete]=="Yes") {
-			$("#delete-finished-button").attr("disabled",false)
-			isComplete = 1;
-			taskBlock.className += " completed-task";
-			taskBlock.appendChild(name)
-			if (startDate!=="" && dueDate!=="") {
-				startDatePhrase.innerHTML = startDateStr + " - " + dueDateStr
-				taskBlock.appendChild(startDatePhrase);
-			}
-			else if (startDate!=="") {
-				startDatePhrase.innerHTML = "Start:"+startDateStr
-				taskBlock.appendChild(startDatePhrase);
-			}
-			else if (dueDate!=="") {
-				dueDatePhrase.innerHTML = "Due: "+dueDateStr
-				taskBlock.appendChild(dueDatePhrase);
-			}
-		}
-		else {
-			taskBlock.appendChild(name)
-		}
-		
+		var isPastTask = 0;
 		if (startDate!=="") {
-			var days_until_start = getDateDifference(today,startDate)
-			if (startDate<today && !dueDate && isComplete==0) {
-				isPastTask = 1;
-				taskBlock.className += " past-task";
-
-				startDatePhrase.innerHTML = startDateStr;
-				taskBlock.appendChild(startDatePhrase);
-
-				var myOpacity = (-days_until_start)*0.1;
-				if (myOpacity>1) myOpacity = 1;
-
-				var iconSpan = document.createElement("span")
-				iconSpan.className = "icon-span"
-				if (lines[currentTask][col_increment]>0) iconSpan.className += " icon-margin"
-				for(var k=0;k<(-days_until_start);k++) {
-					var clockIcon = document.createElement("div");
-					clockIcon.className = "clock-icon"
-					clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
-					iconSpan.appendChild(clockIcon);
-				}
-				taskBlock.appendChild(iconSpan)
-			}
-			else if (isComplete==0) {
-				taskBlock.appendChild(createBR());				
-				if (days_until_start<1) {
-					if (days_until_start==0) {
-						if (lines[currentTask][col_starttime]) {
-							var timeParts = lines[currentTask][col_starttime].split(":")
-							var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
-							var time_until_start = start_mseconds-now_mseconds;
-							if (time_until_start>0) {
-								if (sameTime) {
-									startDatePhrase.innerHTML = "<b></b>";
-									if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
-									else taskBlock.className += " later-task"
-								}
-								else {
-									taskBlock.className += " later-task";
-									startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
-								}
-							}
-							else {
-								if (sameTime) {
-									startDatePhrase.innerHTML = "<b></b>";
-									if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
-									else taskBlock.className += " later-task"
-								}
-								else {
-									startDatePhrase.innerHTML = "<b>Started TODAY</b>";
-									taskBlock.className += " now-task";
-								}
-							}
-						}
-						else {
-							if (sameTime==0) {
-								startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
-								taskBlock.className += " now-task";
-							}
-							else startDatePhrase.innerHTML = "";
-						}							
-					}
-					else {
-						startDatePhrase.innerHTML = "";
-					}
-					taskBlock.className += " now-task";
-				}
-				else {
-					if (sameTime) startDatePhrase.innerHTML = ""
-					else startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
-					taskBlock.className += " later-task";
-				}
-				taskBlock.appendChild(startDatePhrase);
-			}
-		}
-		else if (isComplete==0) {
-			taskBlock.className += " now-task";
-			taskBlock.appendChild(createBR());		
-		}
-
-		if (isPastTask==0 && isComplete==0) {
-			if (shape=="wide") taskBlock.className += " wide-task";
-			else taskBlock.className += " default-task";
+			if (startDate<today && dueDate=="" && isComplete==0) isPastTask = 1;
 		}
 		
-		if (dueDate) var days_until_due = getDateDifference(today,dueDate)
-		if (dueDate && isComplete==0) {
-
-			taskBlock.appendChild(createBR());		
-
-			var time_until_due=0;
-			var dueTimeStr = ""
-			if (lines[currentTask][col_duetime]) {
-				var timeParts = lines[currentTask][col_duetime].split(":")
-				if (timeParts[0]==0) dueTimeStr = "12:"+timeParts[1]
-				else if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]
-				else dueTimeStr = eliminateLeadingZeros2(lines[currentTask][col_duetime])
-				if (timeParts[0]>11 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
-				else dueTimeStr += " am"
-				var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
-				time_until_due = due_mseconds-now_mseconds;
-			}
-						
-			if (days_until_due==0 && time_until_due==0) {
-				dueDatePhrase.style.fontWeight = "bold"
-				if (sameTime==0) dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
-				else dueDatePhrase.innerHTML = "<b>TODAY</b>";
-				taskBlock.appendChild(dueDatePhrase);
-				
-				var alertIcon = document.createElement("div");
-				alertIcon.className = "alert-icon alert-indent";
-				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
-				taskBlock.appendChild(alertIcon);				
-			}
-			else if (days_until_due==0 && time_until_due>0) {
-				dueDatePhrase.style.fontWeight = "bold"
-				if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
-				else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
-				taskBlock.appendChild(dueDatePhrase);
-				
-				var alertIcon = document.createElement("div");
-				alertIcon.className = "alert-icon alert-indent";
-				alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
-				taskBlock.appendChild(alertIcon);
-			}
-			else if (days_until_due==0 && time_until_due<0) {
-				if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
-				else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
-				taskBlock.appendChild(dueDatePhrase);
-
-				var alertIcon = document.createElement("div");
-				alertIcon.className = "alert-icon";
-				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
-				taskBlock.appendChild(alertIcon);
-
-				var overDue = document.createElement("b");
-				overDue.className = "task-details"
-				overDue.innerHTML = "!!! OVERDUE !!!"
-				taskBlock.appendChild(createBR());		
-				taskBlock.appendChild(overDue);
-			}
-			else if (days_until_due<0) {
-				if (sameTime) dueDatePhrase.innerHTML = dueDateStr+", "+dueTimeStr+" ("+(-days_until_due)+" passed)";
-				else dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
-				taskBlock.appendChild(dueDatePhrase);
-
-				var alertIcon = document.createElement("div");
-				alertIcon.className = "alert-icon";
-				alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
-				taskBlock.appendChild(alertIcon);
-
-				var overDue = document.createElement("b");
-				overDue.className = "task-details"
-				overDue.innerHTML = "!!! OVERDUE !!!"
-				taskBlock.appendChild(createBR());		
-				taskBlock.appendChild(overDue);
-			}
-			else {
-				if (sameTime) dueDatePhrase.innerHTML = dueDateStr
-				else dueDatePhrase.innerHTML = "Due: "+dueDateStr
-				if (dueTimeStr!=="") dueDatePhrase.innerHTML += (", "+dueTimeStr)
-				taskBlock.appendChild(dueDatePhrase)
-				if (!startDay>0 || startDate<=today) {
-					dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
-					taskBlock.appendChild(createCountdownIcon(days_until_due));
-				}
-			}
-		}
-
-		if (lines[currentTask][col_increment].length>0) {
-			var repeatIcon = createRepeatIcon(currentTask,(isPastTask||isComplete))
-			taskBlock.appendChild(repeatIcon);
-		};
+		var taskBlock = buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask)
 
 		var rowName = lines[currentTask][col_row];
 		if (rowName == "") rowName = "MISC";
@@ -1793,7 +1579,7 @@ function drawOutput(lines){
 
 		var myTaskName = lines[currentTask][col_task]
 		if (myTaskName.length==0) { myTaskName = "ZZZZZ" }
-		
+
 		var taskWithMeta = [ days_until_start, days_until_due , myTaskName , taskBlock , lines[currentTask][col_duetime]];
 		if (isPastTask||isComplete) tableRows[rowNum][2].push(taskWithMeta);
 		else tableRows[rowNum][0].push(taskWithMeta);
@@ -1829,18 +1615,212 @@ function drawOutput(lines){
 		if (editDebug) console.log("double-clicked misc block")
 		newTask("","",1);
 	});
-	$(".task-row").on("taphold", function (){
-		e.preventDefault();
-		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName);
-		return false;
-	});
-	$(".misc-block").on("taphold", function (){
-		e.preventDefault();
-		var rowName = this.getAttribute("data-rowname");
-		newTask(rowName);
-		return false;
-	});
+}
+
+function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
+
+	var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
+
+	var myName = lines[currentTask][col_task].replace("%44;",",");
+	var name = document.createElement("div");
+	name.className = "task-name"
+	name.innerHTML = "<b>"+myName+"</b>";
+	taskBlock.appendChild(name)
+
+	if (lines[currentTask][col_increment].length>0) taskBlock.appendChild(createRepeatIcon(currentTask,(isPastTask||isComplete)))
+	
+	var days_until_start = "";
+	var days_until_due = "";
+	var startOfToday = new Date(today.getTime());
+	startOfToday.setHours(0,0,0,0);
+	var now_mseconds = today.getTime()-startOfToday.getTime();
+
+	var startDatePhrase = document.createElement("span");
+	startDatePhrase.className = "task-details start-date"
+	if (startDate!=="") {
+		var days_until_start = getDateDifference(today,startDate)
+		var startDateStr = makeDateStr(startDate)
+		startDatePhrase.innerHTML = startDateStr;
+	}
+	if (dueDate!=="") {
+		var days_until_due = getDateDifference(today,dueDate)
+		var dueDateStr = makeDateStr(dueDate)
+		var dueDatePhrase = document.createElement("span")
+		dueDatePhrase.className = "task-details due-date"
+	}
+
+	var sameTime=0;
+	if (startDate!=="" && dueDate!=="") {
+		if (startDate.getTime()==dueDate.getTime() && lines[currentTask][col_starttime]==lines[currentTask][col_duetime]) {
+			sameTime = 1;
+		}
+	}
+
+	if (isComplete==1) {
+		$("#delete-finished-button").attr("disabled",false)
+		taskBlock.className += " completed-task";
+		if (startDate!=="" && dueDate!=="") {
+			startDatePhrase.innerHTML = startDateStr + " - " + dueDateStr
+			taskBlock.appendChild(startDatePhrase);
+		}
+		else if (startDate!=="") {
+			startDatePhrase.innerHTML = "Start:"+startDateStr
+			taskBlock.appendChild(startDatePhrase);
+		}
+		else if (dueDate!=="") {
+			dueDatePhrase.innerHTML = "Due: "+dueDateStr
+			taskBlock.appendChild(dueDatePhrase);
+		}
+		return taskBlock;
+	}
+
+	if (isPastTask==1) {
+		taskBlock.className += " past-task";
+
+		startDatePhrase.innerHTML = startDateStr;
+		taskBlock.appendChild(startDatePhrase);
+
+		var myOpacity = (-days_until_start)*0.1;
+		if (myOpacity>1) myOpacity = 1;
+
+		var iconSpan = document.createElement("span")
+		iconSpan.className = "icon-span"
+		if (lines[currentTask][col_increment]>0) iconSpan.className += " icon-margin"
+		for(var k=0;k<(-days_until_start);k++) {
+			var clockIcon = document.createElement("div");
+			clockIcon.className = "clock-icon"
+			clockIcon.innerHTML = '<i class="fa fa-clock-o" aria-hidden="true" ></i>';
+			iconSpan.appendChild(clockIcon);
+		}
+		taskBlock.appendChild(iconSpan)		
+		return taskBlock;
+	}
+	
+	if (shape=="wide") taskBlock.className += " wide-task";
+	else taskBlock.className += " default-task";
+
+	taskBlock.appendChild(createBR());		
+	if (startDate=="" || days_until_start<0) {
+		taskBlock.className += " now-task";
+	}
+	else if (days_until_start>0) {
+		if (sameTime) startDatePhrase.innerHTML = ""
+		else startDatePhrase.innerHTML = "Start: "+startDateStr+" (wait "+days_until_start+")"
+		taskBlock.className += " later-task";
+	}
+	else if (days_until_start==0 && startDate!=="") {
+		if (lines[currentTask][col_starttime]) {
+			var timeParts = lines[currentTask][col_starttime].split(":")
+			var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+			var time_until_start = start_mseconds-now_mseconds;
+			if (time_until_start>0) {
+				if (sameTime) {
+					startDatePhrase.innerHTML = "<b></b>";
+					if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
+					else taskBlock.className += " later-task"
+				}
+				else {
+					taskBlock.className += " later-task";
+					startDatePhrase.innerHTML = "<b>Starts Later TODAY</b>";
+				}
+			}
+			else {
+				if (sameTime) {
+					startDatePhrase.innerHTML = "<b></b>";
+					if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
+					else taskBlock.className += " later-task"
+				}
+				else {
+					startDatePhrase.innerHTML = "<b>Started TODAY</b>";
+					taskBlock.className += " now-task";
+				}
+			}
+		}
+		else {
+			if (sameTime==0) {
+				startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
+				taskBlock.className += " now-task";
+			}
+			else startDatePhrase.innerHTML = "";
+		}							
+		taskBlock.className += " now-task";
+	}
+	taskBlock.appendChild(startDatePhrase);
+
+	// WE'RE DONE IF THIS IS FOR A BAR INSTEAD OF A STICKY
+	if (dueDate=="" || isPastTask==1) return taskBlock;
+
+	taskBlock.appendChild(createBR());		
+
+	var time_until_due=0;
+	var dueTimeStr = ""
+	if (lines[currentTask][col_duetime]) {
+		var timeParts = lines[currentTask][col_duetime].split(":")
+		if (timeParts[0]==0) dueTimeStr = "12:"+timeParts[1]
+		else if (timeParts[0]>12) dueTimeStr = (timeParts[0]-12)+":"+timeParts[1]
+		else dueTimeStr = eliminateLeadingZeros2(lines[currentTask][col_duetime])
+		if (timeParts[0]>11 || lines[currentTask][col_duetime]=="12:00") dueTimeStr += " pm"
+		else dueTimeStr += " am"
+		var due_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
+		time_until_due = due_mseconds-now_mseconds;
+	}
+				
+	if (days_until_due==0 && time_until_due==0) {
+		dueDatePhrase.style.fontWeight = "bold"
+		if (sameTime==0) dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
+		else dueDatePhrase.innerHTML = "<b>TODAY</b>";
+		var isDueToday = 1;
+	}
+	else if (days_until_due==0 && time_until_due>0) {
+		dueDatePhrase.style.fontWeight = "bold"
+		if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
+		else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+		var isDueToday = 1;
+		
+	}
+	else if (days_until_due==0 && time_until_due<0) {
+		if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
+		else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
+		var isOverdue = 1;
+
+	}
+	else if (days_until_due<0) {
+		if (sameTime) dueDatePhrase.innerHTML = dueDateStr+", "+dueTimeStr+" ("+(-days_until_due)+" passed)";
+		else dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+		var isOverdue = 1;
+	}
+	else {
+		if (sameTime) dueDatePhrase.innerHTML = dueDateStr
+		else dueDatePhrase.innerHTML = "Due: "+dueDateStr
+		if (dueTimeStr!=="") dueDatePhrase.innerHTML += (", "+dueTimeStr)
+		if (startDate=="" || startDate<=today) {
+			dueDatePhrase.innerHTML += " ("+days_until_due+" left)"
+			taskBlock.appendChild(createCountdownIcon(days_until_due));
+		}
+	}
+	taskBlock.appendChild(dueDatePhrase)
+	
+	if (isDueToday==1) {
+			var alertIcon = document.createElement("div");
+		alertIcon.className = "alert-icon alert-indent";
+		alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
+		taskBlock.appendChild(alertIcon);
+	}
+
+	if (isOverdue==1) {
+		var alertIcon = document.createElement("div");
+		alertIcon.className = "alert-icon";
+		alertIcon.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true" ></i>';
+		taskBlock.appendChild(alertIcon);
+
+		var overDue = document.createElement("b");
+		overDue.className = "task-details"
+		overDue.innerHTML = "!!! OVERDUE !!!"
+		taskBlock.appendChild(createBR());		
+		taskBlock.appendChild(overDue);
+	}
+	
+	return taskBlock
 }
 
 // ELEMENT CREATION FUNCTIONS
@@ -2223,7 +2203,6 @@ function errorHandler(evt) {
 // SORTING FUNCTIONS
 
 function myRowSortFunction(a,b) {	
-	var compareString = a[1]+" vs "+b[1];
 	if (a[1]=="MISC") return -1;
 	if (b[1]=="MISC") return 1;
 	return mySortFunction(a[0][0],b[0][0]);
