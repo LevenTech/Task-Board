@@ -67,13 +67,14 @@ body {
 
 #dialog-toolbar {
 	position:absolute;
-	left:10em;
+	left:8em;
 	top:0.3em;
 	display:none;
 }
 .dialog-toolbar-button {
 	margin-top:0.2em;
 	margin-bottom:0.2em;
+	margin-left:0.8em;
 	padding-left:10px;
 	padding-right:10px;
 	padding-top:2px;
