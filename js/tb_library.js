@@ -1,4 +1,6 @@
 
+// MISC LIBRARY FUNCTIONS
+
 function isMobile() { 
  if( navigator.userAgent.match(/Android/i)
  || navigator.userAgent.match(/webOS/i)
@@ -55,6 +57,8 @@ function readCookie(name) {
 function eraseCookie(name) {
     createCookie(name,"",-1);
 }
+
+//STRING MANIPULATION FUNCTIONS
 
 function eliminateLeadingZeros(string) {
 	var stringParts = string.split(" ")
