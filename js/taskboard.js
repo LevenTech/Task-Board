@@ -3,9 +3,9 @@ var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
+var simulateMobile = 0;
 
 var lines = [];
-var showFinished = 0;
 
 var shape = "";
 var inRightClickMode = 0;
@@ -16,11 +16,12 @@ var one_day=1000*60*60*24;
 var one_hour=1000*60*60;
 
 var currentFileName = "newTaskFile.csv";
+var showFinished = 0;
 var isSaved = 1;
+var lastTaskID = 0;
 var currentTask = 0;
 var currentTaskDateSync = 0;
 var currentRowName = "";
-var lastTaskID = 0;
 var isTestFile = 0;
 var testFileDateDiff;
 
@@ -43,7 +44,6 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask;
 
-var simulateMobile = 0;
 
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
