@@ -792,44 +792,6 @@ function clickFinish() {
 function completeTask(wasDropped) {
 
 	$("#deleteDialog").dialog("close");
-	
-	/*var opt = {
-        autoOpen: false,
-        modal: true,
-        width: 350,
-        height:350,
-        title: 'Finish Task',
-		position: {my: "center center", at: "center center", of: "#taskBlock"+currentTask, collision: "fit", within: "body"},
-		buttons: { 
-			Yes: function() {
-				lines[currentTask][10]="Yes";
-				if (lines[currentTask][11].length>0) newTaskCopy();
-				$("#completeDialog").dialog("close");
-				$("#editDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
-				drawOutput(lines);
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
-			},
-			No: function () {
-				$("#completeDialog").dialog("close");
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
-			}
-		},
-		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
-    };
-	if (wasDropped) opt.position = {my: "top right", at: "top right", of: "#finish-area", collision: "fit", within: "body"};
-	var taskName = lines[currentTask][1];
-	$("#completeTaskName").text(taskName);
-
-	$("#completeDialog").dialog(opt).dialog("open");*/
 
 	lines[currentTask][10]="Yes";
 	if (lines[currentTask][11].length>0) newTaskCopy();
@@ -1617,6 +1579,8 @@ function drawOutput(lines){
 	});
 }
 
+// ELEMENT CREATION FUNCTIONS
+
 function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 
 	var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
@@ -1822,8 +1786,6 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 	
 	return taskBlock
 }
-
-// ELEMENT CREATION FUNCTIONS
 
 function createTaskBlock(taskID,myColor) {
 	var taskBlock = document.createElement('div');
