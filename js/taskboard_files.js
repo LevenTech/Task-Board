@@ -1,3 +1,5 @@
+
+
 // FILE HANDLING FUNCTIONS
 
 function handleFiles(files) {
@@ -151,5 +153,51 @@ function saveFile() {
 function errorHandler(evt) {
 	if(evt.target.error.name == "NotReadableError") {
 		alert("Cannot read file !");
+	}
+}
+
+function makeTestDatesDisplayable() {
+	for (var i=0; i< lines.length; i++) {
+		if (lines[i][col_startday]>0) { 
+			var startDate = getStartDate(i)
+			if (isTestFile) {
+				startDate = new Date(startDate.getTime()+testFileDateDiff*one_day)
+				lines[i][col_startday]=startDate.getDate()
+				lines[i][col_startmonth]=startDate.getMonth()+1
+				lines[i][col_startyear]=startDate.getYear()+1900
+			}
+		}
+		if (lines[i][col_dueday]>0) {
+			var dueDate = getDueDate(i)
+			if (isTestFile) {
+				dueDate = new Date(dueDate.getTime()+testFileDateDiff*one_day)
+				lines[i][col_dueday]=dueDate.getDate()
+				lines[i][col_duemonth]=dueDate.getMonth()+1
+				lines[i][col_dueyear]=dueDate.getYear()+1900
+			}
+		}   
+	}
+}
+
+function makeTestDatesSavable() {
+	for (var i=0; i< lines.length; i++) {
+		if (lines[i][col_startday]>0) { 
+			var startDate = getStartDate(i)
+			if (isTestFile) {
+				startDate = new Date(startDate.getTime()-testFileDateDiff*one_day)
+				lines[i][col_startday]=startDate.getDate()
+				lines[i][col_startmonth]=startDate.getMonth()+1
+				lines[i][col_startyear]=startDate.getYear()+1900
+			}
+		}
+		if (lines[i][col_dueday]>0) {
+			var dueDate = getDueDate(i)
+			if (isTestFile) {
+				dueDate = new Date(dueDate.getTime()-testFileDateDiff*one_day)
+				lines[i][col_dueday]=dueDate.getDate()
+				lines[i][col_duemonth]=dueDate.getMonth()+1
+				lines[i][col_dueyear]=dueDate.getYear()+1900
+			}
+		}   
 	}
 }

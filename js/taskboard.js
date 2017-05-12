@@ -61,7 +61,9 @@ $(window).on('resize', function(){
 	width = $(this).width();
 });
 
-// INIT FUNCTIONS
+
+
+// fngroup: INIT FUNCTIONS
 
 function initTaskboardUI() {
 	initDialogs();
@@ -99,30 +101,6 @@ function initDialogs() {
 
 	$(".my-dialog").show();	
 }
-
-function areDatesBad() {
-	if ($("#datepicker-start").val()=="" || $("#datepicker-due").val()=="") return 0;
-
-	var startDateVal = $("#datepicker-start").val();
-	var startDateParts = startDateVal.split("-")
-	var startDate = new Date(startDateParts[2],startDateParts[0],startDateParts[1]);
-
-	var dueDateVal = $("#datepicker-start").val();
-	var dueDateParts = dueDateVal.split("-")
-	var dueDate = new Date(dueDateParts[2],dueDateParts[0],dueDateParts[1]);
-
-	var startTime = $("#timepicker-start").val();
-	var dueTime = $("#timepicker-due").val();
-
-	if (dueDate.getTime()<startDate.getTime()) return 0
-	if (dueDate.getTime()==startDate.getTime()) {
-		if (startTime=="" || dueTime=="") return 0;
-		if (dueTime<startTime) return 1
-		else return 0
-	}
-	return 0
-}
-
 
 function initKeys() {
 	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
@@ -226,85 +204,6 @@ function initRightClickMode() {
 			initContextMenu("right")
 		}
 	})
-}
-
-function initShapePicker() {
-	var shapeCookie = readCookie('shapeCookie');
-	if (shapeCookie=="wide") {
-		$("#shape-button-wide").addClass("active")
-		makeShapeWide()
-	}
-	else {
-		$("#shape-button-default").addClass("active")
-	}	
-}
-
-function initFontSlider() {
-	var cookieVal = readCookie('zoomCookie');
-	if (cookieVal) {	var sliderValue = cookieVal;	}
-	else { 				var sliderValue = 14; 			}
-	$( "#font-size" ).val(sliderValue);
-	
-	var myFontSizeSlider = document.getElementById('font-size-slider');
-	noUiSlider.create(myFontSizeSlider, {
-		start: [sliderValue],
-		step: 2,
-		connect: true,
-		range: { 'min': 8, 'max': 36 }
-	});
-
-	myFontSizeSlider.noUiSlider.on('slide', function(){
-		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
-		createCookie('zoomCookie',sliderValue);
-		$( "#font-size" ).val(sliderValue);
-		document.getElementById("output").style = "font-size:"+sliderValue+"px;"
-	})
-}
-	
-
-
-	
-function initDateSlider() {
-	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
-	
-	var myTodaysDateSlider = document.getElementById('todays-date-slider');
-	noUiSlider.create(myTodaysDateSlider, {
-		start: [0],
-		step: 1,
-		behavior: "tap-drag",
-		connect: true,
-		range: { 'min': 0, 'max': 178 }
-	});
-
-	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
-	myTodaysDateSlider.noUiSlider.on('slide', function(){
-		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
-		makeDateIncremented(sliderValue);
-		drawOutput(lines);
-	})
-	myTodaysDateSlider.noUiSlider.on('end', function(){	dateSliderActive = 0; })
-
-	myTodaysDateSlider.noUiSlider.on('set', function(){
-		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
-		makeDateIncremented(sliderValue);
-		drawOutput(lines);
-	})
-
-	myTodaysDateSlider.noUiSlider.on('change', function(){
-		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
-		makeDateIncremented(sliderValue);
-		drawOutput(lines);
-		if (dateSliderActive==0) setTimeout(clearDateSlider,300);
-		else {
-			dateSliderActive=0;
-			clearDateSlider();
-		}
-	})
-	
-}
-
-function clearDateSlider() {
-	document.getElementById('todays-date-slider').noUiSlider.reset();
 }
 
 function initContextMenu(button) {
@@ -462,89 +361,38 @@ function initRowContextMenu() {
     $(function() { $.contextMenu(myOptions) });	
 }
 
-function renameRow(rowName) {
-	document.getElementById("current-row-name").innerHTML = rowName
-	$("#renamedRowName").val("");
-	var opt = {
+// fngroup:  SAVE DIALOG FUNCTION
+
+function showSaveDialog(fileToOpen) {
+		var opt = {
         autoOpen: false,
         modal: true,
-        width: 350,
-        height:200,
-        title: 'Rename Task Group',
-		position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"},
+        width: 305,
+        height:300,
+        title: 'Save File?',
+		position: {my: "center center", at: "center center", of: window},
 		buttons: { 
-			OK: function() {
-				var newRowName = $("#renamedRowName").val();
-				for (var currentTask = 1; currentTask<lines.length; currentTask++) {
-					var currentRow = lines[currentTask][col_row]
-					if (currentRow) {
-						if (currentRow.toUpperCase()==rowName) lines[currentTask][col_row]=newRowName;
-					}
-				}
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
-				drawOutput(lines);
-				$("#renameRowDialog").dialog("close");
+			Yes: function() {
+				saveFile();
+				$("#saveDialog").dialog(opt).dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+				else { newFile(); }
+			},
+			No: function () {
+				isSaved = 1;
+				$("#saveDialog").dialog(opt).dialog("close");
+				if (fileToOpen) { getAsText(fileToOpen); }
+				else { newFile(); }
 			},
 			Cancel: function () {
-				$("#renameRowDialog").dialog("close");
-			}
+				$("#saveDialog").dialog(opt).dialog("close");
+			}			
 		}
     };
-	$("#renameRowDialog").dialog(opt).dialog("open");
-	$("#renamedRowName").focus();
-	
+	$("#saveDialog").dialog(opt).dialog("open");
 }
 
-// INPUT FUNCTIONS
-
-function makeDateIncremented(numHours) {
-	today = new Date();
-	today = new Date(today.getTime()+numHours*one_hour);
-	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
-	drawOutput(lines);
-	$(".date-button").removeClass("active")
-	$("#today-button").addClass("active");
-}
-
-function checkTime() {
-	now = new Date();
-	if (now.getTime()-today.getTime()>60000) {
-		today=new Date();
-		makeDateIncremented(0)
-	}
-}
-
-function makeShapeDefault() {
-	shape = ""
-	createCookie('shapeCookie',"");
-	$("#shape-button-default").addClass("active")
-	$("#shape-button-wide").removeClass("active")
-	$(".task-details").show()
-	$(".row-name").removeClass("wide-row-name")
-	$(".row-name").addClass("default-row-name")
-	$(".now-task").removeClass("wide-task")
-	$(".later-task").removeClass("wide-task")
-	$(".now-task").addClass("default-task")
-	$(".later-task").addClass("default-task")
-}
-
-function makeShapeWide() {
-	shape = "wide"
-	createCookie('shapeCookie',"wide");
-	$("#shape-button-wide").addClass("active")
-	$("#shape-button-default").removeClass("active")
-	$(".task-details").hide()
-	$(".row-name").removeClass("default-row-name")
-	$(".row-name").addClass("wide-row-name")
-	$(".now-task").removeClass("default-task")
-	$(".later-task").removeClass("default-task")
-	$(".now-task").addClass("wide-task")
-	$(".later-task").addClass("wide-task")
-}
-
-// TASK FUNCTIONS
+// fngroup:  TASK OPERATION FUNCTIONS
 
 function clickFinish() {
 	if (lines[currentTask][col_complete]=="Yes") uncompleteTask();
@@ -699,12 +547,6 @@ function clickTaskBlock(ev,target) {
 	}
 }
 
-function cornerClick(ev) {
-	if (editDebug) console.log("corner clicked currentTask="+currentTask)
-	ev.stopPropagation();
-}
-
-
 function delayTask(numHours) {
 
 	if (lines[currentTask][col_increment]>0 && lines[currentTask][col_startday]>0) {
@@ -747,8 +589,43 @@ function delayTask(numHours) {
 	saveFileCookie();
 }
 
+function renameRow(rowName) {
+	document.getElementById("current-row-name").innerHTML = rowName
+	$("#renamedRowName").val("");
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 350,
+        height:200,
+        title: 'Rename Task Group',
+		position: {my: "center center", at: "center center", of: myClickEvent, collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				var newRowName = $("#renamedRowName").val();
+				for (var currentTask = 1; currentTask<lines.length; currentTask++) {
+					var currentRow = lines[currentTask][col_row]
+					if (currentRow) {
+						if (currentRow.toUpperCase()==rowName) lines[currentTask][col_row]=newRowName;
+					}
+				}
+				isSaved = 0;
+				$("#unsaved-changes").show();
+				saveFileCookie();
+				drawOutput(lines);
+				$("#renameRowDialog").dialog("close");
+			},
+			Cancel: function () {
+				$("#renameRowDialog").dialog("close");
+			}
+		}
+    };
+	$("#renameRowDialog").dialog(opt).dialog("open");
+	$("#renamedRowName").focus();
+	
+}
 
-// DRAG AND DROP FUNCTIONS
+
+// fngroup:  DRAG AND DROP FUNCTIONS
 
 function highlightRow(ev) {
     ev.preventDefault();
@@ -877,7 +754,8 @@ function dropFinish(ev) {
 	ev.stopPropagation();
 }
 
-// CREATION FUNCTIONS
+
+// fngroup: CREATION FUNCTIONS
 	
 function newRow(ev) {
     ev.preventDefault();
@@ -1037,128 +915,3 @@ function newTask(rowName,taskName,openMe) {
 	}
 }
 
-function showSaveDialog(fileToOpen) {
-		var opt = {
-        autoOpen: false,
-        modal: true,
-        width: 305,
-        height:300,
-        title: 'Save File?',
-		position: {my: "center center", at: "center center", of: window},
-		buttons: { 
-			Yes: function() {
-				saveFile();
-				$("#saveDialog").dialog(opt).dialog("close");
-				if (fileToOpen) { getAsText(fileToOpen); }
-				else { newFile(); }
-			},
-			No: function () {
-				isSaved = 1;
-				$("#saveDialog").dialog(opt).dialog("close");
-				if (fileToOpen) { getAsText(fileToOpen); }
-				else { newFile(); }
-			},
-			Cancel: function () {
-				$("#saveDialog").dialog(opt).dialog("close");
-			}			
-		}
-    };
-	$("#saveDialog").dialog(opt).dialog("open");
-}
-
-function makeTestDatesDisplayable() {
-	for (var i=0; i< lines.length; i++) {
-		if (lines[i][col_startday]>0) { 
-			var startDate = getStartDate(i)
-			if (isTestFile) {
-				startDate = new Date(startDate.getTime()+testFileDateDiff*one_day)
-				lines[i][col_startday]=startDate.getDate()
-				lines[i][col_startmonth]=startDate.getMonth()+1
-				lines[i][col_startyear]=startDate.getYear()+1900
-			}
-		}
-		if (lines[i][col_dueday]>0) {
-			var dueDate = getDueDate(i)
-			if (isTestFile) {
-				dueDate = new Date(dueDate.getTime()+testFileDateDiff*one_day)
-				lines[i][col_dueday]=dueDate.getDate()
-				lines[i][col_duemonth]=dueDate.getMonth()+1
-				lines[i][col_dueyear]=dueDate.getYear()+1900
-			}
-		}   
-	}
-}
-
-function makeTestDatesSavable() {
-	for (var i=0; i< lines.length; i++) {
-		if (lines[i][col_startday]>0) { 
-			var startDate = getStartDate(i)
-			if (isTestFile) {
-				startDate = new Date(startDate.getTime()-testFileDateDiff*one_day)
-				lines[i][col_startday]=startDate.getDate()
-				lines[i][col_startmonth]=startDate.getMonth()+1
-				lines[i][col_startyear]=startDate.getYear()+1900
-			}
-		}
-		if (lines[i][col_dueday]>0) {
-			var dueDate = getDueDate(i)
-			if (isTestFile) {
-				dueDate = new Date(dueDate.getTime()-testFileDateDiff*one_day)
-				lines[i][col_dueday]=dueDate.getDate()
-				lines[i][col_duemonth]=dueDate.getMonth()+1
-				lines[i][col_dueyear]=dueDate.getYear()+1900
-			}
-		}   
-	}
-}
-
-// SORTING FUNCTIONS
-
-function myRowSortFunction(a,b) {	
-	if (a[1]=="MISC") return -1;
-	if (b[1]=="MISC") return 1;
-	return mySortFunction(a[0][0],b[0][0]);
-}
-
-function mySortFunction(a,b) {	
-	var returnVal;
-	
-	if (a[0]=="" && a[1].length==0) a[1]=999;
-	if (b[0]=="" && b[1].length==0) b[1]=999;
-
-	if (a[0]>0 && a[1].length==0) a[1]=a[0];
-	if (b[0]>0 && b[1].length==0) b[1]=b[0];
-	
-	if (a[4]=="" || a[4]==null) a[4]="23:59";
-	if (b[4]=="" || b[4]==null) b[4]="23:59";
-
-	if (a[0].length==0) a[0]=-999;
-	if (b[0].length==0) b[0]=-999;
-	
-	if (sortDebug) var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
-
-	if (a[1]==b[1])
-	{
-		if (a[0]==b[0]) 
-		{
-			if (a[4]==b[4]) {
-				returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
-			}
-			else {
-				returnVal = (a[4] < b[4]) ? -1 : (a[4] > b[4]) ? 1 : 0 
-			}
-		}
-		else
-		{
-			returnVal = (a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0 
-		}
-	}
-	else
-	{
-		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
-	}
-	if (sortDebug) { console.log(compareString + " = " + returnVal); }
-	return returnVal;
-}
-
-  

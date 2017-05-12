@@ -1,5 +1,4 @@
 
-
 function initToolbar() {
 	$(window).scroll(function(){
 		if ($(window).scrollTop() > 66) {
@@ -147,6 +146,82 @@ function initRightButtons() {
 	return rightButtons;
 }
 
+function initShapePicker() {
+	var shapeCookie = readCookie('shapeCookie');
+	if (shapeCookie=="wide") {
+		$("#shape-button-wide").addClass("active")
+		makeShapeWide()
+	}
+	else {
+		$("#shape-button-default").addClass("active")
+	}	
+}
+
+function initFontSlider() {
+	var cookieVal = readCookie('zoomCookie');
+	if (cookieVal) {	var sliderValue = cookieVal;	}
+	else { 				var sliderValue = 14; 			}
+	$( "#font-size" ).val(sliderValue);
+	
+	var myFontSizeSlider = document.getElementById('font-size-slider');
+	noUiSlider.create(myFontSizeSlider, {
+		start: [sliderValue],
+		step: 2,
+		connect: true,
+		range: { 'min': 8, 'max': 36 }
+	});
+
+	myFontSizeSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('font-size-slider').noUiSlider.get());
+		createCookie('zoomCookie',sliderValue);
+		$( "#font-size" ).val(sliderValue);
+		document.getElementById("output").style = "font-size:"+sliderValue+"px;"
+	})
+}
+
+function initDateSlider() {
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
+	
+	var myTodaysDateSlider = document.getElementById('todays-date-slider');
+	noUiSlider.create(myTodaysDateSlider, {
+		start: [0],
+		step: 1,
+		behavior: "tap-drag",
+		connect: true,
+		range: { 'min': 0, 'max': 178 }
+	});
+
+	myTodaysDateSlider.noUiSlider.on('start', function(){	dateSliderActive = 1; })
+	myTodaysDateSlider.noUiSlider.on('slide', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+	})
+	myTodaysDateSlider.noUiSlider.on('end', function(){	dateSliderActive = 0; })
+
+	myTodaysDateSlider.noUiSlider.on('set', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+	})
+
+	myTodaysDateSlider.noUiSlider.on('change', function(){
+		var sliderValue = Math.floor(document.getElementById('todays-date-slider').noUiSlider.get())
+		makeDateIncremented(sliderValue);
+		drawOutput(lines);
+		if (dateSliderActive==0) setTimeout(clearDateSlider,300);
+		else {
+			dateSliderActive=0;
+			clearDateSlider();
+		}
+	})
+	
+}
+
+function clearDateSlider() {
+	document.getElementById('todays-date-slider').noUiSlider.reset();
+}
+
 function initToolSelector () {
 
 	$(".toolbar-selection").hide();
@@ -204,6 +279,49 @@ function toggleFinishedVisible() {
 	drawOutput(lines)
 }
 
+function makeDateIncremented(numHours) {
+	today = new Date();
+	today = new Date(today.getTime()+numHours*one_hour);
+	$("#todays-date").val(makeDateStr(today)+","+makeTimeStrFromDate(today));
+	drawOutput(lines);
+	$(".date-button").removeClass("active")
+	$("#today-button").addClass("active");
+}
 
+function checkTime() {
+	now = new Date();
+	if (now.getTime()-today.getTime()>60000) {
+		today=new Date();
+		makeDateIncremented(0)
+	}
+}
+
+function makeShapeDefault() {
+	shape = ""
+	createCookie('shapeCookie',"");
+	$("#shape-button-default").addClass("active")
+	$("#shape-button-wide").removeClass("active")
+	$(".task-details").show()
+	$(".row-name").removeClass("wide-row-name")
+	$(".row-name").addClass("default-row-name")
+	$(".now-task").removeClass("wide-task")
+	$(".later-task").removeClass("wide-task")
+	$(".now-task").addClass("default-task")
+	$(".later-task").addClass("default-task")
+}
+
+function makeShapeWide() {
+	shape = "wide"
+	createCookie('shapeCookie',"wide");
+	$("#shape-button-wide").addClass("active")
+	$("#shape-button-default").removeClass("active")
+	$(".task-details").hide()
+	$(".row-name").removeClass("default-row-name")
+	$(".row-name").addClass("wide-row-name")
+	$(".now-task").removeClass("default-task")
+	$(".later-task").removeClass("default-task")
+	$(".now-task").addClass("wide-task")
+	$(".later-task").addClass("wide-task")
+}
 
 		

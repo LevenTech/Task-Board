@@ -450,3 +450,52 @@ function createCountdownIcon(days_until_due) {
 	
 	return countdownIcon;
 }
+
+// fngroup: SORTING FUNCTIONS
+
+function myRowSortFunction(a,b) {	
+	if (a[1]=="MISC") return -1;
+	if (b[1]=="MISC") return 1;
+	return mySortFunction(a[0][0],b[0][0]);
+}
+
+function mySortFunction(a,b) {	
+	var returnVal;
+	
+	if (a[0]=="" && a[1].length==0) a[1]=999;
+	if (b[0]=="" && b[1].length==0) b[1]=999;
+
+	if (a[0]>0 && a[1].length==0) a[1]=a[0];
+	if (b[0]>0 && b[1].length==0) b[1]=b[0];
+	
+	if (a[4]=="" || a[4]==null) a[4]="23:59";
+	if (b[4]=="" || b[4]==null) b[4]="23:59";
+
+	if (a[0].length==0) a[0]=-999;
+	if (b[0].length==0) b[0]=-999;
+	
+	if (sortDebug) var compareString = a[0]+"/"+a[1]+"/"+a[2]+" vs "+b[0]+"/"+b[1]+"/"+b[2];
+
+	if (a[1]==b[1])
+	{
+		if (a[0]==b[0]) 
+		{
+			if (a[4]==b[4]) {
+				returnVal = (a[2] < b[2]) ? -1 : (a[2] > b[2]) ? 1 : 0 
+			}
+			else {
+				returnVal = (a[4] < b[4]) ? -1 : (a[4] > b[4]) ? 1 : 0 
+			}
+		}
+		else
+		{
+			returnVal = (a[0] < b[0]) ? -1 : (a[0] > b[0]) ? 1 : 0 
+		}
+	}
+	else
+	{
+		returnVal = (a[1] < b[1]) ? -1 : (a[1] > b[1]) ? 1 : 0 
+	}
+	if (sortDebug) { console.log(compareString + " = " + returnVal); }
+	return returnVal;
+}

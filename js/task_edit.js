@@ -352,6 +352,29 @@ function copyDateTimeFromDue() {
 	$("#timepicker-start").val($("#timepicker-due").val())
 }
 
+function areDatesBad() {
+	if ($("#datepicker-start").val()=="" || $("#datepicker-due").val()=="") return 0;
+
+	var startDateVal = $("#datepicker-start").val();
+	var startDateParts = startDateVal.split("-")
+	var startDate = new Date(startDateParts[2],startDateParts[0],startDateParts[1]);
+
+	var dueDateVal = $("#datepicker-start").val();
+	var dueDateParts = dueDateVal.split("-")
+	var dueDate = new Date(dueDateParts[2],dueDateParts[0],dueDateParts[1]);
+
+	var startTime = $("#timepicker-start").val();
+	var dueTime = $("#timepicker-due").val();
+
+	if (dueDate.getTime()<startDate.getTime()) return 0
+	if (dueDate.getTime()==startDate.getTime()) {
+		if (startTime=="" || dueTime=="") return 0;
+		if (dueTime<startTime) return 1
+		else return 0
+	}
+	return 0
+}
+
 function colorpicked() {
 	$("#colorpicker").val(document.getElementById("colorpicker2").value);
 }
