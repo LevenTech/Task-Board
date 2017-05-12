@@ -48,23 +48,31 @@ var makingNewTask;
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
-	initDialogs();
-	initDateSyncing();
-	initKeys();
+	initToolbar();
+	initTaskEditor();
+	initTaskboardUI();
+	
+	loadCookieFile();
+	
+	setInterval(checkTime,60000)
+});
 
-	initShapePicker();
-	initFontSlider();
-	initDateSlider();
+$(window).on('resize', function(){
+	width = $(this).width();
+});
+
+// INIT FUNCTIONS
+
+function initTaskboardUI() {
+	initDialogs();
+	initKeys();
 
 	$.contextMenu( 'destroy' );
 	initRowContextMenu()
 	initContextMenu("right")
 
 	if (isMobile()) { initRightClickMode() }
-	if (isMobile()) { initToolSelector() }
 	
-	loadCookieFile();
-
 	$.ui.dialog.prototype._focusTabbable = function(){};
 	
 	$(document).on('mousedown', '.task-block', function (e){ 
@@ -75,92 +83,11 @@ $(document).ready(function() {
 		myClickEvent = e
 		return true; 
 	});
-	
-	$(window).scroll(function(){
-		if ($(window).scrollTop() > 66) {
-			$("#taskboard-toolbar").removeClass("moving-toolbar");
-			$("#taskboard-toolbar").addClass("stuck-toolbar");
-		}
-		else {
-			$("#taskboard-toolbar").removeClass("stuck-toolbar");
-			$("#taskboard-toolbar").addClass("moving-toolbar");
-		}
-	});	
-	
-	setInterval(checkTime,60000)
-	
-	var showFinishedCookie = readCookie("showFinished")
-	if (showFinishedCookie==1) toggleFinishedVisible()
-
-});
-
-$(window).on('resize', function(){
-	width = $(this).width();
-});
-
-function toggleFinishedVisible() {
-	if ($('#show-finished').is(':checked')) {
-		document.getElementById("show-finished").checked = false;
-		$("#delete-finished-button").hide();
-		showFinished = 0;
-		createCookie("showFinished",0)
-	}
-	else {
-		document.getElementById("show-finished").checked = true;
-		$("#delete-finished-button").show();
-		showFinished = 1;
-		createCookie("showFinished",1)
-	}
-	drawOutput(lines)
-}
-
-// INIT FUNCTIONS
-
-function initToolSelector () {
-
-	$(".toolbar-selection").hide();
-	$("#tool-select-control").show();
-	$("#middle-buttons").show();
-	document.getElementById("left-buttons").style.flexBasis = "1em";
-	document.getElementById("left-buttons").style.flexGrow = "0";
-	document.getElementById("left-buttons").style.flexShrink = "0";
-	document.getElementById("middle-buttons").style.flexBasis = "8em";
-	document.getElementById("new-task-drag").style.marginTop = "0.4em";
-	document.getElementById("new-task-drag").style.paddingTop = "1em";
-	document.getElementById("new-task-drag").innerHTML = "New";
-	document.getElementById("output").marginTop = "30px";
-	$("#right-buttons").show();
-	$("#tool-selector").change(function(){
-		createCookie("selected-tool",this.value)
-		$(".toolbar-selection").hide();
-		$("#right-buttons").append($("#"+this.value))
-		$("#"+this.value).show();
-		document.getElementById(this.value).style.fontSize = "25px";
-	});
-	
-	var alreadySelected = readCookie("selected-tool");
-	if (!alreadySelected) alreadySelected = "new-open-file"
-	$("#tool-selector").val(alreadySelected)
-	$(".toolbar-selection").hide();
-	$("#right-buttons").append($("#"+alreadySelected))
-	$("#"+alreadySelected).show();
-	document.getElementById(alreadySelected).style.fontSize = "25px";
-	$(".newfile-button")
-	document.getElementById("newfile-button").style.fontSize = "20px"
-	document.getElementById("newfile-button-label").innerHTML = "New"
-	document.getElementById("openfile-button").style.fontSize = "20px"
-	document.getElementById("openfile-button-label").innerHTML = "Open"
-	
-	$("#taskboard-toolbar").addClass("padded-toolbar");
-	$("#taskboard-toolbar").addClass("moving-toolbar");
-	//$("#output").addClass("padded-output");
-	$("#app-header").addClass("padded-app-header");
 }
 
 function initDialogs() {
 	var opt = { autoOpen: false	};
  
-	initEditDialog();
 	$("#editDialog").dialog(opt).dialog("close");
 	$("#completeDialog").dialog(opt).dialog("close");
 	$("#uncompleteDialog").dialog(opt).dialog("close");
@@ -171,35 +98,6 @@ function initDialogs() {
 	$("#deleteFinishedDialog").dialog(opt).dialog("close");
 
 	$(".my-dialog").show();	
-}
-
-function initDateSyncing() {
-	$("#datepicker-start").change(function() {
-		if (currentTaskDateSync) $("#datepicker-due").val($("#datepicker-start").val());
-		if (areDatesBad()) { copyDateTimeFromStart(); }
-	});
-	$("#datepicker-due").change(function() {
-		if (currentTaskDateSync) $("#datepicker-start").val($("#datepicker-due").val());
-		if (areDatesBad()) { copyDateTimeFromDue(); }
-	});
-	$("#timepicker-start").change(function() {
-		if (currentTaskDateSync) $("#timepicker-due").val($("#timepicker-start").val());
-		if (areDatesBad()) { copyDateTimeFromStart(); }
-	});
-	$("#timepicker-due").change(function() {
-		if (currentTaskDateSync) $("#timepicker-start").val($("#timepicker-due").val());
-		if (areDatesBad()) { copyDateTimeFromDue(); }
-	});
-}
-
-function copyDateTimeFromStart() {
-	$("#datepicker-due").val($("#datepicker-start").val())
-	$("#timepicker-due").val($("#timepicker-start").val())
-}
-
-function copyDateTimeFromDue() {
-	$("#datepicker-start").val($("#datepicker-due").val())
-	$("#timepicker-start").val($("#timepicker-due").val())
 }
 
 function areDatesBad() {

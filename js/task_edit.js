@@ -1,4 +1,10 @@
-function initEditDialog() {
+
+function initTaskEditor() {
+	generateEditDialog()
+	initDateSyncing();
+}
+
+function generateEditDialog() {
 	var myDialog = document.createElement("div")
 	myDialog.id = "editDialog"
 	myDialog.className = "my-dialog"
@@ -315,6 +321,35 @@ function syncDatesDue() {
 		$("#startpicker-row").attr('rowspan', 2)
 		$("#duepicker-row").hide()
 	}
+}
+
+function initDateSyncing() {
+	$("#datepicker-start").change(function() {
+		if (currentTaskDateSync) $("#datepicker-due").val($("#datepicker-start").val());
+		if (areDatesBad()) { copyDateTimeFromStart(); }
+	});
+	$("#datepicker-due").change(function() {
+		if (currentTaskDateSync) $("#datepicker-start").val($("#datepicker-due").val());
+		if (areDatesBad()) { copyDateTimeFromDue(); }
+	});
+	$("#timepicker-start").change(function() {
+		if (currentTaskDateSync) $("#timepicker-due").val($("#timepicker-start").val());
+		if (areDatesBad()) { copyDateTimeFromStart(); }
+	});
+	$("#timepicker-due").change(function() {
+		if (currentTaskDateSync) $("#timepicker-start").val($("#timepicker-due").val());
+		if (areDatesBad()) { copyDateTimeFromDue(); }
+	});
+}
+
+function copyDateTimeFromStart() {
+	$("#datepicker-due").val($("#datepicker-start").val())
+	$("#timepicker-due").val($("#timepicker-start").val())
+}
+
+function copyDateTimeFromDue() {
+	$("#datepicker-start").val($("#datepicker-due").val())
+	$("#timepicker-start").val($("#timepicker-due").val())
 }
 
 function colorpicked() {
