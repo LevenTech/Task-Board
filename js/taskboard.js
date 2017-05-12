@@ -88,19 +88,28 @@ function initTaskboardUI() {
 }
 
 function initDialogs() {
-	var opt = { autoOpen: false	};
- 
-	$("#editDialog").dialog(opt).dialog("close");
-	$("#completeDialog").dialog(opt).dialog("close");
-	$("#uncompleteDialog").dialog(opt).dialog("close");
-	$("#newRowDialog").dialog(opt).dialog("close");
-	$("#renameRowDialog").dialog(opt).dialog("close");
-	$("#saveDialog").dialog(opt).dialog("close");
-	$("#deleteDialog").dialog(opt).dialog("close");
-	$("#deleteFinishedDialog").dialog(opt).dialog("close");
+	initSaveDialog()
+	initDeleteAllDialog()
+	initDeleteTaskDialog()
+	initUncompleteDialog()
+	initNewRowDialog()
+	initRenameRowDialog()
 
+	var opt = { autoOpen: false	};
+	$(".my-dialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();	
 }
+
+
+function initSaveDialog() {
+	var saveDialog = document.createElement("div")
+	saveDialog.id="saveDialog"
+	saveDialog.className = "my-dialog"
+	saveDialog.innerHTML = "This file has not been saved, and you're about to lose your changes.<br/><br/>Save your changes now?"
+	document.getElementById("myBody").append(saveDialog)
+}
+
+
 
 function initKeys() {
 	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
@@ -418,6 +427,15 @@ function completeTask(wasDropped) {
 	
 }
 
+function initUncompleteDialog() {
+	var uncompleteDialog = document.createElement("div")
+	uncompleteDialog.id="uncompleteDialog"
+	uncompleteDialog.className = "my-dialog"
+	uncompleteDialog.innerHTML = "Are you sure you want to UN-finish the task '<span id='uncompleteTaskName' ></span>'?<br/><br/>This will add the task back to your board.<br/><br/>"
+	document.getElementById("myBody").append(uncompleteDialog)
+}
+
+
 function uncompleteTask() {
 
 	$("#deleteDialog").dialog("close");
@@ -458,6 +476,19 @@ function uncompleteTask() {
 	$("#uncompleteDialog").dialog(opt).dialog("open");
 }
 
+function initDeleteTaskDialog() {
+	var deleteTaskDialog = document.createElement("div")
+	deleteTaskDialog.id="deleteDialog"
+	deleteTaskDialog.className = "my-dialog"
+	deleteTaskDialog.innerHTML = "	Are you sure you want to DELETE the task '<span id='deleteTaskName' ></span>'?<br/><br/>\
+									This will remove all trace of this task, from the board and your save file.<br/><br/> \
+									To keep a record of the task, but remove it from the board, you can \
+									<button type='button' class='btn btn-default' style='padding:5px;padding-top:1px;padding-bottom:1px;margin-left:5px;margin:0px;margin-right:5px;font-size:12px;' onclick='completeTask();'>\
+									<i class='fa fa-check-square-o' aria-hidden='true' style='margin-right:5px;'></i>Finish</button>\
+									it."
+	document.getElementById("myBody").append(deleteTaskDialog)
+}
+
 function deleteTask() {
 
 	$("#completeDialog").dialog("close");
@@ -492,6 +523,15 @@ function deleteTask() {
 	var taskName = lines[currentTask][1];
 	$("#deleteTaskName").text(taskName);
 	$("#deleteDialog").dialog(opt).dialog("open");
+}
+
+
+function initDeleteAllDialog() {
+	var deleteAllDialog = document.createElement("div")
+	deleteAllDialog.id="deleteFinishedDialog"
+	deleteAllDialog.className = "my-dialog"
+	deleteAllDialog.innerHTML = "Are you sure you want to delete all <b id='deleteFinishedCount'></b> finished tasks?<br/><br/>"
+	document.getElementById("myBody").append(deleteAllDialog)
 }
 
 function deleteAllFinished() {
@@ -587,6 +627,14 @@ function delayTask(numHours) {
 	isSaved = 0;
 	$("#unsaved-changes").show();
 	saveFileCookie();
+}
+
+function initRenameRowDialog() {
+	var renameRowDialog = document.createElement("div")
+	renameRowDialog.id="renameRowDialog"
+	renameRowDialog.className = "my-dialog"
+	renameRowDialog.innerHTML = "Give the '<span id='current-row-name'></span>' group a new name:<input id='renamedRowName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(renameRowDialog)
 }
 
 function renameRow(rowName) {
@@ -756,6 +804,14 @@ function dropFinish(ev) {
 
 
 // fngroup: CREATION FUNCTIONS
+
+function initNewRowDialog() {
+	var newRowDialog = document.createElement("div")
+	newRowDialog.id="newRowDialog"
+	newRowDialog.className = "my-dialog"
+	newRowDialog.innerHTML = "Name the new group:<input id='newRowName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(newRowDialog)
+}
 	
 function newRow(ev) {
     ev.preventDefault();
