@@ -146,21 +146,13 @@ function initDialogKeys() {
 				if (lines[currentTask][11].length>0) newTaskCopy();
 				$("#completeDialog").dialog("close");
 				$("#editDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
+				makeFinishUnhighlighted();
 			}
 			else if (key == 27) {
 				$("#completeDialog").dialog("close");
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
+				makeFinishUnhighlighted();
 			}
 		}
 		if ($('#deleteDialog').is(':visible')) {
@@ -169,9 +161,7 @@ function initDialogKeys() {
 				lines.splice(currentTask,1);
 				$("#deleteDialog").dialog("close");
 				$("#editDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 			}
 			else if (key == 27) {
@@ -343,6 +333,12 @@ function showSaveDialog(fileToOpen) {
 	$("#saveDialog").dialog(opt).dialog("open");
 }
 
+function changeToUnsaved() {
+	isSaved = 0;
+	$("#unsaved-changes").show();
+	saveFileCookie();
+}
+
 // fngroup:  TASK OPERATION FUNCTIONS
 
 function clickFinish() {
@@ -358,15 +354,9 @@ function completeTask(wasDropped) {
 	if (lines[currentTask][11].length>0) newTaskCopy();
 	$("#completeDialog").dialog("close");
 	$("#editDialog").dialog("close");
-	isSaved = 0;
-	$("#unsaved-changes").show();
-	saveFileCookie();
+	makeFinishUnhighlighted();
+	changeToUnsaved();
 	drawOutput(lines);
-	$("#finish-area").removeClass("hover-finish");
-	$("#finish-area").addClass("normal-finish");
-	$("#finish-instructions").hide();
-	$("#show-finished-toggle").show();	
-	
 }
 
 function initUncompleteDialog() {
@@ -394,21 +384,13 @@ function uncompleteTask() {
 				lines[currentTask][10]="";
 				$("#uncompleteDialog").dialog("close");
 				$("#editDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
+				makeFinishUnhighlighted();
 			},
 			No: function () {
 				$("#uncompleteDialog").dialog("close");
-				$("#finish-area").removeClass("hover-finish");
-				$("#finish-area").addClass("normal-finish");
-				$("#finish-instructions").hide();
-				$("#show-finished-toggle").show();
+				makeFinishUnhighlighted();
 			}
 		},
 		open: function() { $("#completeDialog").find('button:nth-child(0)').focus(); }
@@ -434,10 +416,7 @@ function initDeleteTaskDialog() {
 function deleteTask() {
 
 	$("#completeDialog").dialog("close");
-	$("#finish-area").removeClass("hover-finish");
-	$("#finish-area").addClass("normal-finish");
-	$("#finish-instructions").hide();
-	$("#show-finished-toggle").show();
+	makeFinishUnhighlighted();
 	
 	var opt = {
         autoOpen: false,
@@ -451,9 +430,7 @@ function deleteTask() {
 				lines.splice(currentTask,1);
 				$("#deleteDialog").dialog("close");
 				$("#editDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 			},
 			No: function () {
@@ -494,9 +471,7 @@ function deleteAllFinished() {
 					}
 				}
 				$("#deleteFinishedDialog").dialog("close");
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 			},
 			No: function () {
@@ -566,9 +541,7 @@ function delayTask(numHours) {
 	}
 	
 	drawOutput(lines);
-	isSaved = 0;
-	$("#unsaved-changes").show();
-	saveFileCookie();
+	changeToUnsaved();
 }
 
 function initRenameRowDialog() {
@@ -598,9 +571,7 @@ function renameRow(rowName) {
 						if (currentRow.toUpperCase()==rowName) lines[currentTask][col_row]=newRowName;
 					}
 				}
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 				$("#renameRowDialog").dialog("close");
 			},
@@ -688,18 +659,25 @@ function allowDrop(ev) {
 function highlightFinish(ev) {
 	if (draggingNew==0) {
 		ev.preventDefault();
-		$("#finish-area").removeClass("normal-finish");
-		$("#finish-area").addClass("hover-finish");
-		$("#finish-instructions").show();
-		$("#show-finished-toggle").hide();
+		makeFinishHighlighted();
 	}
 }
+function makeFinishHighlighted() {
+	$("#finish-area").removeClass("normal-finish");
+	$("#finish-area").addClass("hover-finish");
+	$("#finish-instructions").show();
+	$("#show-finished-toggle").hide();
+}
+
 function unhighlightFinish(ev) {
     ev.preventDefault();
+	makeFinishUnhighlighted();
+}
+function makeFinishUnhighlighted() {
 	$("#finish-area").removeClass("hover-finish");
 	$("#finish-area").addClass("normal-finish");
 	$("#finish-instructions").hide();
-	$("#show-finished-toggle").show();
+	$("#show-finished-toggle").show();	
 }
 
 function drag(ev) {
@@ -728,9 +706,7 @@ function drop(ev) {
 		var taskID = ev.dataTransfer.getData("text");
 		if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
 			lines[taskID][col_row]=newRowName;
-			isSaved = 0;
-			$("#unsaved-changes").show();
-			saveFileCookie();
+			changeToUnsaved();
 			drawOutput(lines);
 		}
 	}
@@ -777,9 +753,7 @@ function newRow(ev) {
 				else {
 					lines[taskID][col_row]=rowName;
 				}
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 				$("#newRowDialog").dialog("close");
 			},
@@ -810,9 +784,7 @@ function newRowMenu() {
 				else {
 					lines[taskID][col_row]=rowName;
 				}
-				isSaved = 0;
-				$("#unsaved-changes").show();
-				saveFileCookie();
+				changeToUnsaved();
 				drawOutput(lines);
 				$("#newRowDialog").dialog("close");
 			},
@@ -885,9 +857,7 @@ function newTaskCopy() {
 
 	lines.push(newTask);
 	drawOutput(lines);
-	isSaved = 0;
-	$("#unsaved-changes").show();
-	saveFileCookie();
+	changeToUnsaved();
 }
 
 function newTask(rowName,taskName,openMe) {

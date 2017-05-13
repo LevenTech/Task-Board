@@ -97,7 +97,7 @@ function editDialogKeypress(e) {
 }
 
 function makeColorButton(color) {
-	return "<button type='button' class='btn btn-default color-button' id='color-button-"+color+"' onclick='changeColor('"+color+"')'><div class='circle' style='background:"+color+";'></div></button>"
+	return "<button type='button' class='btn btn-default color-button' id='color-button-"+color+"' onclick='changeColor(\""+color+"\");'><div class='circle' style='background:"+color+";'></div></button>"
 }
 
 function makeIntervalButton(numDays,extraAttr) {
