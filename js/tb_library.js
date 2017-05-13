@@ -1,4 +1,10 @@
 
+
+function hasClass(element, cls) {
+    return (' ' + element.attr('class') + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+
+
 // MISC LIBRARY FUNCTIONS
 
 function isMobile() { 

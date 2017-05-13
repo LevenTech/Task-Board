@@ -200,7 +200,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 			if (time_until_start>0) {
 				if (sameTime) {
 					startDatePhrase.innerHTML = "<b></b>";
-					if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
+					if (time_until_start < one_hour) taskBlock.className += " now-task"
 					else taskBlock.className += " later-task"
 				}
 				else {
@@ -211,8 +211,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 			else {
 				if (sameTime) {
 					startDatePhrase.innerHTML = "<b></b>";
-					if (time_until_start<(60*60*1000)) taskBlock.className += " now-task"
-					else taskBlock.className += " later-task"
+					taskBlock.className += " now-task"
 				}
 				else {
 					startDatePhrase.innerHTML = "<b>Started TODAY</b>";
@@ -221,13 +220,10 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 			}
 		}
 		else {
-			if (sameTime==0) {
-				startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
-				taskBlock.className += " now-task";
-			}
+			if (sameTime==0) startDatePhrase.innerHTML = "<b>Starts TODAY</b>";
 			else startDatePhrase.innerHTML = "";
+			taskBlock.className += " now-task";
 		}							
-		taskBlock.className += " now-task";
 	}
 	taskBlock.appendChild(startDatePhrase);
 
@@ -254,13 +250,13 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 		if (sameTime==0) dueDatePhrase.innerHTML = "<b>Due TODAY</b>";
 		else dueDatePhrase.innerHTML = "<b>TODAY</b>";
 		var isDueToday = 1;
+		taskBlock.className += " due-task"
 	}
 	else if (days_until_due==0 && time_until_due>0) {
 		dueDatePhrase.style.fontWeight = "bold"
 		if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
 		else dueDatePhrase.innerHTML = "<b>Due TODAY at "+dueTimeStr+"</b>";
 		var isDueToday = 1;
-		
 	}
 	else if (days_until_due==0 && time_until_due<0) {
 		if (sameTime) dueDatePhrase.innerHTML = "<b>TODAY at "+dueTimeStr+"</b>";
@@ -285,10 +281,11 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 	taskBlock.appendChild(dueDatePhrase)
 	
 	if (isDueToday==1) {
-			var alertIcon = document.createElement("div");
+		var alertIcon = document.createElement("div");
 		alertIcon.className = "alert-icon alert-indent";
 		alertIcon.innerHTML = '<i class="fa fa-exclamation" aria-hidden="true" ></i>';
 		taskBlock.appendChild(alertIcon);
+		taskBlock.className += " due-task"
 	}
 
 	if (isOverdue==1) {
@@ -302,6 +299,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 		overDue.innerHTML = "!!! OVERDUE !!!"
 		taskBlock.appendChild(createBR());		
 		taskBlock.appendChild(overDue);
+		taskBlock.className += " due-task"
 	}
 	
 	return taskBlock

@@ -1,6 +1,7 @@
 
 function initTaskEditor() {
 	generateEditDialog()
+	initEditDialogKeys()
 	initDateSyncing();
 }
 
@@ -75,17 +76,15 @@ function generateEditDialog() {
 	document.getElementById("myBody").append(myDialog)
 }
 
-function makeColorButton(color) {
-	return "<button type='button' class='btn btn-default color-button' id='color-button-"+color+"' onclick='changeColor('"+color+"')'><div class='circle' style='background:"+color+";'></div></button>"
+function initEditDialogKeys() {
+	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-start").keypress( function (e) { return editDialogKeypress(e); });
+	$("#timepicker-due").keypress( function (e) { return editDialogKeypress(e); });
+	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
+	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
 }
-
-function makeIntervalButton(numDays,extraAttr) {
-	var numDaysStr = numDays
-	if (numDays==0) numDaysStr="-"
-	return "<button type='button' class='btn btn-default interval-button' id='interval-button"+numDays+"' onclick='changeInterval("+numDays+")' "+extraAttr+">"+numDaysStr+"</button>"
-}
-
-
 
 function editDialogKeypress(e) {
 	if (e.which==13) {
@@ -95,6 +94,16 @@ function editDialogKeypress(e) {
 		$("#editDialog").dialog("close");
 		return false;
 	}
+}
+
+function makeColorButton(color) {
+	return "<button type='button' class='btn btn-default color-button' id='color-button-"+color+"' onclick='changeColor('"+color+"')'><div class='circle' style='background:"+color+";'></div></button>"
+}
+
+function makeIntervalButton(numDays,extraAttr) {
+	var numDaysStr = numDays
+	if (numDays==0) numDaysStr="-"
+	return "<button type='button' class='btn btn-default interval-button' id='interval-button"+numDays+"' onclick='changeInterval("+numDays+")' "+extraAttr+">"+numDaysStr+"</button>"
 }
 
 function editTask(taskID,ev) {

@@ -67,24 +67,18 @@ $(window).on('resize', function(){
 
 function initTaskboardUI() {
 	initDialogs();
-	initKeys();
+	initDialogKeys();
 
 	$.contextMenu( 'destroy' );
 	initRowContextMenu()
-	initContextMenu("right")
+	initTaskContextMenu("right")
 
 	if (isMobile()) { initRightClickMode() }
 	
 	$.ui.dialog.prototype._focusTabbable = function(){};
 	
-	$(document).on('mousedown', '.task-block', function (e){ 
-		myClickEvent = e
-		return true; 
-	});
-	$(document).on('mousedown', '.task-row', function (e){ 
-		myClickEvent = e
-		return true; 
-	});
+	$(document).on('mousedown', '.task-block', function (e){ myClickEvent = e; return true; });
+	$(document).on('mousedown', '.task-row', function (e){ myClickEvent = e; return true; });
 }
 
 function initDialogs() {
@@ -110,15 +104,7 @@ function initSaveDialog() {
 }
 
 
-
-function initKeys() {
-	$("#datepicker-start").keypress( function (e) { return editDialogKeypress(e); });
-	$("#datepicker-due").keypress( function (e) { return editDialogKeypress(e); });
-	$("#timepicker-start").keypress( function (e) { return editDialogKeypress(e); });
-	$("#timepicker-due").keypress( function (e) { return editDialogKeypress(e); });
-	$("#colorpicker").keypress( function (e) { return editDialogKeypress(e); });
-	$("#namepicker").keypress( function (e) { return editDialogKeypress(e); });
-	$("#incrementpicker").keypress( function (e) { return editDialogKeypress(e); });
+function initDialogKeys() {
 	
 	$("#newRowName").keypress( function (e) {
 		if(e.which == 13) {
@@ -205,17 +191,21 @@ function initRightClickMode() {
 		if (inRightClickMode == 0) {
 			inRightClickMode = 1
 			$("#right-click-mode-indicator").show();
-			initContextMenu("left")
+			initTaskContextMenu("left")
 		}
 		else {
 			inRightClickMode = 0
 			$("#right-click-mode-indicator").hide();
-			initContextMenu("right")
+			initTaskContextMenu("right")
 		}
 	})
 }
 
-function initContextMenu(button) {
+function snoozeVisible() {
+	return (lines[currentTask][col_duetime] !== null && lines[currentTask][col_duetime] !== "");
+}
+
+function initTaskContextMenu(button) {
 	var myOptions = {
             selector: '.task-block', 
 			className: 'my-context-menu',
@@ -224,7 +214,7 @@ function initContextMenu(button) {
 					if (isMobile()) {
 						inRightClickMode = 0;
 						$("#right-click-mode-indicator").hide();
-						initContextMenu("right")
+						initTaskContextMenu("right")
 					}
 				}
 			},
@@ -232,39 +222,18 @@ function initContextMenu(button) {
                 "SnoozeMenu": {
 					name: "Snooze", icon: "fa-bell-slash-o",
 					items: {
-						"snooze-key1": {"name":"1 hour", callback: function(key, options) {	delayTask(1);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
-						"snooze-key2": {"name":"2 hours", callback: function(key, options) {	delayTask(2);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
-						"snooze-key4": {"name":"4 hours", callback: function(key, options) {	delayTask(4);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
-						"snooze-key12": {"name":"12 hours", callback: function(key, options) {	delayTask(12);	}, visible: function(key,opt){if (lines[currentTask][col_duetime] == null || lines[currentTask][col_duetime] == "") return false; else return true;}},
-						"snooze-key1d": {"name":"1 day", callback: function(key, options) {	delayTask(24);	}},
-						"snooze-key2d": {"name":"2 days", callback: function(key, options) {	delayTask(48);	}},
-						"snooze-key3d": {"name":"3 days", callback: function(key, options) {	delayTask(72);	}},
-						"snooze-key1w": {"name":"1 week", callback: function(key, options) {	delayTask(168);	}},
+						"snooze-key1": 	{"name":"1 hour",	callback: function(key, options) {	delayTask(1);	}, visible: snoozeVisible},
+						"snooze-key2": 	{"name":"2 hours",	callback: function(key, options) {	delayTask(2);	}, visible: snoozeVisible},
+						"snooze-key4": 	{"name":"4 hours",	callback: function(key, options) {	delayTask(4);	}, visible: snoozeVisible},
+						"snooze-key12": {"name":"12 hours",	callback: function(key, options) {	delayTask(12);	}, visible: snoozeVisible},
+						"snooze-key1d": {"name":"1 day", 	callback: function(key, options) {	delayTask(24);	}},
+						"snooze-key2d": {"name":"2 days",	callback: function(key, options) {	delayTask(48);	}},
+						"snooze-key3d": {"name":"3 days",	callback: function(key, options) {	delayTask(72);	}},
+						"snooze-key1w": {"name":"1 week",	callback: function(key, options) {	delayTask(168);	}},
 					},
-					callback: function(key, options) {	delayTask(24);	},
 			        visible: function(key, opt){        
-						if (lines[currentTask][col_complete] == "Yes") return false;
-						if (lines[currentTask][col_dueday] == null || lines[currentTask][col_dueday] == "") return false;
-						var dueDate = getDueDate(currentTask);
-						var days_until_due = getDateDifference(today,dueDate)
-						if (days_until_due<0 || days_until_due==0 ) {
-							if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
-							else {
-								var startDate = getStartDate(currentTask)
-								var days_until_start = getDateDifference(today,startDate)
-								if (days_until_start<0) return true;
-								if (days_until_start==0) {
-									var startOfToday = new Date(today.getTime());
-									startOfToday.setHours(0,0,0,0);
-									var now_mseconds = today.getTime()-startOfToday.getTime();
-									var timeParts = lines[currentTask][col_starttime].split(":")
-									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
-									var time_until_start = start_mseconds-now_mseconds;
-									if (time_until_start>60*60*1000) return false;
-									else return true;
-								}
-							}
-						}
+						if (!opt.$trigger) return false;
+						if (hasClass(opt.$trigger,"due-task")) return true;
 						return false;
 					}
 				},
@@ -272,60 +241,33 @@ function initContextMenu(button) {
 					name: "Finish", icon: "fa-check-square-o",
 					callback: function(key, options) {	completeTask();	},
 			        visible: function(key, opt){        
-						if (lines[currentTask][col_complete] == "Yes") return false;
-						if (lines[currentTask][col_startday] == null || lines[currentTask][col_startday] == "") return true;
-						var startDate = getStartDate(currentTask)
-						var days_until_start = getDateDifference(today,startDate)
-						if (days_until_start<0 || days_until_start==0 ) {
-							if (lines[currentTask][col_startday] < 1) return true;
-							else {
-								var startDate = getStartDate(currentTask)
-								var days_until_start = getDateDifference(today,startDate)
-								if (days_until_start<0) return true;
-								if (days_until_start==0) {
-									var startOfToday = new Date(today.getTime());
-									startOfToday.setHours(0,0,0,0);
-									var now_mseconds = today.getTime()-startOfToday.getTime();
-									var timeParts = lines[currentTask][col_starttime].split(":")
-									var start_mseconds = (timeParts[0]*60*60+timeParts[1]*60)*1000;
-									var time_until_start = start_mseconds-now_mseconds;
-									if (time_until_start>0) return false;
-									else return true;
-								}
-							}
-						}
+						if (!opt.$trigger) return false;
+						if (hasClass(opt.$trigger,"now-task")) return true;
 						return false;
-					}					
+					}
 				},
                 "Un-Finish": {
 					name: "Un-Finish", icon: "fa-check-square-o",
-					callback: function(key, options) {	uncompleteTask();	},
-			        visible: function(key, opt){        
-						if (lines[currentTask][col_complete] == "Yes") return true;
-						else return false;
-					}					
+					callback: uncompleteTask,
+			        visible: function(key, opt) { return (lines[currentTask][col_complete] == "Yes") }					
 				},				
                 "Edit": {
 					name: "Edit", icon: "fa-edit",
-					callback: function(key, options) {	editTaskContextMenu();	}
+					callback: editTaskContextMenu,
 				},
                 "Put in Group": {
 					name: "Put in Group", icon: "fa-folder-o",
-					callback: function(key, options) {	newRowMenu();	},
-			        visible: function(key, opt){        
-						if (lines[currentTask][col_row] == "") return true;
-						else return false;
-					}						},				
+					callback: newRowMenu,
+			        visible: function(key, opt) { return (lines[currentTask][col_row] == "") }					
+				},				
                 "Change Group": {
 					name: "Change Group", icon: "fa-folder-o",
-					callback: function(key, options) {	newRowMenu();	},
-			        visible: function(key, opt){        
-						if (lines[currentTask][col_row] == "") return false;
-						else return true;
-					}						},				
+					callback: newRowMenu,
+			        visible: function(key, opt) { return (lines[currentTask][col_row] !== "") }
+				},				
                 "Delete": {
 					name: "Delete", icon: "fa-trash",
-					callback: function(key, options) {	deleteTask();	}
+					callback: deleteTask,
 				},
             }
         };
@@ -343,7 +285,7 @@ function initRowContextMenu() {
 					if (isMobile()) {
 						inRightClickMode = 0;
 						$("#right-click-mode-indicator").hide();
-						initContextMenu("right")
+						initTaskContextMenu("right")
 					}
 				}
 			},
