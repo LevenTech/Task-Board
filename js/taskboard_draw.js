@@ -185,6 +185,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 
 	taskBlock.appendChild(createBR());		
 	if (startDate=="" || days_until_start<0) {
+		startDatePhrase.innerHTML = "<b></b>";
 		taskBlock.className += " now-task";
 	}
 	else if (days_until_start>0) {
@@ -265,8 +266,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 
 	}
 	else if (days_until_due<0) {
-		if (sameTime) dueDatePhrase.innerHTML = dueDateStr+", "+dueTimeStr+" ("+(-days_until_due)+" passed)";
-		else dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+		dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
 		var isOverdue = 1;
 	}
 	else {
