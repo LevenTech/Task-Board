@@ -44,6 +44,7 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask;
 
+var myDropboxData;
 
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
@@ -55,6 +56,27 @@ $(document).ready(function() {
 	loadCookieFile();
 	
 	setInterval(checkTime,60000)
+	
+	// FOR DROPBOX INTEGRATION
+	/*
+	options = {
+		success: function(files) {
+			alert("Here's the file link: " + files[0].link)
+			var fileName = files[0].link
+			var fileNameParts = fileName.split("/")
+			currentFileName = fileNameParts[fileNameParts.length]
+			console.log(files[0].link)
+			$.get('https://cors-anywhere.herokuapp.com/'+files[0].link, function (data) { processData(data,currentFileName); });
+		},
+		cancel: function() {
+		},
+		linkType: "direct", // or "direct"
+		multiselect: false, // or true
+		extensions: ['.csv'],
+	};
+	var button = Dropbox.createChooseButton(options);
+	document.getElementById("title-bar").appendChild(button);*/
+
 });
 
 $(window).on('resize', function(){

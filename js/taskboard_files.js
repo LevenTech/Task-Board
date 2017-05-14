@@ -130,14 +130,28 @@ function saveFile() {
 		}
 	}); 
 
-	var link = document.createElement("a");
-
+	// FOR FIREFOX
 	//var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 	//var url = URL.createObjectURL(blob);
 
 	var encodedUri = encodeURI(csvContent);
-	var url = "data:attachment/csv,"+encodedUri;
+	var url = "data:text/csv,"+encodedUri;
 
+	// FOR DROPBOX INTEGRATION
+	/*url = "http://taskboard.leventech.net/sample.csv"
+	var options = {
+		files: [{'url': url, 'filename': currentFileName}],
+		success: function () {
+			alert("Success! Files saved to your Dropbox.");
+		},
+		progress: function (progress) {},
+		cancel: function () {},
+		error: function (errorMessage) {console.log("Error:"+errorMessage);}
+	};
+	Dropbox.save(options);
+	return*/
+
+	var link = document.createElement("a");
 	link.setAttribute("href", url);
 	link.setAttribute("download", currentFileName);
 	document.body.appendChild(link); // Required for FF
