@@ -1,0 +1,28 @@
+TaskNum,Task,Start-Month,Start-Day,Start-Year,Due-Month,Due-Day,Due-Year,Color,Row,Complete?,Interval,Start-Time,Due-Time
+55,Day-Long Today,1,5,2017,5,1,2017,Yellow,Days,,,,
+56,1 Day Later This Week,5,4,2017,5,5,2017,Orange,Future,,,,
+57,Past Event,1,5,2017,5,1,2017,Yellow,EVENTS,,,12:00,12:00
+58,Due Tomorrow,,,,5,2,2017,#8e0000,No Start,,,,
+59,Due Yesterday,,,,4,30,2017,#ffffff,NO START,,,,
+60,1 Day Next Week,5,8,2017,5,9,2017,Red,FUTURE,,,,
+61,1 Week Next Week,5,8,2017,5,12,2017,#8e0000,FUTURE,,,,
+62,Due Later Today,,,,5,1,2017,Orange,NO START,,,,23:00
+63,Due Earlier Today,,,,5,1,2017,Yellow,NO START,,,,05:00
+64,Due Today,,,,5,1,2017,Red,NO START,,,,
+65,Soon Event,5,1,2017,5,1,2017,Orange,EVENTS,,,18:00,18:00
+66,Later Event,5,1,2017,5,1,2017,Red,EVENTS,,,23:00,23:00
+67,Counter 1 Week Ago,4,24,2017,,,,Aqua,FUTURE,,,,
+68,No Dates or Times,,,,,,,Black,,,,,
+69,Day-Long Yesterday,4,30,2017,4,30,2017,Blue,DAYS,,,,
+70,Day-Long Tomorrow,5,2,2017,5,2,2017,Orange,DAYS,,,,
+71,Tomorrow Event,5,2,2017,5,2,2017,#8e0000,EVENTS,,,12:00,12:00
+72,Yesterday Event,4,30,2017,4,30,2017,LightBlue,EVENTS,,,12:00,12:00
+73,Day-Long Not Started,5,8,2017,5,8,2017,Red,DAYS,,,,
+74,Counter Yesterday,4,30,2017,,,,,,,,,
+75,1 Hour Later Today,5,1,2017,5,1,2017,DarkBlue,FUTURE,,,22:00,23:00
+76,1 Hour Tomorrow,5,2,2017,5,2,2017,Yellow,FUTURE,,,22:00,23:00
+77,No Dates or Times,,,,,,,Black,DAYS,,,,
+78,No Dates or Times,,,,,,,Black,FUTURE,,,,
+80,No Dates or Times,,,,,,,Black,NO START,,,,
+81,Counter Tomorrow,5,2,2017,,,,,,,,,
+82,Counter Today,5,1,2017,,,,,,,,,

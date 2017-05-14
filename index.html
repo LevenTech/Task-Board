@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>Task Board by LevenTech</title>
+    <title>Task Board</title>
 
 	<link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
 	
@@ -16,7 +16,21 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
 
     <script type="text/javascript" src="js/taskboard.js"></script>
+	<link rel="stylesheet" href="css/taskboard.css"></style>
     <script type="text/javascript" src="js/tb_library.js"></script>
+
+    <script type="text/javascript" src="js/taskboard_files.js"></script>
+
+    <script type="text/javascript" src="js/taskboard_draw.js"></script>
+	<link rel="stylesheet" href="css/taskboard_draw.css">
+	
+    <script type="text/javascript" src="js/taskboard_toolbar.js"></script>
+	<link rel="stylesheet" href="css/taskboard_toolbar.css">
+	
+    <script type="text/javascript" src="js/task_edit.js"></script>
+	<link rel="stylesheet" href="css/task_edit.css">
+	
+
     <script type="text/javascript" src="js/googleanalytics.js"></script>
     <script type="text/javascript" src="js/colorconvert.js"></script>
 
@@ -29,203 +43,12 @@
     <script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.contextMenu.js" type="text/javascript"></script>
     <script src="https://swisnl.github.io/jQuery-contextMenu/dist/jquery.ui.position.min.js" type="text/javascript"></script>
     <script src="https://swisnl.github.io/jQuery-contextMenu/js/main.js" type="text/javascript"></script>
-	
-	<link rel="stylesheet" href="css/taskboard.css"></style>
-
 </head>
 <body id="myBody" ondrop="newRow(event)" ondragover="allowDrop(event)" draggable="false">
-    <div style="width:100%;background:darkgrey;">
-		<h1 style="float:left;margin-left:20px;" class="app-header" id="app-header">Task Board by LevenTech</h1>
-		<div id="right-click-mode-indicator" class="right-click-mode-indicator" style="float:left;text-align:center;margin:1em;margin-left:24em;font-size:20px;color:white;font-weight:bold;">** IN RIGHT CLICK MODE **</div>
-	</div>
-	<div id="taskboard-toolbar">
-		<div id="left-buttons">
-			<div class="toolbar-selection" id="new-open-file" style="float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;">
-				<div id="open-local-file" class="fileinput fileinput-new" data-provides="fileinput" style="margin-left:0px;margin-bottom:0px;">
-					<div style="text-align:left;margin-left:10px;">
-						<button id="newfile-button" class="btn btn-default toolbar-button newfile-button" onclick="newFile()" style="margin:10px;margin-left:0px;margin-bottom:0px;">
-							<i class="fa fa-file-code-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i><span id="newfile-button-label">New File</span>
-						</button>
-						<span id="openfile-button" class="btn btn-default btn-file" style="margin:10px;margin-left:0px;margin-bottom:0px;">
-							<i class="fa fa-folder-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i>
-							<span id="openfile-button-label">Open File</span>
-							<input type="file" id="csvFileInput" onchange="handleFiles(this.files)" onclick="this.value=null;" accept=".csv"/>
-						</span>
-					</div>
-					<div style="margin-top:10px;">
-						<strong>Current File:</strong>
-						<span class="fileinput-filename"></span>
-						<span class="fileinput-new">No file chosen</span>
-						<span id="unsaved-changes" title="You have changes that haven't been saved to a file yet." style="display:none;">
-							<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-						</span>
-					</div>
-				</div>
-				<span id="result"></span>
-			</div>
-			<div style="float:left;margin-top:30px;margin-left:15px;user-select:none;">
-				<button class="btn btn-default toolbar-button savefile-button" id="savefile-button" onclick="saveFile()" style="margin:0px;padding:8px;" disabled>
-					<div style="float:left;"><i class="fa fa-floppy-o" aria-hidden="true" style="width:40px;font-size:300%;margin-right:10px;"></i></div>
-					<div style="float:left;">Save<br/>to File</div>
-				</button>
-			</div>
-		</div>
-		<div id="middle-buttons" style="diplay:none;user-select:none;">
-			<div style="width:100%;">
-			<div id="tool-select-control" style="font-size:24px;float:left;display:none;padding-left:1em;margin-top:1em;padding-right:1em;">
-				<b>Control:</b><br/>
-				<select id="tool-selector" class="dropdown tool-selector" style="height:3em;">
-					<option value="new-open-file">New File / Open File</option>
-					<option value="draggables">New Task / Finish Task</option>
-					<option value="size-shape">Task Shape / Task Size</option>
-					<option value="future-peek">Future Peek</option>
-				</select><br/>
-			</div>
-			<div class="toolbar-selection" id="size-shape" style="float:left;">
-					<div class="middle-button" style="top:-0.5em;">
-						<label for="task-shape">Shape</label><br/>
-						<div class="btn-group" role="group" style="height:2em;">
-							<button type="button" class="btn btn-default shape-button" id="shape-button-default" onclick="makeShapeDefault()" style="height:4em;">
-								<div style="height:1.2em;width:1.6em;background-color:black;border:2px solid black;margin-left:0.4em;margin-right:0.4em;"></div>
-							</button>
-							<button type="button" class="btn btn-default shape-button" id="shape-button-wide" onclick="makeShapeWide()" style="height:4em;">
-								<div style="height:0.8em;width:2em;background-color:black;border:2px solid black;"></div>
-							</button>
-						</div>
-					</div>
-					<div class="middle-button" style="top:-2em;">
-					  <label for="font-size">Task size:</label>
-					  <input type="text" id="font-size" readonly style="user-select:none;text-align:center;width:8em;border:0; color:#000000; font-weight:bold;">
-					  <div id="font-size-slider" style="margin-top:10px;width:13em;"></div>
-					</div>
-				</div>
-				<div class="toolbar-selection" id="future-peek" style="float:left;">
-					<div class="middle-button" style="top:0em;margin-left:2em;">
-					  <label for="date-select">Show for:</label>
-					  <input type="text" id="todays-date" readonly style="user-select:none;text-align:center;width:12em;px;border:0; color:#000000; font-weight:bold;">
-					  <div id="todays-date-slider" style="margin-left:1em;margin-top:10px;width:15em;"></div>
-					</div>
-				</div>
-			</div>			
-		</div>
-		<div id="right-buttons">
-			<div class="toolbar-selection" id="draggables">
-				<div id="finish-area" class="finish-area normal-finish" ondrop="dropFinish(event)" ondragover="highlightFinish(event)" ondragleave="unhighlightFinish(event)" style="">
-						<i class="fa fa-check-square-o" aria-hidden="true" style="width:10px;margin-right:10px;"></i> Finished <br/><br/>
-						<span id="finish-instructions" ondragover="highlightFinish(event)" style="pointer-events: none;display:none;">Drop here to Finish Task</span>
-						<span id="finished-list" style="pointer-events: none;"></span>
-				</div>
-				<div id="new-task-drag" class="new-task-drag" draggable="true" ondragstart="dragNew(event)" >
-					Drag for new task
-				</div>
-			</div>
-		</div>
-	</div>
-	<br/>
-	<div class="my-dialog" id="editDialog">
-		<div style="position:absolute;left:10em;top:0.3em;display:none;" id="dialog-toolbar">
-				<button type="button" class="btn btn-default" style="padding-left:10px;padding-right:10px;padding-top:2px;padding-bottom:2px;font-size:12px;margin-top:0.2em;margin-bottom:0.2em;" onclick="completeTask();">
-					<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:5px;"></i>Finish
-				</button>
-				<button type="button" class="btn btn-default" style="padding-left:10px;padding-right:10px;padding-top:2px;padding-bottom:2px;margin-left:1em;font-size:12px;margin-top:0.2em;margin-bottom:0.2em;" onclick="deleteTask();">
-					<i class="fa fa-trash" aria-hidden="true" style="margin-right:5px;"></i>Delete
-				</button>	
-		</div>
-		<table style="float:left;width:100%;height:50%;">
-			<tr style="height:0.5em;"></tr>
-			<tr style="vertical-align:top;">
-				<td colspan="3">
-					<textarea type="text" cols="21" rows="2" id="namepicker" style="width:100%;margin-bottom:5px;resize:none;text-align:center;"></textarea>
-				</td>
-			</tr>
-			<tr style="height:2em;">
-				<td rowspan="2">
-					Start:<br/>
-					<button id="sync-from-start" class="btn btn-default sync-button" style="font-size:10px;padding:2px;padding-left:5px;padding-right:5px;" onclick="syncDatesStart();">
-						<i class="fa fa-arrow-down" aria-hidden="true"></i>
-					</button>
-					<button id="sync-from-due" class="btn btn-default sync-button" style="font-size:10px;padding:2px;padding-left:5px;padding-right:5px;" onclick="syncDatesDue();">
-						<i class="fa fa-arrow-up" aria-hidden="true"></i>
-					</button>
-					<br/>
-					Due:
-				</td>
-				<td><input type="date" id="datepicker-start" style="width:60%;"><input type="time" id="timepicker-start" style="width:40%;"></td>
-			</tr>
-			<tr><td><input type="date" id="datepicker-due" style="width:60%;"><input type="time" id="timepicker-due" style="width:40%;"></td></tr>
-		</table>
-		<table style="float:left;width:100%;text-align:center;">
-			<tr style="height:0em;"></tr>
-			<tr style="height:2em;">
-				<td colspan="2" style="width:60%;">Color</td>
-				<td style="padding-right:0.3em;" style="width:40%;">Interval</td>
-			</tr>
-			<tr style="vertical-align:top;">
-				<td style="width:40%;">
-					<div class="btn-group" role="group" style="float:right;">
-						<button type="button" class="btn btn-default color-button" id="color-button-LemonChiffon" onclick="changeColor('LemonChiffon')"><div class="circle" style="background:LemonChiffon;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Aqua" onclick="changeColor('Aqua')"><div class="circle" style="background:Aqua;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Pink" onclick="changeColor('Pink')"><div class="circle" style="background:Pink;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-PaleGreen" onclick="changeColor('PaleGreen')"><div class="circle" style="background:PaleGreen;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Silver" onclick="changeColor('Silver')"><div class="circle" style="background:Silver;"></div></button>
-					</div>
-					<div class="btn-group" role="group" style="float:right;">
-						<button type="button" class="btn btn-default color-button" id="color-button-Yellow" onclick="changeColor('Yellow')"><div class="circle" style="background:Yellow;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Orange" onclick="changeColor('Orange')"><div class="circle" style="background:Orange;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Red" onclick="changeColor('Red')"><div class="circle" style="background:Red;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Blue" onclick="changeColor('Blue')"><div class="circle" style="background:Blue;"></div></button>
-						<button type="button" class="btn btn-default color-button" id="color-button-Black" onclick="changeColor('Black')"><div class="circle" style="background:Black;"></div></button>
-					</div>
-				</td>
-				<td>
-					<input style="float:left;width:3.4em;height:3.4em;" type='color' id="colorpicker2" onchange="colorpicked();" />
-				</td>
-				<td style="width:12em;">
-					<div class="btn-group" role="group">
-						  <button type="button" class="btn btn-default interval-button" id="interval-button0" onclick="changeInterval(0)" style="width:1.4em;">-</button>
-						  <button type="button" class="btn btn-default interval-button" id="interval-button1" onclick="changeInterval(1)">1</button>
-						  <button type="button" class="btn btn-default interval-button" id="interval-button2" onclick="changeInterval(2)">2</button>
-						  <button type="button" class="btn btn-default interval-button" id="interval-button3" onclick="changeInterval(3)">3</button>
-					</div>
-					<div class="btn-group" role="group">
-						  <button type="button" class="btn btn-default interval-button" id="interval-button7" onclick="changeInterval(7)">7</button>
-						  <button type="button" class="btn btn-default interval-button" id="interval-button14" onclick="changeInterval(14)">14</button>
-						  <button type="button" class="btn btn-default interval-button" id="interval-button30" onclick="changeInterval(30)">30</button>
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<input type="text" id="colorpicker" onchange="colortyped();" style="width:8em;margin-top:0.4em;text-align:center;" />
-				</td>
-				<td>
-					<input type="text" id="incrementpicker" onchange="checkInterval()" style="margin-top:0.4em;width:4em;text-align:center;" />
-				</td>
-			</tr>
-			</table>
-	</div>
-	<div class="my-dialog" id="completeDialog">
-		Are you sure you want to finish the task "<span id="completeTaskName" ></span>"?<br/><br/>
-		This will remove the task from your board, but keep a record of it in your save file.<br/><br/>
-		To remove all record of the task, you can 
-		<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:5px;margin:0px;margin-right:5px;font-size:12px;" onclick="deleteTask();">
-				<i class="fa fa-trash" aria-hidden="true" style="margin-right:5px;"></i>Delete</button>
-		 it instead.
-	</div>
-	<div class="my-dialog" id="deleteDialog">
-		Are you sure you want to DELETE the task "<span id="deleteTaskName" ></span>"?<br/><br/>
-		This will remove all trace of this task, from the board and your save file.<br/><br/> 
-		To keep a record of the task, but remove it from the board, you can 
-		<button type="button" class="btn btn-default" style="padding:5px;padding-top:1px;padding-bottom:1px;margin-left:5px;margin:0px;margin-right:5px;font-size:12px;" onclick="completeTask();">
-				<i class="fa fa-check-square-o" aria-hidden="true" style="margin-right:5px;"></i>Finish</button>
-		it.
-	</div>
-	<div class="my-dialog" id="saveDialog">
-		This file has not been saved, and you're about to lose your changes.<br/><br/>Save your changes now?
-	</div>
-	<div class="my-dialog" id="newRowDialog" style="text-align:center;">
-		Name the new group:
-		<input id="newRowName" width="50px" style="margin-top:10px;"></input>
+	<div id="title-bar" style="">
+		<h1 style='float:left;margin-left:20px;' class='app-header' id='app-header'>Task Board by <a class='app-header' href='http://leven.tech'>LevenTech</a></h1>
+		<div id='right-click-mode-indicator' class='right-click-mode-indicator' style='float:left;text-align:center;margin:1em;margin-left:24em;font-size:20px;color:white;font-weight:bold;'>** IN RIGHT CLICK MODE **</div>
+		<a href='http://www.leven.tech/suggestions/' style='position:absolute;right:0px;top:0px;color:white;margin-top:5px;margin-right:20px;'>Feedback?</a>
 	</div>
 	<div id="output" style="" draggable="false"></div>
 </body>
