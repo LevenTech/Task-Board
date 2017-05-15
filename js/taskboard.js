@@ -77,6 +77,7 @@ $(document).ready(function() {
 	var button = Dropbox.createChooseButton(options);
 	document.getElementById("title-bar").appendChild(button);*/
 
+
 });
 
 $(window).on('resize', function(){
@@ -354,6 +355,7 @@ function showSaveDialog(fileToOpen) {
     };
 	$("#saveDialog").dialog(opt).dialog("open");
 }
+
 
 function changeToUnsaved() {
 	isSaved = 0;
@@ -894,7 +896,6 @@ function newTask(rowName,taskName,openMe) {
 	newTask[col_row] = rowName;
 	lines.push(newTask);
 	drawOutput(lines);
-	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
 		currentTask = lines.length-1
@@ -903,5 +904,6 @@ function newTask(rowName,taskName,openMe) {
 		$("#taskBlock"+myTaskID).click();
 		$("#namepicker").focus();
 	}
+	else saveFileCookie();
 }
 

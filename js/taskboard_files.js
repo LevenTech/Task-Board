@@ -41,13 +41,23 @@ function saveFileCookie() {
 			dataString = infoArray.join(",");
 			csvContent += index < lines.length ? dataString+ "^" : dataString;
 		}
-	}); 
+	});
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
+	// For Bookmark Storage
+	/*csvContent = encodeURIComponent(csvContent)
+	window.history.replaceState(null, null, "http://taskboard.leventech.net/?data="+csvContent);
+	$("#my-file-content").val("http://taskboard.leventech.net/?data="+csvContent)*/
 }
 
 function loadCookieFile() {
-	var csv = readCookie("myCSVFile");
+	var myData
+	//myData = getURLParameter("data")
+	if (myData>"") {
+		var csv = myData
+		csv = decodeURIComponent(csv)
+	}
+	else var csv = readCookie("myCSVFile");
 	if (csv) {
 		var altcsv = csv.split("^");
 		csv = altcsv.join("\n");

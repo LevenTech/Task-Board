@@ -43,7 +43,7 @@ function drawOutput(lines){
 		var taskBlock = buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask)
 
 		var rowName = lines[currentTask][col_row];
-		if (rowName == "") rowName = "MISC";
+		if (rowName == "" || rowName == null) rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
 
 		var rowExists = 0;
@@ -106,12 +106,13 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 	var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
 
 	var myName = lines[currentTask][col_task].replace("%44;",",");
+	var myName = lines[currentTask][col_task].replace("%38;","&");
 	var name = document.createElement("div");
 	name.className = "task-name"
 	name.innerHTML = "<b>"+myName+"</b>";
 	taskBlock.appendChild(name)
 
-	if (lines[currentTask][col_increment].length>0) taskBlock.appendChild(createRepeatIcon(currentTask,(isPastTask||isComplete)))
+	if (lines[currentTask][col_increment]>0) taskBlock.appendChild(createRepeatIcon(currentTask,(isPastTask||isComplete)))
 	
 	var days_until_start = "";
 	var days_until_due = "";
@@ -316,7 +317,7 @@ function createTaskBlock(taskID,myColor) {
 	taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 
 	var colorName = myColor;
-	if (colorName=="") colorName = "LemonChiffon";
+	if (colorName=="" || colorName == null) colorName = "LemonChiffon";
 	taskBlock.style.backgroundColor = colorName;
 	
 	if (colorName.substr(0,1)=="#") var myHexColor = colorName

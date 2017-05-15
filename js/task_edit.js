@@ -289,6 +289,7 @@ function updateTask() {
 	newStringParts[col_increment]=$("#incrementpicker").val();
 	newStringParts[col_task]=$("#namepicker").val();
 	newStringParts[col_task] = newStringParts[col_task].replace(",","%44;");
+	newStringParts[col_task] = newStringParts[col_task].replace("&","%38;");
 	
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
