@@ -1,7 +1,7 @@
 
 function initToolbar() {
 	$(window).scroll(function(){
-		if ($(window).scrollTop() > 66) {
+		if ($(window).scrollTop() > 56) {
 			$("#taskboard-toolbar").removeClass("moving-toolbar");
 			$("#taskboard-toolbar").addClass("stuck-toolbar");
 		}
