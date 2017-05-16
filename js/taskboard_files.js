@@ -44,20 +44,23 @@ function saveFileCookie() {
 	});
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
+
+	if (remoteStorage.connected) {
+		remoteStorage.tasks.store(csvContent);
+	}
+
 	// For Bookmark Storage
 	/*csvContent = encodeURIComponent(csvContent)
 	window.history.replaceState(null, null, "http://taskboard.leventech.net/?data="+csvContent);
 	$("#my-file-content").val("http://taskboard.leventech.net/?data="+csvContent)*/
 }
 
+function loadRemoteStorage() {
+	var myData = remoteStorage.tasks.load();
+}
+
 function loadCookieFile() {
-	var myData
-	//myData = getURLParameter("data")
-	if (myData>"") {
-		var csv = myData
-		csv = decodeURIComponent(csv)
-	}
-	else var csv = readCookie("myCSVFile");
+	var csv = readCookie("myCSVFile");
 	if (csv) {
 		var altcsv = csv.split("^");
 		csv = altcsv.join("\n");

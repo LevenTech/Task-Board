@@ -53,10 +53,46 @@ $(document).ready(function() {
 	initTaskEditor();
 	initTaskboardUI();
 	
-	loadCookieFile();
 	
 	setInterval(checkTime,60000)
-	
+
+
+RemoteStorage.defineModule('tasks',
+  function(privateClient, publicClient) {
+ 
+ 
+var tasks = {
+    store: function(tasks) {
+		var csvContent = "";
+		lines.forEach(function(infoArray, index){
+			if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+				dataString = infoArray.join(",");
+				csvContent += index < lines.length ? dataString+ "\n" : dataString;
+			}
+		}); 
+		console.log("storing...")
+		console.log(csvContent)
+		return privateClient.storeFile("text/csv", "mytasks.csv", csvContent);
+	},
+    load: function(tasks) {
+		privateClient.getFile("mytasks.csv", 1000).then(function (file) {
+			if (file.data) processData(file.data,"mytasks.csv")
+			return file.data;
+		});
+	}		
+};
+ 
+  return { exports: tasks };
+});
+
+remoteStorage.access.claim('tasks', 'rw');
+remoteStorage.displayWidget();
+
+remoteStorage.on("connected",function(){
+	if (isSaved==0) showSaveFileDialog();
+	loadRemoteStorage();
+})
+
 	// FOR DROPBOX INTEGRATION
 	/*
 	options = {
