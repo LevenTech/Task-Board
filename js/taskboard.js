@@ -17,7 +17,7 @@ var one_hour=1000*60*60;
 
 var currentFileName = "newTaskFile.csv";
 var showFinished = 0;
-var isSaved = 1;
+var isSaved = 1
 var lastTaskID = 0;
 var currentTask = 0;
 var currentTaskDateSync = 0;
@@ -62,6 +62,9 @@ RemoteStorage.defineModule('tasks',
  
  
 var tasks = {
+    delete: function(tasks) {
+		return privateClient.remove(currentFileName);
+	},
     store: function(tasks) {
 		var csvContent = "";
 		lines.forEach(function(infoArray, index){
@@ -70,8 +73,6 @@ var tasks = {
 				csvContent += index < lines.length ? dataString+ "\n" : dataString;
 			}
 		}); 
-		console.log("storing "+currentFileName+"...")
-		console.log(csvContent)
 		return privateClient.storeFile("text/csv", currentFileName, csvContent);
 	},
     init: function(tasks) {
@@ -86,7 +87,11 @@ var tasks = {
 				}
 				else options += "<option value='"+key+"'>"+key+"</option>"
 			}
-			if (foundFile==0) options = "<option value='' selected>choose a file</option>"+options
+			if (foundFile==0) {
+				options = "<option value='' selected>choose a file</option>"+options
+				lines=""
+				$("#output").innerHTML = ""
+			}
 			else options = "<option value=''></option>"+options
 			var fileNameSelector = document.getElementById("filename-selector")
 			fileNameSelector.innerHTML = options
@@ -111,34 +116,61 @@ remoteStorage.access.claim('tasks', 'rw');
 remoteStorage.displayWidget();
 
 remoteStorage.on("connected",function(privateClient, publicClient){
-	if (isSaved==0) showSaveFileDialog();
-	loadRemoteStorage();
-	$("#filename-selector").on("change",function() {
-		currentFileName = $("#filename-selector").val();
-		if (currentFileName == "") {
-			var output = document.getElementById("output")
-			lines = ""
-			output.innerHTML = ""
-			eraseCookie("fileName")
-		}
-		else {
-			remoteStorage.tasks.load();
-			createCookie("fileName",currentFileName)
-		}
-	});
+	isSaved = readCookie("isSaved")
+	if (isSaved==0) {
+		loadCookieFile()
+		showBeforeConnectDialog();
+	}
+	else {
+		createCookie("remoteConnected",1)
+		$("#filename-selector").show();
+		$(".fileinput-filename").hide();
+		$("#connected-to-remote").show();
+		$("#savefile-button").hide();
+		$("#unsaved-changes").hide();
+		//document.getElementById("newfile-button").style.fontSize = "20px"
+		document.getElementById("newfile-button-label").innerHTML = "New"
+		//document.getElementById("openfile-button").style.fontSize = "20px"
+		document.getElementById("openfile-button-label").innerHTML = "Open"
+		$("#deletefile-button").show()
+		$("#renamefile-button").show()
+		loadRemoteStorage();
+		$("#filename-selector").on("change",function() {
+			currentFileName = $("#filename-selector").val();
+			if (currentFileName == "") {
+				var output = document.getElementById("output")
+				lines = ""
+				output.innerHTML = ""
+				eraseCookie("fileName")
+			}
+			else {
+				remoteStorage.tasks.load();
+				createCookie("fileName",currentFileName)
+			}
+		});
+	}
 })
 
 remoteStorage.on("disconnected",function(privateClient, publicClient){
+	createCookie("remoteConnected",0)
+	eraseCookie("myCSVfile")
 	lines = ""
 	output.innerHTML = ""
 	$("#chosen-file-label").hide()
+	$("#savefile-button").show();
 	$(".instructions").show();		
 	$("#middle-buttons").hide();
 	$("#right-buttons").hide();
+	$("#filename-selector").hide();
+	$(".fileinput-filename").show();
+	$("#connected-to-remote").hide();
+	$("#deletefile-button").hide()
+	$("#renamefile-button").hide()
+	isSaved = 1;
+	createCookie("isSaved",1)
 })
 
-
-});
+});  //End of Doc.Ready
 
 $(window).on('resize', function(){
 	width = $(this).width();
@@ -172,6 +204,10 @@ function initDialogs() {
 	initNewFileDialog()
 	initNewRowDialog()
 	initRenameRowDialog()
+	initDeleteFileDialog()
+	initRenameFileDialog()
+
+	initPrivacyDialog()
 
 	var opt = { autoOpen: false	};
 	$(".my-dialog").dialog(opt).dialog("close");
@@ -187,6 +223,32 @@ function initSaveDialog() {
 	document.getElementById("myBody").append(saveDialog)
 }
 
+function initPrivacyDialog() {
+	var privacyDialog = document.createElement("div")
+	privacyDialog.id="privacyDialog"
+	privacyDialog.className = "my-dialog"
+	privacyDialog.innerHTML = "This application is <a href='http://unhosted.org/' target='_blank'>Unhosted</a>, meaning it doesn't store your data. While you use Task Board, all of your data remains in your control.<br/><br/>"
+	privacyDialog.innerHTML += "By default, your data is only stored locally on the device you're using. We use cookies to remember your board, which are stored by your web browser. If you choose to download your data to a file, you can choose where it goes.<br/><br/>"
+	privacyDialog.innerHTML += "If you choose to connect to <a href='https://remotestorage.io/' target='_blank'>Remote Storage</a>, you will need to create a Remote Storage account through a provider like <a href='https://5apps.com/deploy/apps' target='_blank'>5apps</a>. That way, your data remains yours."
+	document.getElementById("myBody").append(privacyDialog)
+}
+
+function showPrivacyDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:400,
+        title: 'Privacy Policy',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#privacyDialog").dialog(opt).dialog("close");
+			},
+		}
+    };
+	$("#privacyDialog").dialog(opt).dialog("open");
+}
 
 function initDialogKeys() {
 	
@@ -221,6 +283,39 @@ function initDialogKeys() {
 			return false;
 		}
 	});	
+	$("#newFileName").keypress( function (e) {
+		if(e.which == 13) {
+			$("#newFileDialog").dialog("close");
+			e.preventDefault();
+			currentFileName = $("#newFileName").val();
+			var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
+			lines = [line];
+			drawOutput(lines);
+			$(".fileinput-filename").html(currentFileName);
+			createCookie("fileName",currentFileName);
+			$("span.fileinput-new").hide();
+			$(".savefile-button").show();
+			$("#chosen-file-label").show()
+			$(".instructions").hide();
+			$("#right-buttons").show();
+			isSaved = 2;
+			saveFileCookie();
+			if (remoteStorage.connected) remoteStorage.tasks.init();
+			else $("#unsaved-changes").show();
+			return false;
+		}
+	});		
+
+	$("#renamedFileName").keypress( function (e) {
+		if(e.which == 13) {
+			$("#renameFileDialog").dialog("close");
+			e.preventDefault();
+			remoteStorage.tasks.delete()
+			currentFileName = $("#renamedFileName").val();
+			saveFileCookie();
+			remoteStorage.tasks.init()
+		}
+	});
 
 	$(document).on('keydown keyup',  function (e) {
 		if ($('#completeDialog').is(':visible')) {
@@ -417,11 +512,63 @@ function showSaveDialog(fileToOpen) {
 	$("#saveDialog").dialog(opt).dialog("open");
 }
 
+function showBeforeConnectDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Save File?',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			Save: function() {
+				saveFile();
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				loadRemoteStorage();
+			},
+			Upload: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				saveFileCookie();
+				loadRemoteStorage();
+			},
+			Neither: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				loadRemoteStorage();
+			}			
+		}
+    };
+	$("#saveDialog").dialog(opt).dialog("open");
+}
+
+function connectToRemote() {
+	createCookie("remoteConnected",1)
+	$("#filename-selector").show();
+	$(".fileinput-filename").hide();
+	$("#connected-to-remote").show();
+	$("#filename-selector").on("change",function() {
+		currentFileName = $("#filename-selector").val();
+		if (currentFileName == "") {
+			var output = document.getElementById("output")
+			lines = ""
+			output.innerHTML = ""
+			eraseCookie("fileName")
+		}
+		else {
+			remoteStorage.tasks.load();
+			createCookie("fileName",currentFileName)
+		}
+	});
+}
+
 
 function changeToUnsaved() {
 	isSaved = 0;
-	$("#unsaved-changes").show();
+	if (!remoteStorage.connected) $("#unsaved-changes").show();
 	saveFileCookie();
+	createCookie("isSaved",0);
 }
 
 // fngroup:  TASK OPERATION FUNCTIONS
@@ -816,6 +963,22 @@ function initNewFileDialog() {
 	document.getElementById("myBody").append(newFileDialog)
 }
 
+function initRenameFileDialog() {
+	var renameFileDialog = document.createElement("div")
+	renameFileDialog.id="renameFileDialog"
+	renameFileDialog.className = "my-dialog"
+	renameFileDialog.innerHTML = "Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(renameFileDialog)
+}
+
+function initDeleteFileDialog() {
+	var deleteFileDialog = document.createElement("div")
+	deleteFileDialog.id="deleteFileDialog"
+	deleteFileDialog.className = "my-dialog"
+	deleteFileDialog.innerHTML = "Are you sure you want to delete this file?"
+	document.getElementById("myBody").append(deleteFileDialog)
+}
+
 
 
 function initNewRowDialog() {
@@ -919,9 +1082,10 @@ function newFile() {
 					$(".instructions").hide();
 					$("#right-buttons").show();
 					isSaved = 2;
-					$("#unsaved-changes").show();
 					saveFileCookie();
 					$("#newFileDialog").dialog("close");
+					if (remoteStorage.connected) remoteStorage.tasks.init();
+					else $("#unsaved-changes").show();
 				},
 				Cancel: function () {
 					$("#newFileDialog").dialog("close");
@@ -931,6 +1095,58 @@ function newFile() {
 		$("#newFileDialog").dialog(opt).dialog("open");
 		$("#newFileName").focus();
 	}
+}
+
+function renameFile() {
+	$("#renamedFileName").val("");
+	var opt = {
+		autoOpen: false,
+		modal: true,
+		width: 300,
+		height:200,
+		title: 'Rename This File',
+		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				$("#renameFileDialog").dialog("close");
+				remoteStorage.tasks.delete()
+				currentFileName = $("#renamedFileName").val();
+				saveFileCookie();
+				remoteStorage.tasks.init()
+			},
+			Cancel: function () {
+				$("#renameFileDialog").dialog("close");
+			}
+		}
+	};
+	$("#renameFileDialog").dialog(opt).dialog("open");
+	$("#renamedFileName").focus();	
+}
+
+function deleteFile() {
+	var opt = {
+		autoOpen: false,
+		modal: true,
+		width: 300,
+		height:200,
+		title: 'Delete This File',
+		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				$("#deleteFileDialog").dialog("close");
+				remoteStorage.tasks.delete()
+				currentFileName = ""
+				lines = ""
+				var output = document.getElementById("output")
+				output.innerHTML = ""
+				remoteStorage.tasks.init()
+			},
+			Cancel: function () {
+				$("#deleteFileDialog").dialog("close");
+			}
+		}
+	};
+	$("#deleteFileDialog").dialog(opt).dialog("open");
 }
 
 function newTaskCopy() {
@@ -991,4 +1207,5 @@ function newTask(rowName,taskName,openMe) {
 	}
 	else saveFileCookie();
 }
+
 

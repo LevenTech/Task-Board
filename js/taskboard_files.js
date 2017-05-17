@@ -42,17 +42,15 @@ function saveFileCookie() {
 			csvContent += index < lines.length ? dataString+ "^" : dataString;
 		}
 	});
-	createCookie("myCSVFile",csvContent);
-	createCookie("isSaved",isSaved);
 
 	if (remoteStorage.connected) {
 		remoteStorage.tasks.store(csvContent);
+		isSaved = 1;
 	}
 
-	// For Bookmark Storage
-	/*csvContent = encodeURIComponent(csvContent)
-	window.history.replaceState(null, null, "http://taskboard.leventech.net/?data="+csvContent);
-	$("#my-file-content").val("http://taskboard.leventech.net/?data="+csvContent)*/
+	createCookie("myCSVFile",csvContent);
+	createCookie("isSaved",isSaved);
+
 }
 
 function loadRemoteStorage() {
@@ -115,7 +113,7 @@ function processData(csv,fileName) {
 	
 	if (isTestFile) makeTestDatesDisplayable();
 
-	$(".savefile-button").show()
+	if (!remoteStorage.connected) $(".savefile-button").show()
 	$("#chosen-file-label").show()
 	$(".instructions").hide();
 	$("#middle-buttons").show();

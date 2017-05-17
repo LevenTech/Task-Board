@@ -40,14 +40,18 @@ function initLeftButtons() {
 	leftButtons.innerHTML += "\
 			<div class='toolbar-selection' id='new-open-file' style='float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;'>\
 				<div id='open-local-file' class='fileinput fileinput-new' data-provides='fileinput' style='margin-left:0px;margin-bottom:0px;'>\
-					<div id='chosen-file-label' style='margin-top:10px;display:none;'>\
+					<div id='chosen-file-label' style='margin-top:0px;display:none;margin-left:10px;'>\
+						<div id='connected-to-remote' style='display:none;margin-bottom:10px'>\
+							<img class='rs-cube rs-action' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzIiIHdpZHRoPSIzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KIDxkZWZzPgogIDxyYWRpYWxHcmFkaWVudCBpZD0iYSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGN5PSI1NzEuNDIiIGN4PSIxMDQ2LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjE0NDMzIDAgMCAuMTY2NjcgMTIwMS41IDg3Ny4xMSkiIHI9Ijk2Ij4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmNGEwNCIgc3RvcC1vcGFjaXR5PSIuNzYxNTQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmY0YTA0IiBvZmZzZXQ9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogPC9kZWZzPgogPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzMzYuNiAtOTU2LjM1KSI+CiAgPHBhdGggc3R5bGU9ImNvbG9yOiMwMDAwMDAiIGQ9Im0xMzUyLjYgOTU2LjM1IDAuMjg4NiAxNS4xMzYgMTMuNTY3LTcuMTM1Mi0xMy44NTUtOC4wMDExemwtMTMuODU1IDguMDAxMSAxMy41NjcgNy4xMzUyIDAuMjg4Ny0xNS4xMzZ6bS0xMy44NTUgOC4wMDExdjE1Ljk5OGwxMi45NTgtNy44MTYyLTEyLjk1OC04LjE4MTV6bTAgMTUuOTk4IDEzLjg1NSA4LjAwMTEtMC42MDg5LTE1LjMxNy0xMy4yNDYgNy4zMTU2em0xMy44NTUgOC4wMDExIDEzLjg1NS04LjAwMTEtMTMuMjUxLTcuMzE1Ni0wLjYwNDQgMTUuMzE3em0xMy44NTUtOC4wMDExdi0xNS45OThsLTEyLjk2MiA4LjE4MTUgMTIuOTYyIDcuODE2MnoiIGZpbGw9InVybCgjYSkiLz4KIDwvZz4KPC9zdmc+Cg=='>\
+							Connected to Remote Storage\
+						</div>\
 						<strong>Current File:</strong>\
 						<span class='fileinput-filename'></span>\
 						<span id='filename-display' class='fileinput-new'>No file chosen</span>\
 						<span id='unsaved-changes' title='You have changes that haven't been saved to a file yet.' style='display:none;'>\
 							<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>\
 						</span>\
-						<select id='filename-selector'></select>\
+						<select id='filename-selector' style='display:none;'></select>\
 					</div>\
 					<div style='text-align:left;margin-left:10px;'>\
 						<div class='instructions'>\
@@ -59,16 +63,22 @@ function initLeftButtons() {
 							<br/>If this is your first time here, start a \
 						</div>\
 						<button id='newfile-button' class='btn btn-default toolbar-button newfile-button' onclick='newFile()' style='margin:10px;margin-left:0px;margin-bottom:0px;'>\
-							<i class='fa fa-clone' aria-hidden='true' style='width:10px;margin-right:10px;'></i><span id='newfile-button-label'>New File</span>\
+							<i class='fa fa-clone' aria-hidden='true' style='width:10px;margin-right:10px;'></i><span id='newfile-button-label'>New</span>\
 						</button>\
 						<div class='instructions'>\
 							<br/>If you have a local file, use this: \
 						</div>\
 						<span id='openfile-button' class='btn btn-default btn-file' style='margin:10px;margin-left:0px;margin-bottom:0px;'>\
 							<i class='fa fa-folder-o' aria-hidden='true' style='width:10px;margin-right:10px;'></i>\
-							<span id='openfile-button-label'>Open File</span>\
+							<span id='openfile-button-label'>Open</span>\
 							<input type='file' id='csvFileInput' onchange='handleFiles(this.files)' onclick='this.value=null;' accept='.csv'/>\
 						</span>\
+						<button id='renamefile-button' class='btn btn-default toolbar-button renamefile-button' onclick='renameFile()' style='display:none;margin:10px;margin-left:0px;margin-bottom:0px;'>\
+							<i class='fa fa-edit' aria-hidden='true' style='width:10px;margin-right:10px;'></i><span id='renamefile-button-label'>Rename</span>\
+						</button>\
+						<button id='deletefile-button' class='btn btn-default toolbar-button deletefile-button' onclick='deleteFile()' style='display:none;margin:10px;margin-left:0px;margin-bottom:0px;'>\
+							<i class='fa fa-trash' aria-hidden='true' style='width:10px;margin-right:10px;'></i><span id='deletefile-button-label'>Delete</span>\
+						</button>\
 					</div>\
 				</div>\
 				<span id='result'></span>\

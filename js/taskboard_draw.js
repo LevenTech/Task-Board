@@ -10,12 +10,16 @@ function drawOutput(lines){
 	$("#delete-finished-button").attr("disabled",true)
 	var showBodyInstructions = 0;
 	if (lines.length>1) showBodyInstructions = 1
-	
+
+	var numTasks = 0;
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
 		
 		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
+
 		if (isNaN(taskNum)) { continue; }
+		numTasks++;
+		
 		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isComplete = 0;
@@ -72,7 +76,7 @@ function drawOutput(lines){
 	document.getElementById("output").innerHTML = "";
 	document.getElementById("output").append(createTable(tableRows));
 	document.getElementById("output").append(createMiscBlock(tableRows));
-	if (showBodyInstructions==1) {
+	if (numTasks>0 && showBodyInstructions==1) {
 		var bodyInstructions = document.createElement("div")
 		bodyInstructions.setAttribute("id","body-instructions")
 		bodyInstructions.setAttribute("style","font-size:2em;width:100%;text-align:center;margin-top:1em;")
@@ -81,10 +85,7 @@ function drawOutput(lines){
 	}
 	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
-	if (lines.length==1) {
-		$("#myBody").addClass("body-with-help")
-		$("#misc-block").addClass("misc-with-help")
-	}
+	if (numTasks<1) $("#misc-block").addClass("misc-with-help")
 
 	if (shape=="wide") $(".task-details").hide();
 	

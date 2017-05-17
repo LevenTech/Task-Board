@@ -294,9 +294,7 @@ function updateTask() {
 	lines[currentTask] = newStringParts;
 	drawOutput(lines);
 	clearEditDialog();
-	isSaved = 0;
-	$("#unsaved-changes").show();
-	saveFileCookie();
+	changeToUnsaved();
 }
 
 function syncDatesStart() {
