@@ -70,16 +70,38 @@ var tasks = {
 				csvContent += index < lines.length ? dataString+ "\n" : dataString;
 			}
 		}); 
-		console.log("storing...")
+		console.log("storing "+currentFileName+"...")
 		console.log(csvContent)
-		return privateClient.storeFile("text/csv", "mytasks.csv", csvContent);
+		return privateClient.storeFile("text/csv", currentFileName, csvContent);
 	},
-    load: function(tasks) {
-		privateClient.getFile("mytasks.csv", 1000).then(function (file) {
-			if (file.data) processData(file.data,"mytasks.csv")
-			return file.data;
+    init: function(tasks) {
+		privateClient.getListing("", 1000).then(function (objects) {
+			var options
+			var foundFile = 0;
+			for (var key in objects) {
+				if (key == currentFileName) {
+					options += "<option value='"+key+"' selected>"+key+"</option>"
+					remoteStorage.tasks.load()
+					foundFile = 1;
+				}
+				else options += "<option value='"+key+"'>"+key+"</option>"
+			}
+			if (foundFile==0) options = "<option value='' selected>choose a file</option>"+options
+			else options = "<option value=''></option>"+options
+			var fileNameSelector = document.getElementById("filename-selector")
+			fileNameSelector.innerHTML = options
+			$("#filename-display").hide();
+			return options
 		});
-	}		
+		$("#chosen-file-label").show()
+		$(".instructions").hide();		
+	},	
+    load: function(tasks) {
+		privateClient.getFile(currentFileName, 1000).then(function (file) {
+				if (file.data) processData(file.data,currentFileName)
+				return file.data;
+			});
+		}		
 };
  
   return { exports: tasks };
@@ -88,30 +110,32 @@ var tasks = {
 remoteStorage.access.claim('tasks', 'rw');
 remoteStorage.displayWidget();
 
-remoteStorage.on("connected",function(){
+remoteStorage.on("connected",function(privateClient, publicClient){
 	if (isSaved==0) showSaveFileDialog();
 	loadRemoteStorage();
+	$("#filename-selector").on("change",function() {
+		currentFileName = $("#filename-selector").val();
+		if (currentFileName == "") {
+			var output = document.getElementById("output")
+			lines = ""
+			output.innerHTML = ""
+			eraseCookie("fileName")
+		}
+		else {
+			remoteStorage.tasks.load();
+			createCookie("fileName",currentFileName)
+		}
+	});
 })
 
-	// FOR DROPBOX INTEGRATION
-	/*
-	options = {
-		success: function(files) {
-			alert("Here's the file link: " + files[0].link)
-			var fileName = files[0].link
-			var fileNameParts = fileName.split("/")
-			currentFileName = fileNameParts[fileNameParts.length]
-			console.log(files[0].link)
-			$.get('https://cors-anywhere.herokuapp.com/'+files[0].link, function (data) { processData(data,currentFileName); });
-		},
-		cancel: function() {
-		},
-		linkType: "direct", // or "direct"
-		multiselect: false, // or true
-		extensions: ['.csv'],
-	};
-	var button = Dropbox.createChooseButton(options);
-	document.getElementById("title-bar").appendChild(button);*/
+remoteStorage.on("disconnected",function(privateClient, publicClient){
+	lines = ""
+	output.innerHTML = ""
+	$("#chosen-file-label").hide()
+	$(".instructions").show();		
+	$("#middle-buttons").hide();
+	$("#right-buttons").hide();
+})
 
 
 });
@@ -145,6 +169,7 @@ function initDialogs() {
 	initDeleteAllDialog()
 	initDeleteTaskDialog()
 	initUncompleteDialog()
+	initNewFileDialog()
 	initNewRowDialog()
 	initRenameRowDialog()
 
@@ -783,6 +808,16 @@ function dropFinish(ev) {
 
 // fngroup: CREATION FUNCTIONS
 
+function initNewFileDialog() {
+	var newFileDialog = document.createElement("div")
+	newFileDialog.id="newFileDialog"
+	newFileDialog.className = "my-dialog"
+	newFileDialog.innerHTML = "Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(newFileDialog)
+}
+
+
+
 function initNewRowDialog() {
 	var newRowDialog = document.createElement("div")
 	newRowDialog.id="newRowDialog"
@@ -862,25 +897,39 @@ function newFile() {
 		showSaveDialog();
 	}
 	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
-		lines = [line];
-		//newTask("","Misc Task");
-		//newTask("Group","Grouped Task");
-		drawOutput(lines);
-		var myMonth = today.getMonth()+1;
-		if (myMonth.toString().length==1) myMonth = "0"+myMonth
-		var myYear = today.getYear()+1900;
-		currentFileName = "newTaskFile" + "_" + myMonth + today.getDate() + myYear + ".csv";
-		$(".fileinput-filename").html(currentFileName);
-		createCookie("fileName",currentFileName);
-		$("span.fileinput-new").hide();
-		$(".savefile-button").show();
-		$("#chosen-file-label").show()
-		$(".instructions").hide();
-		$("#right-buttons").show();
-		isSaved = 2;
-		$("#unsaved-changes").show();
-		saveFileCookie();
+		$("#newFileName").val("");
+		var opt = {
+			autoOpen: false,
+			modal: true,
+			width: 300,
+			height:200,
+			title: 'Create New File',
+			position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+			buttons: { 
+				OK: function() {
+					currentFileName = $("#newFileName").val();
+					var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
+					lines = [line];
+					drawOutput(lines);
+					$(".fileinput-filename").html(currentFileName);
+					createCookie("fileName",currentFileName);
+					$("span.fileinput-new").hide();
+					$(".savefile-button").show();
+					$("#chosen-file-label").show()
+					$(".instructions").hide();
+					$("#right-buttons").show();
+					isSaved = 2;
+					$("#unsaved-changes").show();
+					saveFileCookie();
+					$("#newFileDialog").dialog("close");
+				},
+				Cancel: function () {
+					$("#newFileDialog").dialog("close");
+				}
+			}
+		};
+		$("#newFileDialog").dialog(opt).dialog("open");
+		$("#newFileName").focus();
 	}
 }
 

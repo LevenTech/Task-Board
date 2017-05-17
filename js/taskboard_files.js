@@ -56,7 +56,8 @@ function saveFileCookie() {
 }
 
 function loadRemoteStorage() {
-	var myData = remoteStorage.tasks.load();
+	currentFileName = readCookie("fileName")
+	remoteStorage.tasks.init();
 }
 
 function loadCookieFile() {
@@ -76,17 +77,19 @@ function loadCookieFile() {
 
 function processData(csv,fileName) {
 	var fullPath = document.getElementById('csvFileInput').value;
-	if (!fileName) {
+	if (!currentFileName) {
 		var fileName = fullPath.split("\\");
 		currentFileName = fileName[fileName.length-1];
 		createCookie("fileName",currentFileName);
 	}
-	if (currentFileName.indexOf("leventest")>-1) {
-		var fileCreationDate = new Date(2017,4,1)
-		var actualStartOfToday = new Date()
-		actualStartOfToday.setHours(0,0,0,0);
-		testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
-		isTestFile=1;
+	if (currentFileName) {
+		if (currentFileName.indexOf("leventest")>-1) {
+			var fileCreationDate = new Date(2017,4,1)
+			var actualStartOfToday = new Date()
+			actualStartOfToday.setHours(0,0,0,0);
+			testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
+			isTestFile=1;
+		}
 	}
 	
     var allTextLines = csv.split(/\r\n|\n/);

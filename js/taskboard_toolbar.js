@@ -40,6 +40,15 @@ function initLeftButtons() {
 	leftButtons.innerHTML += "\
 			<div class='toolbar-selection' id='new-open-file' style='float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;'>\
 				<div id='open-local-file' class='fileinput fileinput-new' data-provides='fileinput' style='margin-left:0px;margin-bottom:0px;'>\
+					<div id='chosen-file-label' style='margin-top:10px;display:none;'>\
+						<strong>Current File:</strong>\
+						<span class='fileinput-filename'></span>\
+						<span id='filename-display' class='fileinput-new'>No file chosen</span>\
+						<span id='unsaved-changes' title='You have changes that haven't been saved to a file yet.' style='display:none;'>\
+							<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>\
+						</span>\
+						<select id='filename-selector'></select>\
+					</div>\
 					<div style='text-align:left;margin-left:10px;'>\
 						<div class='instructions'>\
 							To connect to remote storage, use the widget \
@@ -59,14 +68,6 @@ function initLeftButtons() {
 							<i class='fa fa-folder-o' aria-hidden='true' style='width:10px;margin-right:10px;'></i>\
 							<span id='openfile-button-label'>Open File</span>\
 							<input type='file' id='csvFileInput' onchange='handleFiles(this.files)' onclick='this.value=null;' accept='.csv'/>\
-						</span>\
-					</div>\
-					<div id='chosen-file-label' style='margin-top:10px;display:none;'>\
-						<strong>Current File:</strong>\
-						<span class='fileinput-filename'></span>\
-						<span class='fileinput-new'>No file chosen</span>\
-						<span id='unsaved-changes' title='You have changes that haven't been saved to a file yet.' style='display:none;'>\
-							<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>\
 						</span>\
 					</div>\
 				</div>\
