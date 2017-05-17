@@ -88,7 +88,7 @@ var tasks = {
 				else options += "<option value='"+key+"'>"+key+"</option>"
 			}
 			if (foundFile==0) {
-				options = "<option value='' selected>choose a file</option>"+options
+				options = "<option value='' selected></option>"+options
 				lines=""
 				$("#output").innerHTML = ""
 			}
@@ -137,6 +137,8 @@ remoteStorage.on("connected",function(privateClient, publicClient){
 		loadRemoteStorage();
 		$("#filename-selector").on("change",function() {
 			currentFileName = $("#filename-selector").val();
+			if (currentFileName.indexOf("leventest")!==-1) isTestFile = 1;
+			else isTestFile = 0;
 			if (currentFileName == "") {
 				var output = document.getElementById("output")
 				lines = ""
