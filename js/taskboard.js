@@ -157,7 +157,6 @@ remoteStorage.on("disconnected",function(privateClient, publicClient){
 	lines = ""
 	output.innerHTML = ""
 	$("#chosen-file-label").hide()
-	$("#savefile-button").show();
 	$(".instructions").show();		
 	$("#middle-buttons").hide();
 	$("#right-buttons").hide();
@@ -548,6 +547,7 @@ function connectToRemote() {
 	$("#filename-selector").show();
 	$(".fileinput-filename").hide();
 	$("#connected-to-remote").show();
+	$("#unsaved-changes").hide();
 	$("#filename-selector").on("change",function() {
 		currentFileName = $("#filename-selector").val();
 		if (currentFileName == "") {
