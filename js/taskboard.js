@@ -535,6 +535,8 @@ function showBeforeConnectDialog() {
 			Neither: function () {
 				$("#saveDialog").dialog(opt).dialog("close");
 				connectToRemote()
+				isSaved = 1;
+				createCookie("isSaved",1)
 				loadRemoteStorage();
 			}			
 		}
