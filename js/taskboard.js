@@ -3,6 +3,7 @@ var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
+var fileDebud = 0;
 var simulateMobile = 0;
 
 var lines = [];
@@ -56,120 +57,8 @@ $(document).ready(function() {
 	
 	setInterval(checkTime,60000)
 
+	initRemoteStorage();
 
-RemoteStorage.defineModule('tasks',
-  function(privateClient, publicClient) {
- 
- 
-var tasks = {
-    delete: function(tasks) {
-		return privateClient.remove(currentFileName);
-	},
-    store: function(tasks) {
-		var csvContent = "";
-		lines.forEach(function(infoArray, index){
-			if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
-				dataString = infoArray.join(",");
-				csvContent += index < lines.length ? dataString+ "\n" : dataString;
-			}
-		}); 
-		return privateClient.storeFile("text/csv", currentFileName, csvContent);
-	},
-    init: function(tasks) {
-		privateClient.getListing("", 1000).then(function (objects) {
-			var options
-			var foundFile = 0;
-			for (var key in objects) {
-				if (key == currentFileName) {
-					options += "<option value='"+key+"' selected>"+key+"</option>"
-					remoteStorage.tasks.load()
-					foundFile = 1;
-				}
-				else options += "<option value='"+key+"'>"+key+"</option>"
-			}
-			if (foundFile==0) {
-				options = "<option value='' selected></option>"+options
-				lines=""
-				$("#output").innerHTML = ""
-			}
-			else options = "<option value=''></option>"+options
-			var fileNameSelector = document.getElementById("filename-selector")
-			fileNameSelector.innerHTML = options
-			$("#filename-display").hide();
-			return options
-		});
-		$("#chosen-file-label").show()
-		$(".instructions").hide();		
-	},	
-    load: function(tasks) {
-		privateClient.getFile(currentFileName, 1000).then(function (file) {
-				if (file.data) processData(file.data,currentFileName)
-				return file.data;
-			});
-		}		
-};
- 
-  return { exports: tasks };
-});
-
-remoteStorage.access.claim('tasks', 'rw');
-remoteStorage.displayWidget();
-
-remoteStorage.on("connected",function(privateClient, publicClient){
-	isSaved = readCookie("isSaved")
-	if (isSaved==0) {
-		loadCookieFile()
-		showBeforeConnectDialog();
-	}
-	else {
-		createCookie("remoteConnected",1)
-		$("#filename-selector").show();
-		$(".fileinput-filename").hide();
-		$("#connected-to-remote").show();
-		$("#savefile-button").hide();
-		$("#unsaved-changes").hide();
-		//document.getElementById("newfile-button").style.fontSize = "20px"
-		document.getElementById("newfile-button-label").innerHTML = "New"
-		//document.getElementById("openfile-button").style.fontSize = "20px"
-		document.getElementById("openfile-button-label").innerHTML = "Open"
-		$("#deletefile-button").show()
-		$("#renamefile-button").show()
-		loadRemoteStorage();
-		$("#filename-selector").on("change",function() {
-			currentFileName = $("#filename-selector").val();
-			if (currentFileName.indexOf("leventest")!==-1) isTestFile = 1;
-			else isTestFile = 0;
-			if (currentFileName == "") {
-				var output = document.getElementById("output")
-				lines = ""
-				output.innerHTML = ""
-				eraseCookie("fileName")
-			}
-			else {
-				remoteStorage.tasks.load();
-				createCookie("fileName",currentFileName)
-			}
-		});
-	}
-})
-
-remoteStorage.on("disconnected",function(privateClient, publicClient){
-	createCookie("remoteConnected",0)
-	eraseCookie("myCSVfile")
-	lines = ""
-	output.innerHTML = ""
-	$("#chosen-file-label").hide()
-	$(".instructions").show();		
-	$("#middle-buttons").hide();
-	$("#right-buttons").hide();
-	$("#filename-selector").hide();
-	$(".fileinput-filename").show();
-	$("#connected-to-remote").hide();
-	$("#deletefile-button").hide()
-	$("#renamefile-button").hide()
-	isSaved = 1;
-	createCookie("isSaved",1)
-})
 
 });  //End of Doc.Ready
 
@@ -301,7 +190,13 @@ function initDialogKeys() {
 			$("#right-buttons").show();
 			isSaved = 2;
 			saveFileCookie();
-			if (remoteStorage.connected) remoteStorage.tasks.init();
+			$("#newFileDialog").dialog("close");
+			if (remoteStorage.connected) {
+				var option = "<option value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+				var fileNameSelector = document.getElementById("filename-selector")
+				fileNameSelector.innerHTML += option
+				console.log("adding option="+option)
+			}
 			else $("#unsaved-changes").show();
 			return false;
 		}
@@ -1084,11 +979,17 @@ function newFile() {
 					$(".savefile-button").show();
 					$("#chosen-file-label").show()
 					$(".instructions").hide();
+					$("#middle-buttons").show();
 					$("#right-buttons").show();
 					isSaved = 2;
 					saveFileCookie();
 					$("#newFileDialog").dialog("close");
-					if (remoteStorage.connected) remoteStorage.tasks.init();
+					if (remoteStorage.connected) {
+						var option = "<option value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+						var fileNameSelector = document.getElementById("filename-selector")
+						fileNameSelector.innerHTML += option
+						console.log("adding option="+option)
+					}
 					else $("#unsaved-changes").show();
 				},
 				Cancel: function () {
@@ -1101,57 +1002,6 @@ function newFile() {
 	}
 }
 
-function renameFile() {
-	$("#renamedFileName").val("");
-	var opt = {
-		autoOpen: false,
-		modal: true,
-		width: 300,
-		height:200,
-		title: 'Rename This File',
-		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
-		buttons: { 
-			OK: function() {
-				$("#renameFileDialog").dialog("close");
-				remoteStorage.tasks.delete()
-				currentFileName = $("#renamedFileName").val();
-				saveFileCookie();
-				remoteStorage.tasks.init()
-			},
-			Cancel: function () {
-				$("#renameFileDialog").dialog("close");
-			}
-		}
-	};
-	$("#renameFileDialog").dialog(opt).dialog("open");
-	$("#renamedFileName").focus();	
-}
-
-function deleteFile() {
-	var opt = {
-		autoOpen: false,
-		modal: true,
-		width: 300,
-		height:200,
-		title: 'Delete This File',
-		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
-		buttons: { 
-			OK: function() {
-				$("#deleteFileDialog").dialog("close");
-				remoteStorage.tasks.delete()
-				currentFileName = ""
-				lines = ""
-				var output = document.getElementById("output")
-				output.innerHTML = ""
-				remoteStorage.tasks.init()
-			},
-			Cancel: function () {
-				$("#deleteFileDialog").dialog("close");
-			}
-		}
-	};
-	$("#deleteFileDialog").dialog(opt).dialog("open");
-}
 
 function newTaskCopy() {
 	var newTask = lines[currentTask].slice();

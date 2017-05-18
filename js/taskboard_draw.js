@@ -12,6 +12,7 @@ function drawOutput(lines){
 	if (lines.length>1) showBodyInstructions = 1
 
 	var numTasks = 0;
+	lastTaskID = 0;
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
 		
 		if (editDebug) console.log(lines[currentTask])
