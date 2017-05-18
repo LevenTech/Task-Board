@@ -6,6 +6,9 @@ function initRemoteStorage() {
 			delete: function(tasks) { 
 				if (fileDebug) console.log("deleting file="+currentFileName)
 				privateClient.remove(currentFileName);
+				if (fileDebug) console.log("removing option=#option-"+currentFileName)
+				$("#filename-selector").val("");
+				$("#option-"+currentFileName).hide();
 			},
 			store: function(tasks) {
 				if (fileDebug) console.log("storing file="+currentFileName)
@@ -26,11 +29,11 @@ function initRemoteStorage() {
 					var foundFile = 0;
 					for (var key in objects) {
 						if (key == currentFileName) {
-							options += "<option value='"+key+"' selected>"+key+"</option>"
+							options += "<option id='option-"+key+"' value='"+key+"' selected>"+key+"</option>"
 							remoteStorage.tasks.load()
 							foundFile = 1;
 						}
-						else options += "<option value='"+key+"'>"+key+"</option>"
+						else options += "<option id='option-"+key+"' value='"+key+"'>"+key+"</option>"
 					}
 					if (foundFile==0) {
 						options = "<option value='' selected></option>"+options
@@ -152,12 +155,61 @@ function initRemoteStorage() {
 
 
 function clearOutput() {
+	currentFileName = ""
 	var output = document.getElementById("output")
 	lines = []
 	output.innerHTML = ""
 	eraseCookie("fileName")
 	eraseCookie("myCSVFile")
 	if (fileDebug) console.log("clearing output")
+}
+
+function newFile() {
+	if (parseInt(isSaved)==0) {
+		showSaveDialog();
+	}
+	else {
+		$("#newFileName").val("");
+		var opt = {
+			autoOpen: false,
+			modal: true,
+			width: 300,
+			height:200,
+			title: 'Create New File',
+			position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+			buttons: { 
+				OK: function() {
+					doNewFile();
+				},
+				Cancel: function () {
+					$("#newFileDialog").dialog("close");
+				}
+			}
+		};
+		$("#newFileDialog").dialog(opt).dialog("open");
+		$("#newFileName").focus();
+	}
+}
+
+
+function doNewFile() {
+	currentFileName = $("#newFileName").val();
+	var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
+	lines = [line];
+	drawOutput(lines);
+	$(".fileinput-filename").html(currentFileName);
+	createCookie("fileName",currentFileName);
+	$("span.fileinput-new").hide();
+	$(".savefile-button").show();
+	$("#chosen-file-label").show()
+	$(".instructions").hide();
+	$("#middle-buttons").show();
+	$("#right-buttons").show();
+	isSaved = 2;
+	saveFileCookie();
+	$("#newFileDialog").dialog("close");
+	if (remoteStorage.connected) { insertOption(); }
+	else $("#unsaved-changes").show();	
 }
 
 function renameFile() {
@@ -171,11 +223,7 @@ function renameFile() {
 		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
 		buttons: { 
 			OK: function() {
-				$("#renameFileDialog").dialog("close");
-				remoteStorage.tasks.delete()
-				currentFileName = $("#renamedFileName").val();
-				saveFileCookie();
-				remoteStorage.tasks.init()
+				doRenameFile();
 			},
 			Cancel: function () {
 				$("#renameFileDialog").dialog("close");
@@ -184,6 +232,22 @@ function renameFile() {
 	};
 	$("#renameFileDialog").dialog(opt).dialog("open");
 	$("#renamedFileName").focus();	
+}
+
+function doRenameFile() {
+	$("#renameFileDialog").dialog("close");
+	remoteStorage.tasks.delete()
+ 
+	currentFileName = $("#renamedFileName").val();
+	saveFileCookie();
+	insertOption();
+}
+
+function insertOption() {
+	var option = "<option id='option-"+currentFileName+"' value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+	var fileNameSelector = document.getElementById("filename-selector")
+	fileNameSelector.innerHTML += option
+	if (fileDebug) console.log("adding option="+option)
 }
 
 function deleteFile() {
@@ -199,7 +263,6 @@ function deleteFile() {
 				$("#deleteFileDialog").dialog("close");
 				remoteStorage.tasks.delete()
 				clearOutput();
-				remoteStorage.tasks.init()
 			},
 			Cancel: function () {
 				$("#deleteFileDialog").dialog("close");
@@ -208,6 +271,49 @@ function deleteFile() {
 	};
 	$("#deleteFileDialog").dialog(opt).dialog("open");
 }
+
+function initNewFileDialog() {
+	var newFileDialog = document.createElement("div")
+	newFileDialog.id="newFileDialog"
+	newFileDialog.className = "my-dialog"
+	newFileDialog.innerHTML = "Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(newFileDialog)
+}
+
+function initRenameFileDialog() {
+	var renameFileDialog = document.createElement("div")
+	renameFileDialog.id="renameFileDialog"
+	renameFileDialog.className = "my-dialog"
+	renameFileDialog.innerHTML = "Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(renameFileDialog)
+}
+
+function initDeleteFileDialog() {
+	var deleteFileDialog = document.createElement("div")
+	deleteFileDialog.id="deleteFileDialog"
+	deleteFileDialog.className = "my-dialog"
+	deleteFileDialog.innerHTML = "Are you sure you want to delete this file?"
+	document.getElementById("myBody").append(deleteFileDialog)
+}
+
+function initFileDialogKeys() {
+	$("#newFileName").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			doNewFile();
+			return false;
+		}
+	});		
+
+	$("#renamedFileName").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			doRenameFile();
+			return false;
+		}
+	});	
+}
+
 
 // FILE HANDLING FUNCTIONS
 
@@ -244,10 +350,8 @@ function loadHandler(event) {
 	var fileName = fullPath.split("\\");
 	currentFileName = fileName[fileName.length-1];
 
-	var option = "<option value='"+currentFileName+"' selected>"+currentFileName+"</option>"
-	var fileNameSelector = document.getElementById("filename-selector")
-	fileNameSelector.innerHTML += option
-
+	insertOption();
+	
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	saveFileCookie();
@@ -269,6 +373,7 @@ function saveFileCookie() {
 		isSaved = 1;
 	}
 
+	createCookie("fileName",currentFileName);
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
 

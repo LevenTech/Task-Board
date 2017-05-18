@@ -3,7 +3,7 @@ var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
-var fileDebud = 0;
+var fileDebug = 0;
 var simulateMobile = 0;
 
 var lines = [];
@@ -142,6 +142,8 @@ function showPrivacyDialog() {
 
 function initDialogKeys() {
 	
+	initFileDialogKeys();
+	
 	$("#newRowName").keypress( function (e) {
 		if(e.which == 13) {
 			$("#newRowDialog").dialog("close");
@@ -173,45 +175,7 @@ function initDialogKeys() {
 			return false;
 		}
 	});	
-	$("#newFileName").keypress( function (e) {
-		if(e.which == 13) {
-			$("#newFileDialog").dialog("close");
-			e.preventDefault();
-			currentFileName = $("#newFileName").val();
-			var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
-			lines = [line];
-			drawOutput(lines);
-			$(".fileinput-filename").html(currentFileName);
-			createCookie("fileName",currentFileName);
-			$("span.fileinput-new").hide();
-			$(".savefile-button").show();
-			$("#chosen-file-label").show()
-			$(".instructions").hide();
-			$("#right-buttons").show();
-			isSaved = 2;
-			saveFileCookie();
-			$("#newFileDialog").dialog("close");
-			if (remoteStorage.connected) {
-				var option = "<option value='"+currentFileName+"' selected>"+currentFileName+"</option>"
-				var fileNameSelector = document.getElementById("filename-selector")
-				fileNameSelector.innerHTML += option
-				console.log("adding option="+option)
-			}
-			else $("#unsaved-changes").show();
-			return false;
-		}
-	});		
 
-	$("#renamedFileName").keypress( function (e) {
-		if(e.which == 13) {
-			$("#renameFileDialog").dialog("close");
-			e.preventDefault();
-			remoteStorage.tasks.delete()
-			currentFileName = $("#renamedFileName").val();
-			saveFileCookie();
-			remoteStorage.tasks.init()
-		}
-	});
 
 	$(document).on('keydown keyup',  function (e) {
 		if ($('#completeDialog').is(':visible')) {
@@ -854,29 +818,7 @@ function dropFinish(ev) {
 
 // fngroup: CREATION FUNCTIONS
 
-function initNewFileDialog() {
-	var newFileDialog = document.createElement("div")
-	newFileDialog.id="newFileDialog"
-	newFileDialog.className = "my-dialog"
-	newFileDialog.innerHTML = "Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input>"
-	document.getElementById("myBody").append(newFileDialog)
-}
 
-function initRenameFileDialog() {
-	var renameFileDialog = document.createElement("div")
-	renameFileDialog.id="renameFileDialog"
-	renameFileDialog.className = "my-dialog"
-	renameFileDialog.innerHTML = "Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input>"
-	document.getElementById("myBody").append(renameFileDialog)
-}
-
-function initDeleteFileDialog() {
-	var deleteFileDialog = document.createElement("div")
-	deleteFileDialog.id="deleteFileDialog"
-	deleteFileDialog.className = "my-dialog"
-	deleteFileDialog.innerHTML = "Are you sure you want to delete this file?"
-	document.getElementById("myBody").append(deleteFileDialog)
-}
 
 
 
@@ -954,53 +896,7 @@ function newRowMenu() {
 	$("#newRowName").focus();
 }
 
-function newFile() {
-	if (parseInt(isSaved)==0) {
-		showSaveDialog();
-	}
-	else {
-		$("#newFileName").val("");
-		var opt = {
-			autoOpen: false,
-			modal: true,
-			width: 300,
-			height:200,
-			title: 'Create New File',
-			position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
-			buttons: { 
-				OK: function() {
-					currentFileName = $("#newFileName").val();
-					var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
-					lines = [line];
-					drawOutput(lines);
-					$(".fileinput-filename").html(currentFileName);
-					createCookie("fileName",currentFileName);
-					$("span.fileinput-new").hide();
-					$(".savefile-button").show();
-					$("#chosen-file-label").show()
-					$(".instructions").hide();
-					$("#middle-buttons").show();
-					$("#right-buttons").show();
-					isSaved = 2;
-					saveFileCookie();
-					$("#newFileDialog").dialog("close");
-					if (remoteStorage.connected) {
-						var option = "<option value='"+currentFileName+"' selected>"+currentFileName+"</option>"
-						var fileNameSelector = document.getElementById("filename-selector")
-						fileNameSelector.innerHTML += option
-						console.log("adding option="+option)
-					}
-					else $("#unsaved-changes").show();
-				},
-				Cancel: function () {
-					$("#newFileDialog").dialog("close");
-				}
-			}
-		};
-		$("#newFileDialog").dialog(opt).dialog("open");
-		$("#newFileName").focus();
-	}
-}
+
 
 
 function newTaskCopy() {
