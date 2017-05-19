@@ -111,8 +111,17 @@ function initLeftButtons() {
 				<div class='instructions'>\
 					<br/>If this is your first time here, start a \
 				</div>\
+			</div>\
+			<div id='tool-select-control' style='font-size:24px;float:left;display:none;padding-left:1em;padding-right:1em;'>\
+				<b>Control:</b><br/>\
+				<select id='tool-selector' class='dropdown tool-selector' style='height:3em;'>\
+					<option value='new-open-file'>New File / Open File</option>\
+					<option value='draggables'>New Task / Finish Task</option>\
+					<option value='size-shape'>Task Shape / Task Size</option>\
+					<option value='future-peek'>Future Peek</option>\
+				</select><br/>\
 			</div>"
-	return leftButtons;
+			return leftButtons;
 }
 
 function initMiddleButtons() {
@@ -121,15 +130,6 @@ function initMiddleButtons() {
 	middleButtons.style = "diplay:none;user-select:none;"
 	middleButtons.innerHTML += "\
 			<div style='width:100%;'>\
-			<div id='tool-select-control' style='font-size:24px;float:left;display:none;padding-left:1em;margin-top:1em;padding-right:1em;'>\
-				<b>Control:</b><br/>\
-				<select id='tool-selector' class='dropdown tool-selector' style='height:3em;'>\
-					<option value='new-open-file'>New File / Open File</option>\
-					<option value='draggables'>New Task / Finish Task</option>\
-					<option value='size-shape'>Task Shape / Task Size</option>\
-					<option value='future-peek'>Future Peek</option>\
-				</select><br/>\
-			</div>\
 			<div class='toolbar-selection' id='size-shape' style='float:left;'>\
 					<div class='middle-button' style='top:-0.5em;'>\
 						<label for='task-shape'>Shape</label><br/>\
@@ -265,20 +265,21 @@ function initToolSelector () {
 
 	$(".toolbar-selection").hide();
 	$("#tool-select-control").show();
-	$("#middle-buttons").show();
-	document.getElementById("left-buttons").style.flexBasis = "1em";
+	
+	document.getElementById("taskboard-toolbar").style.display="block"
+	document.getElementById("left-buttons").style.width = "100%";
+	/*document.getElementById("left-buttons").style.flexBasis = "1em";
 	document.getElementById("left-buttons").style.flexGrow = "0";
 	document.getElementById("left-buttons").style.flexShrink = "0";
-	document.getElementById("middle-buttons").style.flexBasis = "8em";
+	document.getElementById("middle-buttons").style.flexBasis = "8em";*/
 	document.getElementById("new-task-drag").style.marginTop = "0.4em";
 	document.getElementById("new-task-drag").style.paddingTop = "1em";
 	document.getElementById("new-task-drag").innerHTML = "New";
 	document.getElementById("output").marginTop = "30px";
-	$("#right-buttons").show();
 	$("#tool-selector").change(function(){
 		createCookie("selected-tool",this.value)
 		$(".toolbar-selection").hide();
-		$("#right-buttons").append($("#"+this.value))
+		$("#left-buttons").append($("#"+this.value))
 		$("#"+this.value).show();
 		document.getElementById(this.value).style.fontSize = "25px";
 	});
@@ -287,14 +288,14 @@ function initToolSelector () {
 	if (!alreadySelected) alreadySelected = "new-open-file"
 	$("#tool-selector").val(alreadySelected)
 	$(".toolbar-selection").hide();
-	$("#right-buttons").append($("#"+alreadySelected))
+	$("#left-buttons").append($("#"+alreadySelected))
 	$("#"+alreadySelected).show();
-	document.getElementById(alreadySelected).style.fontSize = "25px";
-	$(".newfile-button")
+	document.getElementById("open-local-file").style.fontSize = "22px";
+	/*document.getElementById(alreadySelected).style.fontSize = "25px";
 	document.getElementById("newfile-button").style.fontSize = "20px"
 	document.getElementById("newfile-button-label").innerHTML = "New"
 	document.getElementById("openfile-button").style.fontSize = "20px"
-	document.getElementById("openfile-button-label").innerHTML = "Open"
+	document.getElementById("openfile-button-label").innerHTML = "Open"*/
 	
 	$("#taskboard-toolbar").addClass("padded-toolbar");
 	$("#taskboard-toolbar").addClass("moving-toolbar");

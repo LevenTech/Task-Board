@@ -98,7 +98,8 @@ function initDialogs() {
 	initRenameFileDialog()
 
 	initPrivacyDialog()
-
+	initAboutDialog()
+	
 	var opt = { autoOpen: false	};
 	$(".my-dialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();	
@@ -123,6 +124,14 @@ function initPrivacyDialog() {
 	document.getElementById("myBody").append(privacyDialog)
 }
 
+function initAboutDialog() {
+	var aboutDialog = document.createElement("div")
+	aboutDialog.id="aboutDialog"
+	aboutDialog.className = "my-dialog"
+	aboutDialog.innerHTML = "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks."
+	document.getElementById("myBody").append(aboutDialog)
+}
+
 function showPrivacyDialog() {
 	var opt = {
         autoOpen: false,
@@ -138,6 +147,23 @@ function showPrivacyDialog() {
 		}
     };
 	$("#privacyDialog").dialog(opt).dialog("open");
+}
+
+function showAboutDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:400,
+        title: 'About Task Board',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#aboutDialog").dialog(opt).dialog("close");
+			},
+		}
+    };
+	$("#aboutDialog").dialog(opt).dialog("open");
 }
 
 function initDialogKeys() {

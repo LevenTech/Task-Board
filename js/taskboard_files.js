@@ -12,7 +12,7 @@ function initRemoteStorage() {
 	remoteStorage.setApiKeys('dropbox', "");
 
 	var shouldBeConnected = readCookie("isConnected")
-	console.log(shouldBeConnected)
+	if (fileDebug) console.log(shouldBeConnected)
 	if (shouldBeConnected==1) {
 		$("#filename-selector").show();
 		$(".fileinput-filename").hide();
@@ -130,6 +130,7 @@ function initRemoteStorage() {
 		$("#right-buttons").hide();
 		$("#filename-selector").hide();
 		$(".fileinput-filename").show();
+		$("#filename-display").show();
 		$("#connected-to-remote").hide();
 		$("#not-connected-to-remote").show();
 		$(".remote-file-button").hide()

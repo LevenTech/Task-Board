@@ -11,6 +11,7 @@ function getURLParameter(name) {
 // MISC LIBRARY FUNCTIONS
 
 function isMobile() { 
+ if (simulateMobile==1) return true;
  if( navigator.userAgent.match(/Android/i)
  || navigator.userAgent.match(/webOS/i)
  || navigator.userAgent.match(/iPhone/i)
