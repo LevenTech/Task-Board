@@ -219,8 +219,8 @@ function initDialogKeys() {
 
 
 	$(document).on('keydown keyup',  function (e) {
+		var key = e.which;
 		if ($('#completeDialog').is(':visible')) {
-			var key = e.which;
 			if (key == 13) {
 				lines[currentTask][10]="Yes";
 				if (lines[currentTask][11].length>0) newTaskCopy();
@@ -236,7 +236,6 @@ function initDialogKeys() {
 			}
 		}
 		if ($('#deleteDialog').is(':visible')) {
-			var key = e.which;
 			if (key == 13) {
 				lines.splice(currentTask,1);
 				$("#deleteDialog").dialog("close");
@@ -247,6 +246,12 @@ function initDialogKeys() {
 			else if (key == 27) {
 				$("#deleteDialog").dialog("close");
 			}
+		}
+		if ($('#aboutDialog').is(':visible')) {
+			if (key == 13 || key == 27) $('#aboutDialog').dialog("close")
+		}
+		if ($('#privacyDialog').is(':visible')) {
+			if (key == 13 || key == 27) $('#privacyDialog').dialog("close")
 		}
 		e.stopPropagation();
 	});	
