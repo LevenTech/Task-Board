@@ -153,14 +153,13 @@ function initRightButtons() {
 				<div id='finish-area' class='finish-area normal-finish' ondrop='dropFinish(event)' ondragover='highlightFinish(event)' ondragleave='unhighlightFinish(event)' style=''>\
 					<i class='fa fa-check-square-o' aria-hidden='true' style='width:10px;margin-right:10px;'></i> Finished <br/><br/>\
 					<span id='finish-instructions' ondragover='highlightFinish(event)' style='pointer-events: none;display:none;'>Drop here to Finish Task</span>\
-					<span id='finished-list' style='pointer-events: none;'></span>\
-					<span id='show-finished-toggle' style='position:absolute;bottom:0.2em;left:5.5em;font-size:0.8em;'>\
+					<span id='show-finished-toggle' style='position:absolute;bottom:0.2em;left:0em;width:100%;font-size:0.8em;'>\
 						<button id='delete-finished-button' class='btn btn-default' style='padding:0.2em;margin-bottom:0.2em;display:none;' onclick='deleteAllFinished()'>\
 							Delete All\
 						</button><br/>\
-						<button class='btn btn-default' style='padding:0.2em;' onclick='toggleFinishedVisible()'>\
+						<span class='btn btn-default' style='border:0px;width:10em;background:radial-gradient(white,white,lightgrey,black,black);padding:0.2em;' onclick='toggleFinishedVisible()'>\
 							<input style='margin-right:10px;pointer-events:none;' type='checkbox' id='show-finished' />Visible\
-						</button>\
+						</span>\
 					</span>\
 				</div>\
 				<div id='new-task-drag' class='new-task-drag' draggable='true' ondragstart='dragNew(event)' >\
