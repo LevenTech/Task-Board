@@ -1,6 +1,37 @@
 
 
 function initRemoteStorage() {
+	/*remoteStorage.setApiKeys('googledrive', {
+	  clientId: '31747680476-7featrglvba52v6thlmf9g6lhuvd1go5.apps.googleusercontent.com'
+	});
+
+	remoteStorage.setApiKeys('dropbox', {
+	  appKey: 'tdk7d111530qw8d'
+	});*/
+	remoteStorage.setApiKeys('googledrive', "");
+	remoteStorage.setApiKeys('dropbox', "");
+
+	var shouldBeConnected = readCookie("isConnected")
+	console.log(shouldBeConnected)
+	if (shouldBeConnected==1) {
+		$("#filename-selector").show();
+		$(".fileinput-filename").hide();
+		$("#filename-display").hide();
+		$("#connected-to-remote").show();
+		$("#not-connected-to-remote").hide();
+		$("#savefile-button").hide();
+		$("#unsaved-changes").hide();
+		$(".remote-file-button").show()
+		$("#openfile-button-name").hide()
+		$("#importfile-button-name").show()
+	}
+	else {
+		$("#not-connected-to-remote").show();
+	}
+
+	loadCookieFile();
+
+
 	RemoteStorage.defineModule('tasks',	function(privateClient, publicClient) {
 		var tasks = {
 			delete: function(tasks) { 
@@ -37,7 +68,7 @@ function initRemoteStorage() {
 					}
 					if (foundFile==0) {
 						options = "<option value='' selected></option>"+options
-						clearOutput();
+						noFileSelected();
 					}
 					else options = "<option value=''></option>"+options
 					var fileNameSelector = document.getElementById("filename-selector")
@@ -45,10 +76,13 @@ function initRemoteStorage() {
 					$("#filename-display").hide();
 					return options
 				});
-				$("#chosen-file-label").show()
+				//$("#chosen-file-label").show()
 				$(".instructions").hide();		
 			},	
 			load: function(tasks) {
+				$("#exportfile-button").attr("disabled",false)
+				$("#renamefile-button").attr("disabled",false)
+				$("#deletefile-button").attr("disabled",false)
 				privateClient.getFile(currentFileName, 1000).then(function (file) {
 					if (fileDebug) console.log("loading file="+currentFileName)
 					if (file.data) processData(file.data,currentFileName)
@@ -77,12 +111,9 @@ function initRemoteStorage() {
 			$("#not-connected-to-remote").hide();
 			$("#savefile-button").hide();
 			$("#unsaved-changes").hide();
-			//document.getElementById("newfile-button").style.fontSize = "20px"
-			document.getElementById("newfile-button-label").innerHTML = "New"
-			//document.getElementById("openfile-button").style.fontSize = "20px"
-			document.getElementById("openfile-button-label").innerHTML = "Open"
-			$("#deletefile-button").show()
-			$("#renamefile-button").show()
+			$(".remote-file-button").show()
+			$("#openfile-button-name").hide()
+			$("#importfile-button-name").show()
 			loadRemoteStorage();
 		}
 		createCookie("isConnected",1)
@@ -93,15 +124,17 @@ function initRemoteStorage() {
 		eraseCookie("myCSVFile")
 		lines = ""
 		output.innerHTML = ""
-		$("#chosen-file-label").hide()
+		//$("#chosen-file-label").hide()
 		$(".instructions").show();		
 		$("#middle-buttons").hide();
 		$("#right-buttons").hide();
 		$("#filename-selector").hide();
 		$(".fileinput-filename").show();
 		$("#connected-to-remote").hide();
-		$("#deletefile-button").hide()
-		$("#renamefile-button").hide()
+		$("#not-connected-to-remote").show();
+		$(".remote-file-button").hide()
+		$("#openfile-button-name").show()
+		$("#importfile-button-name").hide()
 		isSaved = 1;
 		createCookie("isSaved",1)
 		createCookie("isConnected",0)
@@ -109,13 +142,14 @@ function initRemoteStorage() {
 	
 	remoteStorage.on("error",function(errorMessage){
 		alert("You were connected to remote storage, but your connection has been lost. Re-establish using the widget, otherwise your data will not sync to other devices.")
-		$("#chosen-file-label").hide()
+		//$("#chosen-file-label").hide()
 		$("#filename-selector").hide();
 		$(".fileinput-filename").show();
 		$("#connected-to-remote").hide();
 		$("#not-connected-to-remote").show();
-		$("#deletefile-button").hide()
-		$("#renamefile-button").hide()
+		$(".remote-file-button").hide()
+		$("#openfile-button-name").show()
+		$("#importfile-button-name").hide()
 		$("#savefile-button").show();
 		createCookie("isConnected",0)
 	})	
@@ -125,7 +159,7 @@ function initRemoteStorage() {
 		if (currentFileName.indexOf("leventest")!==-1) isTestFile = 1;
 		else isTestFile = 0;
 		if (currentFileName == "") {
-			clearOutput();
+			noFileSelected();
 		}
 		else {
 			remoteStorage.tasks.load();
@@ -133,24 +167,16 @@ function initRemoteStorage() {
 		}
 	});	
 	
-	loadCookieFile();
-	var shouldBeConnected = readCookie("isConnected")
-	if (shouldBeConnected==1) {
-		$("#filename-selector").show();
-		$(".fileinput-filename").hide();
-		$("#connected-to-remote").show();
-		$("#savefile-button").hide();
-		$("#unsaved-changes").hide();
-		//document.getElementById("newfile-button").style.fontSize = "20px"
-		document.getElementById("newfile-button-label").innerHTML = "New"
-		//document.getElementById("openfile-button").style.fontSize = "20px"
-		document.getElementById("openfile-button-label").innerHTML = "Open"
-		$("#deletefile-button").show()
-		$("#renamefile-button").show()		
-	}
-	else {
-		$("#not-connected-to-remote").show();
-	}
+
+}
+
+function noFileSelected() {
+	clearOutput();
+	$("#exportfile-button").attr("disabled",true)
+	$("#renamefile-button").attr("disabled",true)
+	$("#deletefile-button").attr("disabled",true)
+	$("#middle-buttons").hide();
+	$("#right-buttons").hide();
 }
 
 
@@ -194,6 +220,7 @@ function newFile() {
 
 function doNewFile() {
 	currentFileName = $("#newFileName").val();
+	if (currentFileName=="") currentFileName = "no name"
 	var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
 	lines = [line];
 	drawOutput(lines);
@@ -201,7 +228,7 @@ function doNewFile() {
 	createCookie("fileName",currentFileName);
 	$("span.fileinput-new").hide();
 	$(".savefile-button").show();
-	$("#chosen-file-label").show()
+	//$("#chosen-file-label").show()
 	$(".instructions").hide();
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
@@ -398,6 +425,15 @@ function loadCookieFile() {
 		$(".fileinput-filename").html(currentFileName);
 		$("span.fileinput-new").hide();
 	}
+	var fileName = readCookie("fileName");
+	if (fileName) {
+		var option = "<option id='option-"+currentFileName+"' value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+		var fileNameSelector = document.getElementById("filename-selector")
+		fileNameSelector.innerHTML += option
+	}
+	else {
+		noFileSelected();
+	}
 }
 
 function processData(csv,fileName) {
@@ -441,7 +477,7 @@ function processData(csv,fileName) {
 	if (isTestFile) makeTestDatesDisplayable();
 
 	if (!remoteStorage.connected) $(".savefile-button").show()
-	$("#chosen-file-label").show()
+	//$("#chosen-file-label").show()
 	$(".instructions").hide();
 	$("#middle-buttons").show();
 	$("#right-buttons").show();

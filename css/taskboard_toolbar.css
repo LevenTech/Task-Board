@@ -1,4 +1,60 @@
 
+
+.file-button {
+	position:relative;
+	height:32px;
+	padding-left:8px;
+	width:32px;
+}
+
+#unsaved-changes {
+	position:relative;
+}
+
+#unsaved-changes .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+ 
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+
+    width: 120px;
+    bottom: 100%;
+    left: 50%; 
+    margin-left: -60px; 	
+}
+
+.file-button .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+ 
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+
+    width: 80px;
+    bottom: 100%;
+    left: 50%; 
+    margin-left: -40px; 	
+}
+
+.file-button:hover .tooltiptext {
+    visibility: visible;
+}
+
+#unsaved-changes:hover .tooltiptext {
+    visibility: visible;
+}
+
 #taskboard-toolbar {
 	display:flex;
 	background:darkgrey;
@@ -19,6 +75,9 @@
 	margin:15px;
 	margin-left: 30px;
 }
+
+
+
 
 .right-click-mode-indicator {
 	display:none;

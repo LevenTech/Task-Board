@@ -300,7 +300,8 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 		var overDue = document.createElement("b");
 		overDue.className = "task-details"
 		overDue.innerHTML = "!!! OVERDUE !!!"
-		taskBlock.appendChild(createBR());		
+		taskBlock.appendChild(createBR());
+		taskBlock.appendChild(createBR());
 		taskBlock.appendChild(overDue);
 		taskBlock.className += " due-task"
 	}

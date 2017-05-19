@@ -16,7 +16,7 @@ var today = new Date();
 var one_day=1000*60*60*24;
 var one_hour=1000*60*60;
 
-var currentFileName = "newTaskFile.csv";
+var currentFileName = "";
 var showFinished = 0;
 var isSaved = 1
 var lastTaskID = 0;
