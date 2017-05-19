@@ -286,12 +286,12 @@ function deleteFile() {
 		title: 'Delete This File',
 		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
 		buttons: { 
-			OK: function() {
+			Yes: function() {
 				$("#deleteFileDialog").dialog("close");
 				remoteStorage.tasks.delete()
 				clearOutput();
 			},
-			Cancel: function () {
+			No: function () {
 				$("#deleteFileDialog").dialog("close");
 			}
 		}
