@@ -1,5 +1,348 @@
 
 
+function initRemoteStorage() {
+	/*remoteStorage.setApiKeys('googledrive', {
+	  clientId: '31747680476-7featrglvba52v6thlmf9g6lhuvd1go5.apps.googleusercontent.com'
+	});
+
+	remoteStorage.setApiKeys('dropbox', {
+	  appKey: 'tdk7d111530qw8d'
+	});*/
+	remoteStorage.setApiKeys('googledrive', "");
+	remoteStorage.setApiKeys('dropbox', "");
+
+	var shouldBeConnected = readCookie("isConnected")
+	if (fileDebug) console.log(shouldBeConnected)
+	if (shouldBeConnected==1) {
+		$("#filename-selector").show();
+		$(".fileinput-filename").hide();
+		$("#filename-display").hide();
+		$("#connected-to-remote").show();
+		$("#not-connected-to-remote").hide();
+		$("#savefile-button").hide();
+		$("#unsaved-changes").hide();
+		$(".remote-file-button").show()
+		$("#openfile-button-name").hide()
+		$("#importfile-button-name").show()
+	}
+	else {
+		$("#not-connected-to-remote").show();
+	}
+
+	loadCookieFile();
+
+
+	RemoteStorage.defineModule('tasks',	function(privateClient, publicClient) {
+		var tasks = {
+			delete: function(tasks) { 
+				if (fileDebug) console.log("deleting file="+currentFileName)
+				privateClient.remove(currentFileName);
+				if (fileDebug) console.log("removing option=#option-"+currentFileName)
+				$("#filename-selector").val("");
+				$("#option-"+currentFileName).hide();
+			},
+			store: function(tasks) {
+				if (fileDebug) console.log("storing file="+currentFileName)
+				var csvContent = "";
+				lines.forEach(function(infoArray, index){
+					if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
+						dataString = infoArray.join(",");
+						csvContent += index < lines.length ? dataString+ "\n" : dataString;
+					}
+				}); 
+				return privateClient.storeFile("text/csv", currentFileName, csvContent);
+			},
+			init: function(tasks) {
+				if (fileDebug) console.log("rebuilding file list")
+				privateClient.getListing("/", 1000).then(function (objects) {
+					if (fileDebug) console.log(objects)
+					var options
+					var foundFile = 0;
+					for (var key in objects) {
+						if (key == currentFileName) {
+							options += "<option id='option-"+key+"' value='"+key+"' selected>"+key+"</option>"
+							remoteStorage.tasks.load()
+							foundFile = 1;
+						}
+						else options += "<option id='option-"+key+"' value='"+key+"'>"+key+"</option>"
+					}
+					if (foundFile==0) {
+						options = "<option value='' selected></option>"+options
+						noFileSelected();
+					}
+					else options = "<option value=''></option>"+options
+					var fileNameSelector = document.getElementById("filename-selector")
+					fileNameSelector.innerHTML = options
+					$("#filename-display").hide();
+					return options
+				});
+				//$("#chosen-file-label").show()
+				$(".instructions").hide();		
+			},	
+			load: function(tasks) {
+				$("#exportfile-button").attr("disabled",false)
+				$("#renamefile-button").attr("disabled",false)
+				$("#deletefile-button").attr("disabled",false)
+				privateClient.getFile(currentFileName, 1000).then(function (file) {
+					if (fileDebug) console.log("loading file="+currentFileName)
+					if (file.data) processData(file.data,currentFileName)
+					saveFileCookie();
+					return file.data;
+				});
+			}		
+		};
+		return { exports: tasks };
+	});
+
+	remoteStorage.access.claim('tasks', 'rw');
+	remoteStorage.displayWidget();
+
+	remoteStorage.on("connected",function(privateClient, publicClient){
+		isSaved = readCookie("isSaved")
+		if (isSaved==0) {
+			loadCookieFile()
+			showBeforeConnectDialog();
+		}
+		else {
+			createCookie("remoteConnected",1)
+			$("#filename-selector").show();
+			$(".fileinput-filename").hide();
+			$("#connected-to-remote").show();
+			$("#not-connected-to-remote").hide();
+			$("#savefile-button").hide();
+			$("#unsaved-changes").hide();
+			$(".remote-file-button").show()
+			$("#openfile-button-name").hide()
+			$("#importfile-button-name").show()
+			loadRemoteStorage();
+		}
+		createCookie("isConnected",1)
+	})
+
+	remoteStorage.on("disconnected",function(privateClient, publicClient){
+		createCookie("remoteConnected",0)
+		eraseCookie("myCSVFile")
+		lines = ""
+		output.innerHTML = ""
+		//$("#chosen-file-label").hide()
+		$(".instructions").show();		
+		$("#middle-buttons").hide();
+		$("#right-buttons").hide();
+		$("#filename-selector").hide();
+		$(".fileinput-filename").show();
+		$("#filename-display").show();
+		$("#connected-to-remote").hide();
+		$("#not-connected-to-remote").show();
+		$(".remote-file-button").hide()
+		$("#openfile-button-name").show()
+		$("#importfile-button-name").hide()
+		isSaved = 1;
+		createCookie("isSaved",1)
+		createCookie("isConnected",0)
+	})
+	
+	remoteStorage.on("error",function(errorMessage){
+		alert("You were connected to remote storage, but your connection has been lost. Re-establish using the widget, otherwise your data will not sync to other devices.")
+		//$("#chosen-file-label").hide()
+		$("#filename-selector").hide();
+		$(".fileinput-filename").show();
+		$("#connected-to-remote").hide();
+		$("#not-connected-to-remote").show();
+		$(".remote-file-button").hide()
+		$("#openfile-button-name").show()
+		$("#importfile-button-name").hide()
+		$("#savefile-button").show();
+		createCookie("isConnected",0)
+	})	
+	
+	$("#filename-selector").on("change",function() {
+		currentFileName = $("#filename-selector").val();
+		if (currentFileName.indexOf("leventest")!==-1) isTestFile = 1;
+		else isTestFile = 0;
+		if (currentFileName == "") {
+			noFileSelected();
+		}
+		else {
+			remoteStorage.tasks.load();
+			createCookie("fileName",currentFileName)
+		}
+	});	
+	
+
+}
+
+function noFileSelected() {
+	clearOutput();
+	$("#exportfile-button").attr("disabled",true)
+	$("#renamefile-button").attr("disabled",true)
+	$("#deletefile-button").attr("disabled",true)
+	$("#middle-buttons").hide();
+	$("#right-buttons").hide();
+}
+
+
+function clearOutput() {
+	currentFileName = ""
+	var output = document.getElementById("output")
+	lines = []
+	output.innerHTML = ""
+	eraseCookie("fileName")
+	eraseCookie("myCSVFile")
+	if (fileDebug) console.log("clearing output")
+}
+
+function newFile() {
+	if (parseInt(isSaved)==0) {
+		showSaveDialog();
+	}
+	else {
+		$("#newFileName").val("");
+		var opt = {
+			autoOpen: false,
+			modal: true,
+			width: 300,
+			height:200,
+			title: 'Create New File',
+			position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+			buttons: { 
+				OK: function() {
+					doNewFile();
+				},
+				Cancel: function () {
+					$("#newFileDialog").dialog("close");
+				}
+			}
+		};
+		$("#newFileDialog").dialog(opt).dialog("open");
+		$("#newFileName").focus();
+	}
+}
+
+
+function doNewFile() {
+	currentFileName = $("#newFileName").val();
+	if (currentFileName=="") currentFileName = "no name"
+	var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
+	lines = [line];
+	drawOutput(lines);
+	$(".fileinput-filename").html(currentFileName);
+	createCookie("fileName",currentFileName);
+	$("span.fileinput-new").hide();
+	$(".savefile-button").show();
+	//$("#chosen-file-label").show()
+	$(".instructions").hide();
+	$("#middle-buttons").show();
+	$("#right-buttons").show();
+	isSaved = 2;
+	saveFileCookie();
+	$("#newFileDialog").dialog("close");
+	if (remoteStorage.connected) { insertOption(); }
+	else $("#unsaved-changes").show();	
+}
+
+function renameFile() {
+	$("#renamedFileName").val("");
+	var opt = {
+		autoOpen: false,
+		modal: true,
+		width: 300,
+		height:200,
+		title: 'Rename This File',
+		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				doRenameFile();
+			},
+			Cancel: function () {
+				$("#renameFileDialog").dialog("close");
+			}
+		}
+	};
+	$("#renameFileDialog").dialog(opt).dialog("open");
+	$("#renamedFileName").focus();	
+}
+
+function doRenameFile() {
+	$("#renameFileDialog").dialog("close");
+	remoteStorage.tasks.delete()
+ 
+	currentFileName = $("#renamedFileName").val();
+	saveFileCookie();
+	insertOption();
+}
+
+function insertOption() {
+	var option = "<option id='option-"+currentFileName+"' value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+	var fileNameSelector = document.getElementById("filename-selector")
+	fileNameSelector.innerHTML += option
+	if (fileDebug) console.log("adding option="+option)
+}
+
+function deleteFile() {
+	var opt = {
+		autoOpen: false,
+		modal: true,
+		width: 300,
+		height:200,
+		title: 'Delete This File',
+		position: {my: "center center", at: "center center", of: "body", collision: "fit", within: "body"},
+		buttons: { 
+			OK: function() {
+				$("#deleteFileDialog").dialog("close");
+				remoteStorage.tasks.delete()
+				clearOutput();
+			},
+			Cancel: function () {
+				$("#deleteFileDialog").dialog("close");
+			}
+		}
+	};
+	$("#deleteFileDialog").dialog(opt).dialog("open");
+}
+
+function initNewFileDialog() {
+	var newFileDialog = document.createElement("div")
+	newFileDialog.id="newFileDialog"
+	newFileDialog.className = "my-dialog"
+	newFileDialog.innerHTML = "Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(newFileDialog)
+}
+
+function initRenameFileDialog() {
+	var renameFileDialog = document.createElement("div")
+	renameFileDialog.id="renameFileDialog"
+	renameFileDialog.className = "my-dialog"
+	renameFileDialog.innerHTML = "Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input>"
+	document.getElementById("myBody").append(renameFileDialog)
+}
+
+function initDeleteFileDialog() {
+	var deleteFileDialog = document.createElement("div")
+	deleteFileDialog.id="deleteFileDialog"
+	deleteFileDialog.className = "my-dialog"
+	deleteFileDialog.innerHTML = "Are you sure you want to delete this file?"
+	document.getElementById("myBody").append(deleteFileDialog)
+}
+
+function initFileDialogKeys() {
+	$("#newFileName").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			doNewFile();
+			return false;
+		}
+	});		
+
+	$("#renamedFileName").keypress( function (e) {
+		if(e.which == 13) {
+			e.preventDefault();
+			doRenameFile();
+			return false;
+		}
+	});	
+}
+
+
 // FILE HANDLING FUNCTIONS
 
 function handleFiles(files) {
@@ -7,7 +350,7 @@ function handleFiles(files) {
 	if (parseInt(isSaved)==0) {
 		showSaveDialog(files[0]);
 	}
-	else 
+	else {
 		// Check for the various File API support.
 		if (window.FileReader) {
 			// FileReader are supported.
@@ -15,6 +358,7 @@ function handleFiles(files) {
 		} else {
 			alert('FileReader are not supported in this browser.');
 		}
+	}
 }
 
 function getAsText(fileToRead) {
@@ -29,21 +373,44 @@ function getAsText(fileToRead) {
 function loadHandler(event) {
 	var csv = event.target.result;
 	processData(csv);
+	
+	var fullPath = document.getElementById('csvFileInput').value;
+	var fileName = fullPath.split("\\");
+	currentFileName = fileName[fileName.length-1];
+
+	insertOption();
+	
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	saveFileCookie();
 }
 
 function saveFileCookie() {
+	if (isTestFile) makeTestDatesSavable();
+
 	var csvContent = "";
 	lines.forEach(function(infoArray, index){
 		if (infoArray[0]=="TaskNum" || infoArray[0]>0) {
 			dataString = infoArray.join(",");
 			csvContent += index < lines.length ? dataString+ "^" : dataString;
 		}
-	}); 
+	});
+
+	if (remoteStorage.connected) {
+		remoteStorage.tasks.store(csvContent);
+		isSaved = 1;
+	}
+
+	createCookie("fileName",currentFileName);
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
+
+	if (isTestFile) makeTestDatesDisplayable();
+}
+
+function loadRemoteStorage() {
+	currentFileName = readCookie("fileName")
+	remoteStorage.tasks.init();
 }
 
 function loadCookieFile() {
@@ -51,29 +418,40 @@ function loadCookieFile() {
 	if (csv) {
 		var altcsv = csv.split("^");
 		csv = altcsv.join("\n");
+		currentFileName = readCookie("fileName")
 		processData(csv,readCookie("fileName"));
 		isSaved = readCookie("isSaved");
 		if (isSaved==1) $("#unsaved-changes").hide();
 		else $("#unsaved-changes").show();
-		currentFileName = readCookie("fileName")
 		$(".fileinput-filename").html(currentFileName);
 		$("span.fileinput-new").hide();
+	}
+	var fileName = readCookie("fileName");
+	if (fileName) {
+		var option = "<option id='option-"+currentFileName+"' value='"+currentFileName+"' selected>"+currentFileName+"</option>"
+		var fileNameSelector = document.getElementById("filename-selector")
+		fileNameSelector.innerHTML += option
+	}
+	else {
+		noFileSelected();
 	}
 }
 
 function processData(csv,fileName) {
 	var fullPath = document.getElementById('csvFileInput').value;
-	if (!fileName) {
+	if (!currentFileName) {
 		var fileName = fullPath.split("\\");
 		currentFileName = fileName[fileName.length-1];
 		createCookie("fileName",currentFileName);
 	}
-	if (currentFileName.indexOf("leventest")>-1) {
-		var fileCreationDate = new Date(2017,4,1)
-		var actualStartOfToday = new Date()
-		actualStartOfToday.setHours(0,0,0,0);
-		testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
-		isTestFile=1;
+	if (currentFileName) {
+		if (currentFileName.indexOf("leventest")>-1) {
+			var fileCreationDate = new Date(2017,4,1)
+			var actualStartOfToday = new Date()
+			actualStartOfToday.setHours(0,0,0,0);
+			testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
+			isTestFile=1;
+		}
 	}
 	
     var allTextLines = csv.split(/\r\n|\n/);
@@ -99,8 +477,8 @@ function processData(csv,fileName) {
 	
 	if (isTestFile) makeTestDatesDisplayable();
 
-	$(".savefile-button").show()
-	$("#chosen-file-label").show()
+	if (!remoteStorage.connected) $(".savefile-button").show()
+	//$("#chosen-file-label").show()
 	$(".instructions").hide();
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
@@ -130,14 +508,14 @@ function saveFile() {
 		}
 	}); 
 
-	var link = document.createElement("a");
-
+	// FOR FIREFOX
 	//var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 	//var url = URL.createObjectURL(blob);
 
 	var encodedUri = encodeURI(csvContent);
-	var url = "data:attachment/csv,"+encodedUri;
+	var url = "data:text/csv,"+encodedUri;
 
+	var link = document.createElement("a");
 	link.setAttribute("href", url);
 	link.setAttribute("download", currentFileName);
 	document.body.appendChild(link); // Required for FF

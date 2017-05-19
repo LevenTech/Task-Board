@@ -10,12 +10,17 @@ function drawOutput(lines){
 	$("#delete-finished-button").attr("disabled",true)
 	var showBodyInstructions = 0;
 	if (lines.length>1) showBodyInstructions = 1
-	
+
+	var numTasks = 0;
+	lastTaskID = 0;
 	for (var currentTask = 1; currentTask < lines.length; currentTask++) {
 		
 		if (editDebug) console.log(lines[currentTask])
 		var taskNum = parseInt(lines[currentTask][col_ID]);
+
 		if (isNaN(taskNum)) { continue; }
+		numTasks++;
+		
 		if (taskNum>lastTaskID) { lastTaskID = taskNum; }
 
 		var isComplete = 0;
@@ -43,7 +48,7 @@ function drawOutput(lines){
 		var taskBlock = buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask)
 
 		var rowName = lines[currentTask][col_row];
-		if (rowName == "") rowName = "MISC";
+		if (rowName == "" || rowName == null) rowName = "MISC";
 		else (rowName = rowName.toUpperCase());
 
 		var rowExists = 0;
@@ -72,7 +77,7 @@ function drawOutput(lines){
 	document.getElementById("output").innerHTML = "";
 	document.getElementById("output").append(createTable(tableRows));
 	document.getElementById("output").append(createMiscBlock(tableRows));
-	if (showBodyInstructions==1) {
+	if (numTasks>0 && showBodyInstructions==1) {
 		var bodyInstructions = document.createElement("div")
 		bodyInstructions.setAttribute("id","body-instructions")
 		bodyInstructions.setAttribute("style","font-size:2em;width:100%;text-align:center;margin-top:1em;")
@@ -81,10 +86,7 @@ function drawOutput(lines){
 	}
 	document.getElementById("output").style =	"font-size:"+$( "#font-size" ).val()+"px;"
 
-	if (lines.length==1) {
-		$("#myBody").addClass("body-with-help")
-		$("#misc-block").addClass("misc-with-help")
-	}
+	if (numTasks<1) $("#misc-block").addClass("misc-with-help")
 
 	if (shape=="wide") $(".task-details").hide();
 	
@@ -106,12 +108,13 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 	var taskBlock = createTaskBlock(currentTask,lines[currentTask][col_color])
 
 	var myName = lines[currentTask][col_task].replace("%44;",",");
+	var myName = lines[currentTask][col_task].replace("%38;","&");
 	var name = document.createElement("div");
 	name.className = "task-name"
 	name.innerHTML = "<b>"+myName+"</b>";
 	taskBlock.appendChild(name)
 
-	if (lines[currentTask][col_increment].length>0) taskBlock.appendChild(createRepeatIcon(currentTask,(isPastTask||isComplete)))
+	if (lines[currentTask][col_increment]>0) taskBlock.appendChild(createRepeatIcon(currentTask,(isPastTask||isComplete)))
 	
 	var days_until_start = "";
 	var days_until_due = "";
@@ -185,6 +188,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 
 	taskBlock.appendChild(createBR());		
 	if (startDate=="" || days_until_start<0) {
+		startDatePhrase.innerHTML = "<b></b>";
 		taskBlock.className += " now-task";
 	}
 	else if (days_until_start>0) {
@@ -265,8 +269,7 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 
 	}
 	else if (days_until_due<0) {
-		if (sameTime) dueDatePhrase.innerHTML = dueDateStr+", "+dueTimeStr+" ("+(-days_until_due)+" passed)";
-		else dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
+		dueDatePhrase.innerHTML = "Due: "+dueDateStr+" ("+(-days_until_due)+" passed)";
 		var isOverdue = 1;
 	}
 	else {
@@ -297,7 +300,8 @@ function buildTaskBlock(currentTask,startDate,dueDate,isComplete,isPastTask) {
 		var overDue = document.createElement("b");
 		overDue.className = "task-details"
 		overDue.innerHTML = "!!! OVERDUE !!!"
-		taskBlock.appendChild(createBR());		
+		taskBlock.appendChild(createBR());
+		taskBlock.appendChild(createBR());
 		taskBlock.appendChild(overDue);
 		taskBlock.className += " due-task"
 	}
@@ -316,7 +320,7 @@ function createTaskBlock(taskID,myColor) {
 	taskBlock.setAttribute("onclick","clickTaskBlock(event,this)");
 
 	var colorName = myColor;
-	if (colorName=="") colorName = "LemonChiffon";
+	if (colorName=="" || colorName == null) colorName = "LemonChiffon";
 	taskBlock.style.backgroundColor = colorName;
 	
 	if (colorName.substr(0,1)=="#") var myHexColor = colorName

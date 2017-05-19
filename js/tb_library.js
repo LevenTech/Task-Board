@@ -4,10 +4,14 @@ function hasClass(element, cls) {
     return (' ' + element.attr('class') + ' ').indexOf(' ' + cls + ' ') > -1;
 }
 
+function getURLParameter(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+}
 
 // MISC LIBRARY FUNCTIONS
 
 function isMobile() { 
+ if (simulateMobile==1) return true;
  if( navigator.userAgent.match(/Android/i)
  || navigator.userAgent.match(/webOS/i)
  || navigator.userAgent.match(/iPhone/i)

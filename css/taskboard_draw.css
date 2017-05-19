@@ -139,6 +139,7 @@
 }
 
 .later-task {
+	font-style:italic;
 	text-align: center;
 	opacity: 0.5;
 }

@@ -3,6 +3,7 @@ var myClickEvent;
 
 var sortDebug = 0;
 var editDebug = 0;
+var fileDebug = 0;
 var simulateMobile = 0;
 
 var lines = [];
@@ -15,9 +16,9 @@ var today = new Date();
 var one_day=1000*60*60*24;
 var one_hour=1000*60*60;
 
-var currentFileName = "newTaskFile.csv";
+var currentFileName = "";
 var showFinished = 0;
-var isSaved = 1;
+var isSaved = 1
 var lastTaskID = 0;
 var currentTask = 0;
 var currentTaskDateSync = 0;
@@ -44,6 +45,7 @@ var dragcounter = 0;
 var draggingNew = 0;
 var makingNewTask;
 
+var myDropboxData;
 
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
@@ -52,10 +54,13 @@ $(document).ready(function() {
 	initTaskEditor();
 	initTaskboardUI();
 	
-	loadCookieFile();
 	
 	setInterval(checkTime,60000)
-});
+
+	initRemoteStorage();
+
+
+});  //End of Doc.Ready
 
 $(window).on('resize', function(){
 	width = $(this).width();
@@ -86,9 +91,15 @@ function initDialogs() {
 	initDeleteAllDialog()
 	initDeleteTaskDialog()
 	initUncompleteDialog()
+	initNewFileDialog()
 	initNewRowDialog()
 	initRenameRowDialog()
+	initDeleteFileDialog()
+	initRenameFileDialog()
 
+	initPrivacyDialog()
+	initAboutDialog()
+	
 	var opt = { autoOpen: false	};
 	$(".my-dialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();	
@@ -103,8 +114,61 @@ function initSaveDialog() {
 	document.getElementById("myBody").append(saveDialog)
 }
 
+function initPrivacyDialog() {
+	var privacyDialog = document.createElement("div")
+	privacyDialog.id="privacyDialog"
+	privacyDialog.className = "my-dialog"
+	privacyDialog.innerHTML = "This application is <a href='http://unhosted.org/' target='_blank' style='font-weight:bold;'>Unhosted</a>, meaning it doesn't store your data. While you use Task Board, all of your data remains in your control.<br/><br/>"
+	privacyDialog.innerHTML += "By default, your data is only stored locally on the device you're using. We use cookies to remember your board, which are stored by your web browser. If you choose to download your data to a file, you can choose where it goes.<br/><br/>"
+	privacyDialog.innerHTML += "If you choose to connect to <a href='https://remotestorage.io/' target='_blank' style='font-weight:bold;'>Remote Storage</a>, you will need to create a Remote Storage account through a provider like <a href='https://5apps.com/users/sign_up?site=deploy' target='_blank' style='font-weight:bold;'>5apps</a>. That way, your data remains yours."
+	document.getElementById("myBody").append(privacyDialog)
+}
+
+function initAboutDialog() {
+	var aboutDialog = document.createElement("div")
+	aboutDialog.id="aboutDialog"
+	aboutDialog.className = "my-dialog"
+	aboutDialog.innerHTML = "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks."
+	document.getElementById("myBody").append(aboutDialog)
+}
+
+function showPrivacyDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:400,
+        title: 'Privacy Policy',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#privacyDialog").dialog(opt).dialog("close");
+			},
+		}
+    };
+	$("#privacyDialog").dialog(opt).dialog("open");
+}
+
+function showAboutDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:400,
+        title: 'About Task Board',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#aboutDialog").dialog(opt).dialog("close");
+			},
+		}
+    };
+	$("#aboutDialog").dialog(opt).dialog("open");
+}
 
 function initDialogKeys() {
+	
+	initFileDialogKeys();
 	
 	$("#newRowName").keypress( function (e) {
 		if(e.which == 13) {
@@ -137,6 +201,7 @@ function initDialogKeys() {
 			return false;
 		}
 	});	
+
 
 	$(document).on('keydown keyup',  function (e) {
 		if ($('#completeDialog').is(':visible')) {
@@ -333,10 +398,66 @@ function showSaveDialog(fileToOpen) {
 	$("#saveDialog").dialog(opt).dialog("open");
 }
 
+function showBeforeConnectDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 305,
+        height:300,
+        title: 'Save File?',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			Save: function() {
+				saveFile();
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				loadRemoteStorage();
+			},
+			Upload: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				saveFileCookie();
+				loadRemoteStorage();
+			},
+			Neither: function () {
+				$("#saveDialog").dialog(opt).dialog("close");
+				connectToRemote()
+				isSaved = 1;
+				createCookie("isSaved",1)
+				loadRemoteStorage();
+			}			
+		}
+    };
+	$("#saveDialog").dialog(opt).dialog("open");
+}
+
+function connectToRemote() {
+	createCookie("remoteConnected",1)
+	$("#filename-selector").show();
+	$(".fileinput-filename").hide();
+	$("#connected-to-remote").show();
+	$("#unsaved-changes").hide();
+	$("#filename-selector").on("change",function() {
+		currentFileName = $("#filename-selector").val();
+		if (currentFileName == "") {
+			var output = document.getElementById("output")
+			lines = ""
+			output.innerHTML = ""
+			eraseCookie("fileName")
+		}
+		else {
+			remoteStorage.tasks.load();
+			createCookie("fileName",currentFileName)
+		}
+	});
+}
+
+
 function changeToUnsaved() {
 	isSaved = 0;
-	$("#unsaved-changes").show();
+	if (!remoteStorage.connected) $("#unsaved-changes").show();
 	saveFileCookie();
+	createCookie("isSaved",0);
 }
 
 // fngroup:  TASK OPERATION FUNCTIONS
@@ -723,6 +844,10 @@ function dropFinish(ev) {
 
 // fngroup: CREATION FUNCTIONS
 
+
+
+
+
 function initNewRowDialog() {
 	var newRowDialog = document.createElement("div")
 	newRowDialog.id="newRowDialog"
@@ -797,32 +922,8 @@ function newRowMenu() {
 	$("#newRowName").focus();
 }
 
-function newFile() {
-	if (parseInt(isSaved)==0) {
-		showSaveDialog();
-	}
-	else {
-		var line = [ "TaskNum" , "Task" ,"Start-Month","Start-Day","Start-Year","Due-Month","Due-Day","Due-Year","Color","Row","Complete?","Interval","Start-Time","Due-Time"];
-		lines = [line];
-		//newTask("","Misc Task");
-		//newTask("Group","Grouped Task");
-		drawOutput(lines);
-		var myMonth = today.getMonth()+1;
-		if (myMonth.toString().length==1) myMonth = "0"+myMonth
-		var myYear = today.getYear()+1900;
-		currentFileName = "newTaskFile" + "_" + myMonth + today.getDate() + myYear + ".csv";
-		$(".fileinput-filename").html(currentFileName);
-		createCookie("fileName",currentFileName);
-		$("span.fileinput-new").hide();
-		$(".savefile-button").show();
-		$("#chosen-file-label").show()
-		$(".instructions").hide();
-		$("#right-buttons").show();
-		isSaved = 2;
-		$("#unsaved-changes").show();
-		saveFileCookie();
-	}
-}
+
+
 
 function newTaskCopy() {
 	var newTask = lines[currentTask].slice();
@@ -872,7 +973,6 @@ function newTask(rowName,taskName,openMe) {
 	newTask[col_row] = rowName;
 	lines.push(newTask);
 	drawOutput(lines);
-	saveFileCookie();
 	if (openMe==1) {
 		makingNewTask = 1;
 		currentTask = lines.length-1
@@ -881,5 +981,7 @@ function newTask(rowName,taskName,openMe) {
 		$("#taskBlock"+myTaskID).click();
 		$("#namepicker").focus();
 	}
+	else saveFileCookie();
 }
+
 
