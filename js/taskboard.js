@@ -128,7 +128,22 @@ function initAboutDialog() {
 	var aboutDialog = document.createElement("div")
 	aboutDialog.id="aboutDialog"
 	aboutDialog.className = "my-dialog"
-	aboutDialog.innerHTML = "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks."
+	aboutDialog.innerHTML += "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks.<br/><br/>"
+	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>The board starts with one big region, but you can create as many as you want, and they will appear next to the main region like this:</div>"
+	aboutDialog.innerHTML += "<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'><div style='float:left;width:60px;'>\
+				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
+				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
+				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div></div>\
+				<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:60px;height:60px;'></div></div></div>"
+	aboutDialog.innerHTML += "Tasks inside a region are sorted by their due date. Then the regions themselves are sorted by their next due task.<br/><br/>"
+	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>You can also create \"counter\" tasks that tally the days since it began. These tasks are shown as bars above the normal tasks.</div>"
+	aboutDialog.innerHTML += "<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'>\
+					<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:80px;height:60px;'>\
+					<div style='background-color:black;float:left;border:1px solid black;width:68px;height:10px;margin:2px;'></div>\
+					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+					</div></div>"
 	document.getElementById("myBody").append(aboutDialog)
 }
 

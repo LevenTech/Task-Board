@@ -38,6 +38,10 @@ function generateToolbar() {
 	document.getElementById("myBody").append(myToolbar)
 }
 
+function getRemoteStorageIcon() {
+	return "<img class='rs-cube rs-action' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzIiIHdpZHRoPSIzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KIDxkZWZzPgogIDxyYWRpYWxHcmFkaWVudCBpZD0iYSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGN5PSI1NzEuNDIiIGN4PSIxMDQ2LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjE0NDMzIDAgMCAuMTY2NjcgMTIwMS41IDg3Ny4xMSkiIHI9Ijk2Ij4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmNGEwNCIgc3RvcC1vcGFjaXR5PSIuNzYxNTQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmY0YTA0IiBvZmZzZXQ9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogPC9kZWZzPgogPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzMzYuNiAtOTU2LjM1KSI+CiAgPHBhdGggc3R5bGU9ImNvbG9yOiMwMDAwMDAiIGQ9Im0xMzUyLjYgOTU2LjM1IDAuMjg4NiAxNS4xMzYgMTMuNTY3LTcuMTM1Mi0xMy44NTUtOC4wMDExemwtMTMuODU1IDguMDAxMSAxMy41NjcgNy4xMzUyIDAuMjg4Ny0xNS4xMzZ6bS0xMy44NTUgOC4wMDExdjE1Ljk5OGwxMi45NTgtNy44MTYyLTEyLjk1OC04LjE4MTV6bTAgMTUuOTk4IDEzLjg1NSA4LjAwMTEtMC42MDg5LTE1LjMxNy0xMy4yNDYgNy4zMTU2em0xMy44NTUgOC4wMDExIDEzLjg1NS04LjAwMTEtMTMuMjUxLTcuMzE1Ni0wLjYwNDQgMTUuMzE3em0xMy44NTUtOC4wMDExdi0xNS45OThsLTEyLjk2MiA4LjE4MTUgMTIuOTYyIDcuODE2MnoiIGZpbGw9InVybCgjYSkiLz4KIDwvZz4KPC9zdmc+Cg=='>"
+}
+
 function initLeftButtons() {
 	var leftButtons = document.createElement("div")
 	leftButtons.id = "left-buttons"
@@ -46,12 +50,10 @@ function initLeftButtons() {
 				<div id='open-local-file' class='fileinput fileinput-new' data-provides='fileinput' style='margin-left:0px;margin-bottom:0px;'>\
 					<div id='chosen-file-label' style='margin-top:0px;margin-left:10px;'>\
 						<div id='connected-to-remote' style='display:none;margin-bottom:10px'>\
-							<img class='rs-cube rs-action' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzIiIHdpZHRoPSIzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KIDxkZWZzPgogIDxyYWRpYWxHcmFkaWVudCBpZD0iYSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGN5PSI1NzEuNDIiIGN4PSIxMDQ2LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjE0NDMzIDAgMCAuMTY2NjcgMTIwMS41IDg3Ny4xMSkiIHI9Ijk2Ij4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmNGEwNCIgc3RvcC1vcGFjaXR5PSIuNzYxNTQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmY0YTA0IiBvZmZzZXQ9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogPC9kZWZzPgogPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzMzYuNiAtOTU2LjM1KSI+CiAgPHBhdGggc3R5bGU9ImNvbG9yOiMwMDAwMDAiIGQ9Im0xMzUyLjYgOTU2LjM1IDAuMjg4NiAxNS4xMzYgMTMuNTY3LTcuMTM1Mi0xMy44NTUtOC4wMDExemwtMTMuODU1IDguMDAxMSAxMy41NjcgNy4xMzUyIDAuMjg4Ny0xNS4xMzZ6bS0xMy44NTUgOC4wMDExdjE1Ljk5OGwxMi45NTgtNy44MTYyLTEyLjk1OC04LjE4MTV6bTAgMTUuOTk4IDEzLjg1NSA4LjAwMTEtMC42MDg5LTE1LjMxNy0xMy4yNDYgNy4zMTU2em0xMy44NTUgOC4wMDExIDEzLjg1NS04LjAwMTEtMTMuMjUxLTcuMzE1Ni0wLjYwNDQgMTUuMzE3em0xMy44NTUtOC4wMDExdi0xNS45OThsLTEyLjk2MiA4LjE4MTUgMTIuOTYyIDcuODE2MnoiIGZpbGw9InVybCgjYSkiLz4KIDwvZz4KPC9zdmc+Cg=='>\
-							Connected to Remote Storage\
+							"+getRemoteStorageIcon()+"Connected to Remote Storage\
 						</div>\
 						<div id='not-connected-to-remote' style='display:none;margin-bottom:10px'>\
-							<img class='rs-cube rs-action' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzIiIHdpZHRoPSIzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KIDxkZWZzPgogIDxyYWRpYWxHcmFkaWVudCBpZD0iYSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGN5PSI1NzEuNDIiIGN4PSIxMDQ2LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjE0NDMzIDAgMCAuMTY2NjcgMTIwMS41IDg3Ny4xMSkiIHI9Ijk2Ij4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmNGEwNCIgc3RvcC1vcGFjaXR5PSIuNzYxNTQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmY0YTA0IiBvZmZzZXQ9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogPC9kZWZzPgogPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzMzYuNiAtOTU2LjM1KSI+CiAgPHBhdGggc3R5bGU9ImNvbG9yOiMwMDAwMDAiIGQ9Im0xMzUyLjYgOTU2LjM1IDAuMjg4NiAxNS4xMzYgMTMuNTY3LTcuMTM1Mi0xMy44NTUtOC4wMDExemwtMTMuODU1IDguMDAxMSAxMy41NjcgNy4xMzUyIDAuMjg4Ny0xNS4xMzZ6bS0xMy44NTUgOC4wMDExdjE1Ljk5OGwxMi45NTgtNy44MTYyLTEyLjk1OC04LjE4MTV6bTAgMTUuOTk4IDEzLjg1NSA4LjAwMTEtMC42MDg5LTE1LjMxNy0xMy4yNDYgNy4zMTU2em0xMy44NTUgOC4wMDExIDEzLjg1NS04LjAwMTEtMTMuMjUxLTcuMzE1Ni0wLjYwNDQgMTUuMzE3em0xMy44NTUtOC4wMDExdi0xNS45OThsLTEyLjk2MiA4LjE4MTUgMTIuOTYyIDcuODE2MnoiIGZpbGw9InVybCgjYSkiLz4KIDwvZz4KPC9zdmc+Cg=='>\
-							Not Connected to Remote Storage\
+							"+getRemoteStorageIcon()+"Not Connected to Remote Storage\
 						</div>\
 						<strong>Current File:</strong>\
 						<span class='fileinput-filename'></span>\
@@ -64,53 +66,42 @@ function initLeftButtons() {
 						<div class='btn-group' role='group'>\
 							<button id='newfile-button' class='btn btn-default file-button newfile-button' onclick='newFile()'>\
 								<span class='tooltiptext'>New</span>\
-								<i class='fa fa-clone' aria-hidden='true' style='width:10px;'></i><span id='newfile-button-label'></span>\
+								<i class='fa fa-clone' aria-hidden='true' style=''></i><span id='newfile-button-label'></span>\
 							</button>\
 							<button id='openfile-button' class='btn btn-default btn-file file-button' style='overflow:visible;'>\
 								<span id='openfile-button-label'>\
 									<span id='openfile-button-name'>\
 										<span class='tooltiptext'>Open</span>\
-										<i class='fa fa-folder-o' aria-hidden='true' style='width:10px;'></i>\
+										<i class='fa fa-folder-o' aria-hidden='true' style=''></i>\
 									</span>\
 									<span id='importfile-button-name' style='display:none;'>\
 										<span class='tooltiptext'>Upload</span>\
-										<i class='fa fa-cloud-upload' aria-hidden='true' style='width:10px;'></i>\
+										<i class='fa fa-cloud-upload' aria-hidden='true' style=''></i>\
 									</span>\
 								</span>\
 								<input type='file' id='csvFileInput' style='cursor:pointer;' onchange='handleFiles(this.files)' onclick='this.value=null;' accept='.csv'/>\
 							</button>\
 							<button id='renamefile-button' class='btn btn-default file-button remote-file-button' onclick='renameFile()' style='display:none;z-index:2;'>\
 								<span class='tooltiptext'>Rename</span>\
-								<i class='fa fa-edit' aria-hidden='true' style='width:10px;'></i><span id='renamefile-button-label'></span>\
+								<i class='fa fa-edit' aria-hidden='true' style=''></i><span id='renamefile-button-label'></span>\
 							</button>\
 							<button id='deletefile-button' class='btn btn-default file-button remote-file-button' onclick='deleteFile()' style='display:none;z-index:2;'>\
 								<span class='tooltiptext'>Delete</span>\
-								<i class='fa fa-trash' aria-hidden='true' style='width:10px;'></i><span id='deletefile-button-label'></span>\
+								<i class='fa fa-trash' aria-hidden='true' style=''></i><span id='deletefile-button-label'></span>\
 							</button>\
 							<button id='exportfile-button' class='btn btn-default file-button' onclick='saveFile()' style='z-index:2;'>\
 								<span class='tooltiptext'>Download</span>\
-								<i class='fa fa-download' aria-hidden='true' style='width:10px;'></i><span id='renamefile-button-label'></span>\
+								<i class='fa fa-download' aria-hidden='true' style=''></i><span id='renamefile-button-label'></span>\
 							</button>\
 						</div>\
 					</div>\
 				</div>\
 				<span id='result'></span>\
 			</div>\
-			<div style='float:left;margin-top:30px;margin-left:15px;user-select:none;display:none;'>\
-				<button class='btn btn-default toolbar-button savefile-button' id='savefile-button' onclick='saveFile()' style='margin:0px;padding:8px;display:none;' >\
-					<div style='float:left;'><i class='fa fa-floppy-o' aria-hidden='true' style='width:40px;font-size:300%;margin-right:10px;'></i></div>\
-					<div style='float:left;'>Save<br/>to File</div>\
-				</button>\
-			</div>\
-			<div style='text-align:left;margin-left:10px;display:none;'>\
-				<div class='instructions'>\
-					To connect to remote storage, use the widget \
-					<img class='rs-cube rs-action' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMzIiIHdpZHRoPSIzMiIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KIDxkZWZzPgogIDxyYWRpYWxHcmFkaWVudCBpZD0iYSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGN5PSI1NzEuNDIiIGN4PSIxMDQ2LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoLjE0NDMzIDAgMCAuMTY2NjcgMTIwMS41IDg3Ny4xMSkiIHI9Ijk2Ij4KICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmNGEwNCIgc3RvcC1vcGFjaXR5PSIuNzYxNTQiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmY0YTA0IiBvZmZzZXQ9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogPC9kZWZzPgogPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzMzYuNiAtOTU2LjM1KSI+CiAgPHBhdGggc3R5bGU9ImNvbG9yOiMwMDAwMDAiIGQ9Im0xMzUyLjYgOTU2LjM1IDAuMjg4NiAxNS4xMzYgMTMuNTY3LTcuMTM1Mi0xMy44NTUtOC4wMDExemwtMTMuODU1IDguMDAxMSAxMy41NjcgNy4xMzUyIDAuMjg4Ny0xNS4xMzZ6bS0xMy44NTUgOC4wMDExdjE1Ljk5OGwxMi45NTgtNy44MTYyLTEyLjk1OC04LjE4MTV6bTAgMTUuOTk4IDEzLjg1NSA4LjAwMTEtMC42MDg5LTE1LjMxNy0xMy4yNDYgNy4zMTU2em0xMy44NTUgOC4wMDExIDEzLjg1NS04LjAwMTEtMTMuMjUxLTcuMzE1Ni0wLjYwNDQgMTUuMzE3em0xMy44NTUtOC4wMDExdi0xNS45OThsLTEyLjk2MiA4LjE4MTUgMTIuOTYyIDcuODE2MnoiIGZpbGw9InVybCgjYSkiLz4KIDwvZz4KPC9zdmc+Cg=='>\
-					<br/>Otherwise, your data will only be available on this device\
-				</div>\
-				<div class='instructions'>\
-					<br/>If this is your first time here, start a \
-				</div>\
+			<div class='instructions' style='text-align:left;margin-left:10px;display:none;'>\
+				To connect to remote storage, use the widget "+getRemoteStorageIcon+"\
+				<br/>Otherwise, your data will only be available on this device\
+				<br/>If this is your first time here, start a \
 			</div>\
 			<div id='tool-select-control' style='font-size:24px;float:left;display:none;padding-left:1em;padding-right:1em;'>\
 				<b>Control:</b><br/>\
@@ -268,10 +259,6 @@ function initToolSelector () {
 	
 	document.getElementById("taskboard-toolbar").style.display="block"
 	document.getElementById("left-buttons").style.width = "100%";
-	/*document.getElementById("left-buttons").style.flexBasis = "1em";
-	document.getElementById("left-buttons").style.flexGrow = "0";
-	document.getElementById("left-buttons").style.flexShrink = "0";
-	document.getElementById("middle-buttons").style.flexBasis = "8em";*/
 	document.getElementById("new-task-drag").style.marginTop = "0.4em";
 	document.getElementById("new-task-drag").style.paddingTop = "1em";
 	document.getElementById("new-task-drag").innerHTML = "New";
@@ -291,15 +278,10 @@ function initToolSelector () {
 	$("#left-buttons").append($("#"+alreadySelected))
 	$("#"+alreadySelected).show();
 	document.getElementById("open-local-file").style.fontSize = "22px";
-	/*document.getElementById(alreadySelected).style.fontSize = "25px";
-	document.getElementById("newfile-button").style.fontSize = "20px"
-	document.getElementById("newfile-button-label").innerHTML = "New"
-	document.getElementById("openfile-button").style.fontSize = "20px"
-	document.getElementById("openfile-button-label").innerHTML = "Open"*/
+
 	
 	$("#taskboard-toolbar").addClass("padded-toolbar");
 	$("#taskboard-toolbar").addClass("moving-toolbar");
-	//$("#output").addClass("padded-output");
 	$("#app-header").addClass("padded-app-header");
 }
 
