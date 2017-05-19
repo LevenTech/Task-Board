@@ -227,7 +227,7 @@ function doNewFile() {
 	createCookie("fileName",currentFileName);
 	$("span.fileinput-new").hide();
 	$(".savefile-button").show();
-	//$("#chosen-file-label").show()
+	$("#exportfile-button").attr("disabled",false);
 	$(".instructions").hide();
 	$("#middle-buttons").show();
 	$("#right-buttons").show();
@@ -513,9 +513,12 @@ function saveFile() {
 	var encodedUri = encodeURI(csvContent);
 	var url = "data:text/csv,"+encodedUri;
 
+	var downloadFileName = currentFileName
+	if (downloadFileName.indexOf(".") == -1) downloadFileName += ".csv"
+	
 	var link = document.createElement("a");
 	link.setAttribute("href", url);
-	link.setAttribute("download", currentFileName);
+	link.setAttribute("download", downloadFileName);
 	document.body.appendChild(link); // Required for FF
 	link.click();
 	
