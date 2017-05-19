@@ -488,7 +488,7 @@ function clickFinish() {
 }
 
 function completeTask(wasDropped) {
-
+	if (!lines[currentTask]) return;
 	$("#deleteDialog").dialog("close");
 
 	lines[currentTask][10]="Yes";
