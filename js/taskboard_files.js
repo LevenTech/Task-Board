@@ -239,7 +239,7 @@ function doNewFile() {
 }
 
 function renameFile() {
-	$("#renamedFileName").val("");
+	$("#renamedFileName").val(currentFileName);
 	var opt = {
 		autoOpen: false,
 		modal: true,
@@ -277,6 +277,7 @@ function insertOption() {
 }
 
 function deleteFile() {
+	document.getElementById("deleteFileName").innerHTML = currentFileName
 	var opt = {
 		autoOpen: false,
 		modal: true,
@@ -318,7 +319,7 @@ function initDeleteFileDialog() {
 	var deleteFileDialog = document.createElement("div")
 	deleteFileDialog.id="deleteFileDialog"
 	deleteFileDialog.className = "my-dialog"
-	deleteFileDialog.innerHTML = "<div style='text-align:center;'>Are you sure you want to delete this file?</div>"
+	deleteFileDialog.innerHTML = "<div style='text-align:center;'>Are you sure you want to delete the file \"<span id='deleteFileName'></span>\"?</div>"
 	document.getElementById("myBody").append(deleteFileDialog)
 }
 
