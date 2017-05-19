@@ -54,13 +54,15 @@ function initLeftButtons() {
 							<span id='not-connected-to-remote'>Not </span>Connected to Remote Storage\
 						</div>\
 						<strong>Current File:</strong>\
-						<span class='fileinput-filename'></span>\
-						<span id='filename-display' class='fileinput-new' style='width:10em;'>No file chosen</span>\
-						<span id='unsaved-changes' style='display:none;'>\
-							<span class='tooltiptext'>Unsaved Changes</span>\
-							<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>\
-						</span>\
-						<select id='filename-selector' class='btn btn-default file-button' style='display:none;width:10em;'></select>\
+						<div style='display:inline-block;width:10em;'>\
+							<span class='fileinput-filename'></span>\
+							<span id='filename-display' class='fileinput-new'>No File</span>\
+							<span id='unsaved-changes' style='display:none;'>\
+								<span class='tooltiptext'>Unsaved Changes</span>\
+								<i class='fa fa-exclamation-triangle' aria-hidden='true'></i>\
+							</span>\
+							<select id='filename-selector' class='btn btn-default file-button' style='display:none;width:10em;'></select>\
+						</div>\
 						<div class='btn-group' role='group'>\
 							<button id='newfile-button' class='btn btn-default file-button newfile-button' onclick='newFile()'>\
 								<span class='tooltiptext'>New</span>\

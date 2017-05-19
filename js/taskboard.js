@@ -129,7 +129,7 @@ function initAboutDialog() {
 	aboutDialog.id="aboutDialog"
 	aboutDialog.className = "my-dialog"
 	aboutDialog.innerHTML += "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks.<br/><br/>"
-	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>The board starts with one big region, but you can create as many as you want, and they will appear next to the main region like this:</div>"
+	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>The board starts with one big region, but you can create as many as you want, and they will appear next to the main region.</div>"
 	aboutDialog.innerHTML += "<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'><div style='float:left;width:60px;'>\
 				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
 				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
