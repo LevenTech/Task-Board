@@ -73,10 +73,8 @@ function initRemoteStorage() {
 					else options = "<option value=''></option>"+options
 					var fileNameSelector = document.getElementById("filename-selector")
 					fileNameSelector.innerHTML = options
-					$("#filename-display").hide();
 					return options
 				});
-				//$("#chosen-file-label").show()
 				$(".instructions").hide();		
 			},	
 			load: function(tasks) {
@@ -106,6 +104,7 @@ function initRemoteStorage() {
 		else {
 			createCookie("remoteConnected",1)
 			$("#filename-selector").show();
+			$("#filename-display").hide();
 			$(".fileinput-filename").hide();
 			$("#connected-to-remote").show();
 			$("#not-connected-to-remote").hide();

@@ -49,11 +49,9 @@ function initLeftButtons() {
 			<div class='toolbar-selection' id='new-open-file' style='float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;'>\
 				<div id='open-local-file' class='fileinput fileinput-new' data-provides='fileinput' style='margin-left:0px;margin-bottom:0px;'>\
 					<div id='chosen-file-label' style='margin-top:0px;margin-left:10px;'>\
-						<div id='connected-to-remote' style='display:none;margin-bottom:10px'>\
-							"+getRemoteStorageIcon()+"Connected to Remote Storage\
-						</div>\
-						<div id='not-connected-to-remote' style='display:none;margin-bottom:10px'>\
-							"+getRemoteStorageIcon()+"Not Connected to Remote Storage\
+						<div style='margin-bottom:10px'>\
+							"+getRemoteStorageIcon()+"<span style='width:10px;'></span>\
+							<span id='not-connected-to-remote'>Not </span>Connected to Remote Storage\
 						</div>\
 						<strong>Current File:</strong>\
 						<span class='fileinput-filename'></span>\
@@ -97,11 +95,6 @@ function initLeftButtons() {
 					</div>\
 				</div>\
 				<span id='result'></span>\
-			</div>\
-			<div class='instructions' style='text-align:left;margin-left:10px;display:none;'>\
-				To connect to remote storage, use the widget "+getRemoteStorageIcon+"\
-				<br/>Otherwise, your data will only be available on this device\
-				<br/>If this is your first time here, start a \
 			</div>\
 			<div id='tool-select-control' style='font-size:24px;float:left;display:none;padding-left:1em;padding-right:1em;'>\
 				<b>Control:</b><br/>\
