@@ -73,10 +73,8 @@ function initRemoteStorage() {
 					else options = "<option value=''></option>"+options
 					var fileNameSelector = document.getElementById("filename-selector")
 					fileNameSelector.innerHTML = options
-					$("#filename-display").hide();
 					return options
 				});
-				//$("#chosen-file-label").show()
 				$(".instructions").hide();		
 			},	
 			load: function(tasks) {
@@ -106,6 +104,7 @@ function initRemoteStorage() {
 		else {
 			createCookie("remoteConnected",1)
 			$("#filename-selector").show();
+			$("#filename-display").hide();
 			$(".fileinput-filename").hide();
 			$("#connected-to-remote").show();
 			$("#not-connected-to-remote").hide();
@@ -123,13 +122,12 @@ function initRemoteStorage() {
 		createCookie("remoteConnected",0)
 		eraseCookie("myCSVFile")
 		lines = ""
+		currentFileName = ""
 		output.innerHTML = ""
-		//$("#chosen-file-label").hide()
 		$(".instructions").show();		
 		$("#middle-buttons").hide();
 		$("#right-buttons").hide();
 		$("#filename-selector").hide();
-		$(".fileinput-filename").show();
 		$("#filename-display").show();
 		$("#connected-to-remote").hide();
 		$("#not-connected-to-remote").show();
@@ -304,7 +302,7 @@ function initNewFileDialog() {
 	var newFileDialog = document.createElement("div")
 	newFileDialog.id="newFileDialog"
 	newFileDialog.className = "my-dialog"
-	newFileDialog.innerHTML = "Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input>"
+	newFileDialog.innerHTML = "<div style='text-align:center;'>Name the new file:<input id='newFileName' width='50px' style='margin-top:10px;'></input></div>"
 	document.getElementById("myBody").append(newFileDialog)
 }
 
@@ -312,7 +310,7 @@ function initRenameFileDialog() {
 	var renameFileDialog = document.createElement("div")
 	renameFileDialog.id="renameFileDialog"
 	renameFileDialog.className = "my-dialog"
-	renameFileDialog.innerHTML = "Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input>"
+	renameFileDialog.innerHTML = "<div style='text-align:center;'>Choose a new name:<input id='renamedFileName' width='50px' style='margin-top:10px;'></input></div>"
 	document.getElementById("myBody").append(renameFileDialog)
 }
 
@@ -320,7 +318,7 @@ function initDeleteFileDialog() {
 	var deleteFileDialog = document.createElement("div")
 	deleteFileDialog.id="deleteFileDialog"
 	deleteFileDialog.className = "my-dialog"
-	deleteFileDialog.innerHTML = "Are you sure you want to delete this file?"
+	deleteFileDialog.innerHTML = "<div style='text-align:center;'>Are you sure you want to delete this file?</div>"
 	document.getElementById("myBody").append(deleteFileDialog)
 }
 
