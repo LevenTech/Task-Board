@@ -47,6 +47,11 @@ var makingNewTask;
 
 var myDropboxData;
 
+  var myURL = window.location.href
+  if (myURL.indexOf("taskboard.leventech.net")>0) {
+	document.title = "Test Task Board"
+  }
+
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
@@ -365,15 +370,15 @@ function initRowContextMenu() {
 				}
 			},
 			items: {
-                "New Task": {
-					name: "New Task", icon: "fa-clone",
+                "New Task Here": {
+					name: "New Task Here", icon: "fa-clone",
 					callback: function(key, options) {	newTask(options.$trigger.attr("data-rowname"),"",1);	},
 			        visible: function(key, opt){        
 						return true;
 					}
 				},
-                "Rename Row": {
-					name: "Rename Row", icon: "fa-edit",
+                "Rename Group": {
+					name: "Rename Group", icon: "fa-edit",
 					callback: function(key, options) {	renameRow(options.$trigger.attr("data-rowname"),"",1);	},
 			        visible: function(key, opt){     
 						if (opt.$trigger) {

@@ -100,7 +100,7 @@ function initLeftButtons() {
 			</div>\
 			<div id='tool-select-control' style='font-size:24px;float:left;display:none;padding-left:1em;padding-right:1em;'>\
 				<b>Control:</b><br/>\
-				<select id='tool-selector' class='dropdown tool-selector' style='height:3em;'>\
+				<select id='tool-selector' class='btn btn-default dropdown tool-selector' style='font-size:24px;height:3em;'>\
 					<option value='new-open-file'>New File / Open File</option>\
 					<option value='draggables'>New Task / Finish Task</option>\
 					<option value='size-shape'>Task Shape / Task Size</option>\
