@@ -162,8 +162,8 @@ function initRemoteStorage() {
 		}
 		else {
 			remoteStorage.tasks.load();
-			createCookie("fileName",currentFileName)
 		}
+		createCookie("fileName",currentFileName)
 	});	
 	
 
