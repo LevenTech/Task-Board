@@ -47,6 +47,11 @@ var makingNewTask;
 
 var myDropboxData;
 
+  var myURL = window.location.href
+  if (myURL.indexOf("taskboard.leventech.net")>0) {
+	document.title = "Test Task Board"
+  }
+
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
