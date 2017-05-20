@@ -1,4 +1,8 @@
 
+#remotestorage-widget {
+	top:-5px !important;
+	right:0px !important;
+}
 
 .file-button {
 	position:relative;
@@ -24,7 +28,7 @@
     z-index: 1;
 
     width: 120px;
-    bottom: 100%;
+    top: 100%;
     left: 50%; 
     margin-left: -60px; 	
 }
@@ -42,7 +46,7 @@
     z-index: 1;
 
     width: 80px;
-    bottom: 100%;
+    top: 100%;
     left: 50%; 
     margin-left: -40px; 	
 }
@@ -50,6 +54,15 @@
 .file-button:hover .tooltiptext {
     visibility: visible;
 }
+
+.open-local-file:hover .openfile-button {
+	overflow:hidden;
+}
+
+.btn-group:hover .openfile-button {
+	overflow:visible;
+}
+
 
 #unsaved-changes:hover .tooltiptext {
     visibility: visible;

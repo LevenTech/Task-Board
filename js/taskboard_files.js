@@ -94,6 +94,8 @@ function initRemoteStorage() {
 
 	remoteStorage.access.claim('tasks', 'rw');
 	remoteStorage.displayWidget();
+	$("#remotestorage-widget").appendTo("#taskboard-remote-storage")
+	
 
 	remoteStorage.on("connected",function(privateClient, publicClient){
 		isSaved = readCookie("isSaved")
