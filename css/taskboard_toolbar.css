@@ -55,14 +55,6 @@
     visibility: visible;
 }
 
-.open-local-file:hover .openfile-button {
-	overflow:hidden;
-}
-
-.btn-group:hover .openfile-button {
-	overflow:visible;
-}
-
 
 #unsaved-changes:hover .tooltiptext {
     visibility: visible;
