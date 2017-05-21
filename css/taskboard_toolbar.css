@@ -63,6 +63,7 @@
 #taskboard-toolbar {
 	background:darkgrey;
 	width:100%;
+	white-space:nowrap;
 }
 .stuck-toolbar {
 	position:fixed;
@@ -70,7 +71,7 @@
 }
 .moving-toolbar {
 	position:relative;
-	margin-top:3em;
+	margin-top:3.5em;
 }
 
 .toolbar-button {
