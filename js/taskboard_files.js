@@ -214,6 +214,9 @@ function newFile() {
 				},
 				Cancel: function () {
 					$("#newFileDialog").dialog("close");
+				},
+				close: function(event,ui) {
+					$("#filename-selector").focus();
 				}
 			}
 		};
@@ -259,6 +262,9 @@ function renameFile() {
 			Cancel: function () {
 				$("#renameFileDialog").dialog("close");
 			}
+		},
+		close: function(event,ui) {
+			$("#filename-selector").focus();
 		}
 	};
 	$("#renameFileDialog").dialog(opt).dialog("open");
@@ -267,7 +273,7 @@ function renameFile() {
 
 function doRenameFile() {
 	$("#renameFileDialog").dialog("close");
-
+	
 	remoteStorage.taskboards.delete()
 
 	currentFileName = $("#renamedFileName").val();
@@ -300,6 +306,9 @@ function deleteFile() {
 			No: function () {
 				$("#deleteFileDialog").dialog("close");
 			}
+		},
+		close: function(event,ui) {
+			$("#filename-selector").focus();
 		}
 	};
 	$("#deleteFileDialog").dialog(opt).dialog("open");

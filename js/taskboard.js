@@ -84,7 +84,7 @@ function initTaskboardUI() {
 
 	if (isMobile()) { initRightClickMode() }
 	
-	$.ui.dialog.prototype._focusTabbable = function(){};
+	//$.ui.dialog.prototype._focusTabbable = function(){};
 	
 	$(document).on('mousedown', '.task-block', function (e){ myClickEvent = e; return true; });
 	$(document).on('mousedown', '.task-row', function (e){ myClickEvent = e; return true; });
