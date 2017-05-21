@@ -56,11 +56,11 @@ $(document).ready(function() {
 
 	initPageLinks();
 	initToolbar();
+	initTaskEditor();
 	
 	initTaskboardUI();
 	initRemoteStorage();
 
-	initTaskEditor();
 
 	setInterval(checkTime,60000)
 
