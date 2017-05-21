@@ -102,7 +102,7 @@ function initLeftButtons() {
 								<span class='tooltiptext'>New</span>\
 								<i class='fa fa-clone' aria-hidden='true' style=''></i><span id='newfile-button-label'></span>\
 							</button>\
-							<button id='openfile-button' class='openfile-button btn btn-default file-button' onclick='document.getElementById(\"csvFileInput\").click();' style=''>\
+							<button id='openfile-button' class='openfile-button btn btn-default file-button' onclick='document.getElementById(\"csvFileInput\").click(); $(\"#openfile-button\").blur();' style=''>\
 								<span id='openfile-button-label'>\
 									<span id='openfile-button-name'>\
 										<span class='tooltiptext'>Open</span>\

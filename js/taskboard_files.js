@@ -217,7 +217,7 @@ function newFile() {
 				}
 			},
 			close: function(event,ui) {
-				$("#filename-selector").focus();
+				$("#newfile-button").blur();
 			}
 		};
 		$("#newFileDialog").dialog(opt).dialog("open");
@@ -235,8 +235,8 @@ function doNewFile() {
 	$(".fileinput-filename").html(currentFileName);
 	createCookie("fileName",currentFileName);
 	$("span.fileinput-new").hide();
-	$(".savefile-button").show();
-	$("#exportfile-button").attr("disabled",false);
+	//$(".savefile-button").show();
+	$(".file-button").attr("disabled",false);
 	$(".instructions").hide();
 	$(".other-buttons").show();
 	isSaved = 2;
@@ -264,7 +264,7 @@ function renameFile() {
 			}
 		},
 		close: function(event,ui) {
-			$("#filename-selector").focus();
+			$("#renamefile-button").blur();
 		}
 	};
 	$("#renameFileDialog").dialog(opt).dialog("open");
@@ -308,7 +308,7 @@ function deleteFile() {
 			}
 		},
 		close: function(event,ui) {
-			$("#filename-selector").focus();
+			$("#filename-selector").blur();
 		}
 	};
 	$("#deleteFileDialog").dialog(opt).dialog("open");
