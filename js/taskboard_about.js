@@ -12,14 +12,14 @@ function getPageLinks() {
 	pageLinks.id = "page-links"
 	pageLinks.style = ""
 	pageLinks.innerHTML = "\
-		<a class='page-link' href='javascript:void(0)' onclick='showAboutDialog();'>About</a> -\
+		<a class='page-link' id='about-page-link' href='javascript:void(0)' onclick='showAboutDialog();'>About</a> -\
 		<a class='page-link' href='https://www.google.com/chrome/browser/desktop/index.html' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>Chrome\
 		</a> -\
 		<a class='page-link' href='https://www.gnu.org/licenses/gpl-3.0.en.html' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>License (GPLv3)\
 		</a> -\
-		<a class='page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
+		<a class='page-link' id='privacy-page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
 		<a class='page-link' href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>Feedback\
 		</a>"
@@ -71,6 +71,9 @@ function showAboutDialog() {
 			OK: function() {
 				$("#aboutDialog").dialog(opt).dialog("close");
 			},
+		},
+		close: function(event,ui) {
+			$("#about-page-link").blur();
 		}
     };
 	$("#aboutDialog").dialog(opt).dialog("open");
@@ -101,6 +104,9 @@ function showPrivacyDialog() {
 			OK: function() {
 				$("#privacyDialog").dialog(opt).dialog("close");
 			},
+		},
+		close: function(event,ui) {
+			$("#privacy-page-link").blur();
 		}
     };
 	$("#privacyDialog").dialog(opt).dialog("open");
