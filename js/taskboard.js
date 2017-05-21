@@ -47,25 +47,22 @@ var makingNewTask;
 
 var myDropboxData;
 
-  var myURL = window.location.href
-  if (myURL.indexOf("taskboard.leventech.net")>0) {
-	document.title = "Test Task Board"
-  }
-
+var myURL = window.location.href
+if (myURL.indexOf("taskboard.leventech.net")!==-1) document.title = "Test Task Board"
+else if (myURL.indexOf("file:///")!==-1) document.title = "Local Task Board"
   
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
 	initPageLinks();
 	initToolbar();
-	initTaskEditor();
+	
 	initTaskboardUI();
-	
-	
-	setInterval(checkTime,60000)
-
 	initRemoteStorage();
 
+	initTaskEditor();
+
+	setInterval(checkTime,60000)
 
 });  //End of Doc.Ready
 
