@@ -10,12 +10,19 @@ function initPageLinks() {
 function getPageLinks() {
 	var pageLinks = document.createElement("div")
 	pageLinks.id = "page-links"
-	pageLinks.style = "position:absolute;top:0px;left:45vw;text-align:center;margin-top:5px;color:white;"
+	pageLinks.style = ""
 	pageLinks.innerHTML = "\
-		<a href='javascript:void(0)' style='color:white;' onclick='showAboutDialog();'>About</a> -\
-		<a href='https://www.gnu.org/licenses/gpl-3.0.en.html' style='color:white;' target='_blank' >License (GPLv3)</a> -\
-		<a href='javascript:void(0)' style='color:white;' onclick='showPrivacyDialog();'>Privacy</a> -\
-		<a href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >Feedback</a>"
+		<a class='page-link' href='javascript:void(0)' onclick='showAboutDialog();'>About</a> -\
+		<a class='page-link' href='https://www.google.com/chrome/browser/desktop/index.html' target='_blank' >\
+			<span class='tooltiptext'>opens new tab</span>Chrome\
+		</a> -\
+		<a class='page-link' href='https://www.gnu.org/licenses/gpl-3.0.en.html' target='_blank' >\
+			<span class='tooltiptext'>opens new tab</span>License (GPLv3)\
+		</a> -\
+		<a class='page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
+		<a class='page-link' href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >\
+			<span class='tooltiptext'>opens new tab</span>Feedback\
+		</a>"
 	return pageLinks;
 }
 		
@@ -26,21 +33,28 @@ function initAboutDialog() {
 	aboutDialog.id="aboutDialog"
 	aboutDialog.className = "my-dialog"
 	aboutDialog.innerHTML += "Task Board is a sticky note application for your to-do list, with automatic sorting and highlighting to help you identify the most urgent tasks.<br/><br/>"
-	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>The board starts with one big region, but you can create as many as you want, and they will appear next to the main region.</div>"
-	aboutDialog.innerHTML += "<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'><div style='float:left;width:60px;'>\
+	aboutDialog.innerHTML += "\
+	<div style='float:left;width:60%;margin-bottom:10px;'>\
+		The board starts with one big region, but you can create as many as you want, and they will appear next to the main region.</div>\
+		<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'>\
+			<div style='float:left;width:60px;'>\
 				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
 				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
-				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div></div>\
-				<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:60px;height:60px;'></div></div></div>"
-	aboutDialog.innerHTML += "Tasks inside a region are sorted by their due date. Then the regions themselves are sorted by their next due task.<br/><br/>"
-	aboutDialog.innerHTML += "<div style='float:left;width:60%;margin-bottom:10px;'>You can also create \"counter\" tasks that tally the days since it began. These tasks are shown as bars above the normal tasks.</div>"
-	aboutDialog.innerHTML += "<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'>\
-					<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:80px;height:60px;'>\
-					<div style='background-color:black;float:left;border:1px solid black;width:68px;height:10px;margin:2px;'></div>\
-					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
-					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
-					<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
-					</div></div>"
+				<div style='margin-bottom:2px;border:1px solid black;border-radius:3px;width:100%;height:20px;'></div>\
+			</div>\
+			<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:60px;height:60px;'></div>\
+		</div>\
+	</div>\
+	Tasks inside a region are sorted by their due date. Then the regions themselves are sorted by their next due task.<br/><br/>\
+	<div style='float:left;width:60%;margin-bottom:10px;'>You can also create \"counter\" tasks that tally the days since it began. These tasks are shown as bars above the normal tasks.</div>\
+	<div style='float:left;width:40%;margin-bottom:10px;padding-left:30px;'>\
+		<div style='margin-left:2px;border:1px solid black;border-radius:3px;float:left;width:80px;height:60px;'>\
+			<div style='background-color:black;float:left;border:1px solid black;width:68px;height:10px;margin:2px;'></div>\
+			<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+			<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+			<div style='float:left;border:1px solid black;width:20px;height:20px;margin:2px;'></div>\
+		</div>\
+	</div>"
 	document.getElementById("myBody").append(aboutDialog)
 }
 
