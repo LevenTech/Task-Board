@@ -81,7 +81,7 @@ function initPrivacyDialog() {
 	var privacyDialog = document.createElement("div")
 	privacyDialog.id="privacyDialog"
 	privacyDialog.className = "my-dialog"
-	privacyDialog.innerHTML = "This application is <a href='http://unhosted.org/' target='_blank' style='font-weight:bold;'>Unhosted</a>, meaning it doesn't store your data. While you use Task Board, all of your data remains in your control.<br/><br/>"
+	privacyDialog.innerHTML = "This application is <a id='unhosted-link' href='http://unhosted.org/' target='_blank' style='font-weight:bold;'>Unhosted</a>, meaning it doesn't store your data. While you use Task Board, all of your data remains in your control.<br/><br/>"
 	privacyDialog.innerHTML += "By default, your data is only stored locally on the device you're using. We use cookies to remember your board, which are stored by your web browser. If you choose to download your data to a file, you can choose where it goes.<br/><br/>"
 	privacyDialog.innerHTML += "If you choose to connect to <a href='https://remotestorage.io/' target='_blank' style='font-weight:bold;'>Remote Storage</a>, you will need to create a Remote Storage account through a provider like <a href='https://5apps.com/users/sign_up?site=deploy' target='_blank' style='font-weight:bold;'>5apps</a>. That way, your data remains yours."
 	document.getElementById("myBody").append(privacyDialog)
@@ -104,4 +104,5 @@ function showPrivacyDialog() {
 		}
     };
 	$("#privacyDialog").dialog(opt).dialog("open");
+	$("#unhosted-link").blur();
 }
