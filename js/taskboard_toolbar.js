@@ -1,5 +1,16 @@
 
+
+
+function checkWidth() {
+	if (isMobile()) return;
+
+	width = $(this).width();
+	if (width<1400) initToolSelector();
+	else reverseToolSelector();
+}
+
 function initToolbar() {
+
 	$(window).scroll(function(){
 		if ($(window).scrollTop() > 56) {
 			$("#taskboard-toolbar").removeClass("moving-toolbar");
@@ -25,6 +36,10 @@ function initToolbar() {
 	if (showFinishedCookie==1) toggleFinishedVisible()
 	
 	if (isMobile()) { initToolSelector() }
+	else {
+		$(window).on('resize', checkWidth);
+		checkWidth()
+	}
 }
 
 function generateToolbar() {	
@@ -33,7 +48,8 @@ function generateToolbar() {
 	myToolbar.className = "moving-toolbar"
 	myToolbar.appendChild(createBR())
 	myToolbar.appendChild(initLeftButtons())
-	myToolbar.appendChild(initMiddleButtons())
+	myToolbar.appendChild(initLeftMiddleButtons())
+	myToolbar.appendChild(initRightMiddleButtons())
 	myToolbar.appendChild(initRightButtons())
 	document.getElementById("myBody").append(myToolbar)
 }
@@ -110,14 +126,15 @@ function initLeftButtons() {
 			return leftButtons;
 }
 
-function initMiddleButtons() {
+function initLeftMiddleButtons() {
 	var middleButtons = document.createElement("div")
-	middleButtons.id = "middle-buttons"
+	middleButtons.id = "left-middle-buttons"
+	middleButtons.className = "other-buttons"
 	middleButtons.style = "diplay:none;user-select:none;"
 	middleButtons.innerHTML += "\
-			<div style='width:100%;'>\
-			<div class='toolbar-selection' id='size-shape' style='float:left;'>\
-					<div class='middle-button' style='top:-0.5em;'>\
+			<div style='width:400px;display:inline-block;'>\
+				<div class='toolbar-selection' id='size-shape' style='display:inline-block;\'>\
+					<div class='middle-button' style='margin-top:20px;'>\
 						<label for='task-shape'>Shape</label><br/>\
 						<div class='btn-group' role='group' style='height:2em;'>\
 							<button type='button' class='btn btn-default shape-button' id='shape-button-default' onclick='makeShapeDefault()' style='height:4em;'>\
@@ -128,15 +145,26 @@ function initMiddleButtons() {
 							</button>\
 						</div>\
 					</div>\
-					<div class='middle-button' style='top:-2em;'>\
-					  <label for='font-size'>Task size:</label>\
+					<div class='middle-button' style='margin-left:15px;'>\
+					  <label for='font-size'>Size</label><br/>\
 					  <input type='text' id='font-size' readonly style='user-select:none;text-align:center;width:8em;border:0; color:#000000; font-weight:bold;'>\
 					  <div id='font-size-slider' style='margin-top:10px;width:13em;'></div>\
 					</div>\
 				</div>\
-				<div class='toolbar-selection' id='future-peek' style='float:left;'>\
-					<div class='middle-button' style='top:0em;margin-left:2em;'>\
-					  <label for='date-select'>Show for:</label>\
+			</div>"
+	return middleButtons;
+}
+
+function initRightMiddleButtons() {
+	var middleButtons = document.createElement("div")
+	middleButtons.id = "right-middle-buttons"
+	middleButtons.className = "other-buttons"
+	middleButtons.style = "diplay:none;user-select:none;"
+	middleButtons.innerHTML += "\
+			<div style='width:200px;display:inline-block;'>\
+				<div class='toolbar-selection' id='future-peek' style='display:inline-block;'>\
+					<div class='middle-button' style='margin-top:22px;margin-left:2em;'>\
+					  <label for='date-select'>Future Peek</label><br/>\
 					  <input type='text' id='todays-date' readonly style='user-select:none;text-align:center;width:12em;px;border:0; color:#000000; font-weight:bold;'>\
 					  <div id='todays-date-slider' style='margin-left:1em;margin-top:10px;width:15em;'></div>\
 					</div>\
@@ -148,6 +176,7 @@ function initMiddleButtons() {
 function initRightButtons() {
 	var rightButtons = document.createElement("div")
 	rightButtons.id = "right-buttons"
+	rightButtons.className = "other-buttons"
 	rightButtons.innerHTML += "\
 			<div class='toolbar-selection' id='draggables'>\
 				<div id='finish-area' class='finish-area normal-finish' ondrop='dropFinish(event)' ondragover='highlightFinish(event)' ondragleave='unhighlightFinish(event)' style=''>\
@@ -251,18 +280,15 @@ function initToolSelector () {
 	$(".toolbar-selection").hide();
 	$("#tool-select-control").show();
 	
-	document.getElementById("taskboard-toolbar").style.display="block"
 	document.getElementById("left-buttons").style.width = "100%";
-	document.getElementById("new-task-drag").style.marginTop = "0.4em";
-	document.getElementById("new-task-drag").style.paddingTop = "1em";
 	document.getElementById("new-task-drag").innerHTML = "New";
-	document.getElementById("output").marginTop = "30px";
+	//document.getElementById("output").marginTop = "30px";
+
 	$("#tool-selector").change(function(){
 		createCookie("selected-tool",this.value)
 		$(".toolbar-selection").hide();
 		$("#left-buttons").append($("#"+this.value))
 		$("#"+this.value).show();
-		document.getElementById(this.value).style.fontSize = "25px";
 	});
 	
 	var alreadySelected = readCookie("selected-tool");
@@ -271,13 +297,19 @@ function initToolSelector () {
 	$(".toolbar-selection").hide();
 	$("#left-buttons").append($("#"+alreadySelected))
 	$("#"+alreadySelected).show();
-	document.getElementById("open-local-file").style.fontSize = "22px";
-
-	
-	$("#taskboard-toolbar").addClass("padded-toolbar");
-	$("#taskboard-toolbar").addClass("moving-toolbar");
-	$("#app-header").addClass("padded-app-header");
 }
+
+
+
+function reverseToolSelector () {
+
+	$(".toolbar-selection").show();
+	$("#tool-select-control").hide();
+	
+	document.getElementById("left-buttons").style.width = "auto";
+	document.getElementById("new-task-drag").innerHTML = "Drag for New Task";
+}
+
 
 function toggleFinishedVisible() {
 	if ($('#show-finished').is(':checked')) {

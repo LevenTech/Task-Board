@@ -68,9 +68,7 @@ $(document).ready(function() {
 
 });  //End of Doc.Ready
 
-$(window).on('resize', function(){
-	width = $(this).width();
-});
+
 
 
 
@@ -989,7 +987,7 @@ function newTaskCopy() {
 
 function newTask(rowName,taskName,openMe) {
 	
-	$("#middle-buttons").show();
+	$(".other-buttons").show();
 	
 	var newTask = ["","","","","","","","","","","","","",""];
 	lastTaskID = lastTaskID+1;
