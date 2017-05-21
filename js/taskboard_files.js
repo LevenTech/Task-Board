@@ -127,8 +127,7 @@ function initRemoteStorage() {
 		currentFileName = ""
 		output.innerHTML = ""
 		$(".instructions").show();		
-		$("#middle-buttons").hide();
-		$("#right-buttons").hide();
+		$(".other-buttons").hide();
 		$("#filename-selector").hide();
 		$("#filename-display").show();
 		$("#connected-to-remote").hide();
@@ -176,8 +175,7 @@ function noFileSelected() {
 	$("#exportfile-button").attr("disabled",true)
 	$("#renamefile-button").attr("disabled",true)
 	$("#deletefile-button").attr("disabled",true)
-	$("#middle-buttons").hide();
-	$("#right-buttons").hide();
+	$(".other-buttons").hide();
 }
 
 
@@ -231,8 +229,7 @@ function doNewFile() {
 	$(".savefile-button").show();
 	$("#exportfile-button").attr("disabled",false);
 	$(".instructions").hide();
-	$("#middle-buttons").show();
-	$("#right-buttons").show();
+	$(".other-buttons").show();
 	isSaved = 2;
 	saveFileCookie();
 	$("#newFileDialog").dialog("close");
@@ -481,8 +478,7 @@ function processData(csv,fileName) {
 	if (!remoteStorage.connected) $(".savefile-button").show()
 	//$("#chosen-file-label").show()
 	$(".instructions").hide();
-	$("#middle-buttons").show();
-	$("#right-buttons").show();
+	$(".other-buttons").show();
 	drawOutput(lines);
 }
 
