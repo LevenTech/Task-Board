@@ -56,6 +56,7 @@ var myDropboxData;
 document.onselectstart = function() { return false; };
 $(document).ready(function() {
 
+	initPageLinks();
 	initToolbar();
 	initTaskEditor();
 	initTaskboardUI();
@@ -101,9 +102,7 @@ function initDialogs() {
 	initDeleteFileDialog()
 	initRenameFileDialog()
 
-	initPrivacyDialog()
-	initAboutDialog()
-	
+
 	var opt = { autoOpen: false	};
 	$(".my-dialog").dialog(opt).dialog("close");
 	$(".my-dialog").show();	
