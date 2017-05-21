@@ -470,7 +470,7 @@ function connectToRemote() {
 			eraseCookie("fileName")
 		}
 		else {
-			remoteStorage.tasks.load();
+			remoteStorage.taskboards.load();
 			createCookie("fileName",currentFileName)
 		}
 	});

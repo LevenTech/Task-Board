@@ -31,17 +31,21 @@ function initRemoteStorage() {
 
 	loadCookieFile();
 
-
 	RemoteStorage.defineModule('tasks',	function(privateClient, publicClient) {
-		var tasks = {
-			delete: function(tasks) { 
+		var tasks = {}
+		return { exports: tasks };
+	});	
+	
+	RemoteStorage.defineModule('taskboards',	function(privateClient, publicClient) {
+		var taskboards = {
+			delete: function(taskboards) { 
 				if (fileDebug) console.log("deleting file="+currentFileName)
 				privateClient.remove(currentFileName);
 				if (fileDebug) console.log("removing option=#option-"+currentFileName)
 				$("#filename-selector").val("");
 				$("#option-"+currentFileName).hide();
 			},
-			store: function(tasks) {
+			store: function(taskboards) {
 				if (fileDebug) console.log("storing file="+currentFileName)
 				var csvContent = "";
 				lines.forEach(function(infoArray, index){
@@ -52,7 +56,7 @@ function initRemoteStorage() {
 				}); 
 				return privateClient.storeFile("text/csv", currentFileName, csvContent);
 			},
-			init: function(tasks) {
+			init: function(taskboards) {
 				if (fileDebug) console.log("rebuilding file list")
 				privateClient.getListing("/", 1000).then(function (objects) {
 					if (fileDebug) console.log(objects)
@@ -61,7 +65,7 @@ function initRemoteStorage() {
 					for (var key in objects) {
 						if (key == currentFileName) {
 							options += "<option id='option-"+key+"' value='"+key+"' selected>"+key+"</option>"
-							remoteStorage.tasks.load()
+							remoteStorage.taskboards.load()
 							foundFile = 1;
 						}
 						else options += "<option id='option-"+key+"' value='"+key+"'>"+key+"</option>"
@@ -77,7 +81,7 @@ function initRemoteStorage() {
 				});
 				$(".instructions").hide();		
 			},	
-			load: function(tasks) {
+			load: function(taskboards) {
 				$("#exportfile-button").attr("disabled",false)
 				$("#renamefile-button").attr("disabled",false)
 				$("#deletefile-button").attr("disabled",false)
@@ -89,9 +93,10 @@ function initRemoteStorage() {
 				});
 			}		
 		};
-		return { exports: tasks };
+		return { exports: taskboards };
 	});
 
+	remoteStorage.access.claim('taskboards', 'rw');
 	remoteStorage.access.claim('tasks', 'rw');
 	remoteStorage.displayWidget();
 	$("#remotestorage-widget").appendTo("#taskboard-remote-storage")
@@ -162,7 +167,7 @@ function initRemoteStorage() {
 			noFileSelected();
 		}
 		else {
-			remoteStorage.tasks.load();
+			remoteStorage.taskboards.load();
 		}
 		createCookie("fileName",currentFileName)
 	});	
@@ -261,7 +266,7 @@ function renameFile() {
 
 function doRenameFile() {
 	$("#renameFileDialog").dialog("close");
-	remoteStorage.tasks.delete()
+	remoteStorage.taskboards.delete()
  
 	currentFileName = $("#renamedFileName").val();
 	saveFileCookie();
@@ -287,7 +292,7 @@ function deleteFile() {
 		buttons: { 
 			Yes: function() {
 				$("#deleteFileDialog").dialog("close");
-				remoteStorage.tasks.delete()
+				remoteStorage.taskboards.delete()
 				clearOutput();
 			},
 			No: function () {
@@ -395,7 +400,7 @@ function saveFileCookie() {
 	});
 
 	if (remoteStorage.connected) {
-		remoteStorage.tasks.store(csvContent);
+		remoteStorage.taskboards.store(csvContent);
 		isSaved = 1;
 	}
 
@@ -408,7 +413,7 @@ function saveFileCookie() {
 
 function loadRemoteStorage() {
 	currentFileName = readCookie("fileName")
-	remoteStorage.tasks.init();
+	remoteStorage.taskboards.init();
 }
 
 function loadCookieFile() {
@@ -450,6 +455,7 @@ function processData(csv,fileName) {
 			testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
 			isTestFile=1;
 		}
+		else isTestFile=0;
 	}
 	
     var allTextLines = csv.split(/\r\n|\n/);
