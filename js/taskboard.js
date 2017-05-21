@@ -412,7 +412,6 @@ function changeToUnsaved() {
 	isSaved = 0;
 	if (!remoteStorage.connected) $("#unsaved-changes").show();
 	saveFileCookie();
-	createCookie("isSaved",0);
 }
 
 // fngroup:  TASK OPERATION FUNCTIONS

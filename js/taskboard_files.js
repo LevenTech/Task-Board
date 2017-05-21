@@ -12,7 +12,7 @@ function initRemoteStorage() {
 	remoteStorage.setApiKeys('dropbox', "");
 
 	var shouldBeConnected = readCookie("isConnected")
-	if (fileDebug) console.log(shouldBeConnected)
+	if (fileDebug) console.log("shouldBeConnected="+shouldBeConnected)
 	if (shouldBeConnected==1) {
 		$("#filename-selector").show();
 		$(".fileinput-filename").hide();
@@ -105,6 +105,7 @@ function initRemoteStorage() {
 
 	remoteStorage.on("connected",function(privateClient, publicClient){
 		isSaved = readCookie("isSaved")
+		if (fileDebug) console.log("reading isSaved="+isSaved)
 		if (isSaved==0) {
 			loadCookieFile()
 			showBeforeConnectDialog();
@@ -143,6 +144,7 @@ function initRemoteStorage() {
 		$("#importfile-button-name").hide()
 		isSaved = 1;
 		createCookie("isSaved",1)
+		if (fileDebug) console.log("isSaved="+1)
 		createCookie("isConnected",0)
 	})
 	
@@ -413,11 +415,13 @@ function saveFileCookie() {
 	if (remoteStorage.connected) {
 		remoteStorage.taskboards.store(csvContent);
 		isSaved = 1;
+		if (fileDebug) console.log("isSaved=1")
 	}
 
 	createCookie("fileName",currentFileName);
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
+	if (fileDebug) console.log("saving isSaved="+isSaved)
 
 	if (isTestFile) makeTestDatesDisplayable();
 }
@@ -541,7 +545,7 @@ function saveFile() {
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
-	
+	if (fileDebug) console.log("saving isSaved="+isSaved)
 	if (isTestFile) makeTestDatesDisplayable();
 }
 
