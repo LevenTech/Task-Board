@@ -64,6 +64,7 @@
 	background:darkgrey;
 	width:100%;
 	white-space:nowrap;
+	height:8em;
 }
 .stuck-toolbar {
 	position:fixed;

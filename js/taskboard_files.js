@@ -12,7 +12,7 @@ function initRemoteStorage() {
 	remoteStorage.setApiKeys('dropbox', "");
 
 	var shouldBeConnected = readCookie("isConnected")
-	if (fileDebug) console.log(shouldBeConnected)
+	if (fileDebug) console.log("shouldBeConnected="+shouldBeConnected)
 	if (shouldBeConnected==1) {
 		$("#filename-selector").show();
 		$(".fileinput-filename").hide();
@@ -31,17 +31,22 @@ function initRemoteStorage() {
 
 	loadCookieFile();
 
-
 	RemoteStorage.defineModule('tasks',	function(privateClient, publicClient) {
-		var tasks = {
-			delete: function(tasks) { 
+		var tasks = {}
+		return { exports: tasks };
+	});	
+	
+	RemoteStorage.defineModule('taskboards',	function(privateClient, publicClient) {
+		var taskboards = {
+			delete: function(taskboards) { 
 				if (fileDebug) console.log("deleting file="+currentFileName)
-				privateClient.remove(currentFileName);
-				if (fileDebug) console.log("removing option=#option-"+currentFileName)
+				var fileToRemove = currentFileName
+				privateClient.remove(currentFileName).then(function () {
+					$("#option-"+fileToRemove).hide();
+				});
 				$("#filename-selector").val("");
-				$("#option-"+currentFileName).hide();
 			},
-			store: function(tasks) {
+			store: function(taskboards) {
 				if (fileDebug) console.log("storing file="+currentFileName)
 				var csvContent = "";
 				lines.forEach(function(infoArray, index){
@@ -52,7 +57,7 @@ function initRemoteStorage() {
 				}); 
 				return privateClient.storeFile("text/csv", currentFileName, csvContent);
 			},
-			init: function(tasks) {
+			init: function(taskboards) {
 				if (fileDebug) console.log("rebuilding file list")
 				privateClient.getListing("/", 1000).then(function (objects) {
 					if (fileDebug) console.log(objects)
@@ -61,7 +66,7 @@ function initRemoteStorage() {
 					for (var key in objects) {
 						if (key == currentFileName) {
 							options += "<option id='option-"+key+"' value='"+key+"' selected>"+key+"</option>"
-							remoteStorage.tasks.load()
+							remoteStorage.taskboards.load()
 							foundFile = 1;
 						}
 						else options += "<option id='option-"+key+"' value='"+key+"'>"+key+"</option>"
@@ -77,7 +82,7 @@ function initRemoteStorage() {
 				});
 				$(".instructions").hide();		
 			},	
-			load: function(tasks) {
+			load: function(taskboards) {
 				$("#exportfile-button").attr("disabled",false)
 				$("#renamefile-button").attr("disabled",false)
 				$("#deletefile-button").attr("disabled",false)
@@ -89,9 +94,10 @@ function initRemoteStorage() {
 				});
 			}		
 		};
-		return { exports: tasks };
+		return { exports: taskboards };
 	});
 
+	remoteStorage.access.claim('taskboards', 'rw');
 	remoteStorage.access.claim('tasks', 'rw');
 	remoteStorage.displayWidget();
 	$("#remotestorage-widget").appendTo("#taskboard-remote-storage")
@@ -99,6 +105,7 @@ function initRemoteStorage() {
 
 	remoteStorage.on("connected",function(privateClient, publicClient){
 		isSaved = readCookie("isSaved")
+		if (fileDebug) console.log("reading isSaved="+isSaved)
 		if (isSaved==0) {
 			loadCookieFile()
 			showBeforeConnectDialog();
@@ -137,6 +144,7 @@ function initRemoteStorage() {
 		$("#importfile-button-name").hide()
 		isSaved = 1;
 		createCookie("isSaved",1)
+		if (fileDebug) console.log("isSaved="+1)
 		createCookie("isConnected",0)
 	})
 	
@@ -162,7 +170,7 @@ function initRemoteStorage() {
 			noFileSelected();
 		}
 		else {
-			remoteStorage.tasks.load();
+			remoteStorage.taskboards.load();
 		}
 		createCookie("fileName",currentFileName)
 	});	
@@ -209,6 +217,9 @@ function newFile() {
 				Cancel: function () {
 					$("#newFileDialog").dialog("close");
 				}
+			},
+			close: function(event,ui) {
+				$("#newfile-button").blur();
 			}
 		};
 		$("#newFileDialog").dialog(opt).dialog("open");
@@ -226,8 +237,8 @@ function doNewFile() {
 	$(".fileinput-filename").html(currentFileName);
 	createCookie("fileName",currentFileName);
 	$("span.fileinput-new").hide();
-	$(".savefile-button").show();
-	$("#exportfile-button").attr("disabled",false);
+	//$(".savefile-button").show();
+	$(".file-button").attr("disabled",false);
 	$(".instructions").hide();
 	$(".other-buttons").show();
 	isSaved = 2;
@@ -253,6 +264,9 @@ function renameFile() {
 			Cancel: function () {
 				$("#renameFileDialog").dialog("close");
 			}
+		},
+		close: function(event,ui) {
+			$("#renamefile-button").blur();
 		}
 	};
 	$("#renameFileDialog").dialog(opt).dialog("open");
@@ -261,11 +275,12 @@ function renameFile() {
 
 function doRenameFile() {
 	$("#renameFileDialog").dialog("close");
-	remoteStorage.tasks.delete()
- 
+	
+	remoteStorage.taskboards.delete()
+
 	currentFileName = $("#renamedFileName").val();
-	saveFileCookie();
 	insertOption();
+	saveFileCookie();
 }
 
 function insertOption() {
@@ -287,12 +302,15 @@ function deleteFile() {
 		buttons: { 
 			Yes: function() {
 				$("#deleteFileDialog").dialog("close");
-				remoteStorage.tasks.delete()
-				clearOutput();
+				remoteStorage.taskboards.delete()
+				noFileSelected();
 			},
 			No: function () {
 				$("#deleteFileDialog").dialog("close");
 			}
+		},
+		close: function(event,ui) {
+			$("#filename-selector").blur();
 		}
 	};
 	$("#deleteFileDialog").dialog(opt).dialog("open");
@@ -395,20 +413,22 @@ function saveFileCookie() {
 	});
 
 	if (remoteStorage.connected) {
-		remoteStorage.tasks.store(csvContent);
+		remoteStorage.taskboards.store(csvContent);
 		isSaved = 1;
+		if (fileDebug) console.log("isSaved=1")
 	}
 
 	createCookie("fileName",currentFileName);
 	createCookie("myCSVFile",csvContent);
 	createCookie("isSaved",isSaved);
+	if (fileDebug) console.log("saving isSaved="+isSaved)
 
 	if (isTestFile) makeTestDatesDisplayable();
 }
 
 function loadRemoteStorage() {
 	currentFileName = readCookie("fileName")
-	remoteStorage.tasks.init();
+	remoteStorage.taskboards.init();
 }
 
 function loadCookieFile() {
@@ -450,6 +470,7 @@ function processData(csv,fileName) {
 			testFileDateDiff = getDateDifference(fileCreationDate,actualStartOfToday)
 			isTestFile=1;
 		}
+		else isTestFile=0;
 	}
 	
     var allTextLines = csv.split(/\r\n|\n/);
@@ -524,7 +545,7 @@ function saveFile() {
 	isSaved = 1;
 	$("#unsaved-changes").hide();
 	createCookie("isSaved",1);
-	
+	if (fileDebug) console.log("saving isSaved="+isSaved)
 	if (isTestFile) makeTestDatesDisplayable();
 }
 
