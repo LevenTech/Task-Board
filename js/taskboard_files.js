@@ -40,10 +40,11 @@ function initRemoteStorage() {
 		var taskboards = {
 			delete: function(taskboards) { 
 				if (fileDebug) console.log("deleting file="+currentFileName)
-				privateClient.remove(currentFileName);
-				if (fileDebug) console.log("removing option=#option-"+currentFileName)
+				var fileToRemove = currentFileName
+				privateClient.remove(currentFileName).then(function () {
+					$("#option-"+fileToRemove).hide();
+				});
 				$("#filename-selector").val("");
-				$("#option-"+currentFileName).hide();
 			},
 			store: function(taskboards) {
 				if (fileDebug) console.log("storing file="+currentFileName)
@@ -266,11 +267,12 @@ function renameFile() {
 
 function doRenameFile() {
 	$("#renameFileDialog").dialog("close");
+
 	remoteStorage.taskboards.delete()
- 
+
 	currentFileName = $("#renamedFileName").val();
-	saveFileCookie();
 	insertOption();
+	saveFileCookie();
 }
 
 function insertOption() {
