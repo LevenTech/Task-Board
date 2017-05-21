@@ -214,10 +214,10 @@ function newFile() {
 				},
 				Cancel: function () {
 					$("#newFileDialog").dialog("close");
-				},
-				close: function(event,ui) {
-					$("#filename-selector").focus();
 				}
+			},
+			close: function(event,ui) {
+				$("#filename-selector").focus();
 			}
 		};
 		$("#newFileDialog").dialog(opt).dialog("open");
@@ -301,7 +301,7 @@ function deleteFile() {
 			Yes: function() {
 				$("#deleteFileDialog").dialog("close");
 				remoteStorage.taskboards.delete()
-				clearOutput();
+				noFileSelected();
 			},
 			No: function () {
 				$("#deleteFileDialog").dialog("close");
