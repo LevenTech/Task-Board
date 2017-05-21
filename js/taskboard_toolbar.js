@@ -12,7 +12,7 @@ function checkWidth() {
 function initToolbar() {
 
 	$(window).scroll(function(){
-		if ($(window).scrollTop() > 56) {
+		if ($(window).scrollTop() > 45) {
 			$("#taskboard-toolbar").removeClass("moving-toolbar");
 			$("#taskboard-toolbar").addClass("stuck-toolbar");
 		}
