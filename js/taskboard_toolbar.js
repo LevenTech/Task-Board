@@ -87,6 +87,7 @@ function initLeftButtons() {
 							<span id='not-connected-to-remote' style='display:none;'>Working Locally</span>\
 						</div>\
 						<strong>Current File:</strong>\
+						<input type='file' id='csvFileInput' style='display:none;' onchange='handleFiles(this.files)' onclick='this.value=null;' accept='.csv'/ hidden>\
 						<div style='display:inline-block;width:10em;'>\
 							<span class='fileinput-filename'></span>\
 							<span id='filename-display' class='fileinput-new'>No File</span>\
@@ -101,7 +102,7 @@ function initLeftButtons() {
 								<span class='tooltiptext'>New</span>\
 								<i class='fa fa-clone' aria-hidden='true' style=''></i><span id='newfile-button-label'></span>\
 							</button>\
-							<button id='openfile-button' class='openfile-button btn btn-default btn-file file-button' onclick='document.getElementById(\"csvFileInput\").click();' style=''>\
+							<button id='openfile-button' class='openfile-button btn btn-default file-button' onclick='document.getElementById(\"csvFileInput\").click();' style=''>\
 								<span id='openfile-button-label'>\
 									<span id='openfile-button-name'>\
 										<span class='tooltiptext'>Open</span>\
@@ -112,7 +113,6 @@ function initLeftButtons() {
 										<i class='fa fa-cloud-upload' aria-hidden='true' style=''></i>\
 									</span>\
 								</span>\
-								<input type='file' id='csvFileInput' style='display:none;' onchange='handleFiles(this.files)' onclick='this.value=null;' accept='.csv'/ >\
 							</button>\
 							<button id='renamefile-button' class='btn btn-default file-button remote-file-button' onclick='renameFile()' style='display:none;z-index:2;'>\
 								<span class='tooltiptext'>Rename</span>\
