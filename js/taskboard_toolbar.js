@@ -46,7 +46,6 @@ function generateToolbar() {
 	var myToolbar = document.createElement("div")
 	myToolbar.id = "taskboard-toolbar"
 	myToolbar.className = "moving-toolbar"
-	myToolbar.appendChild(createBR())
 	myToolbar.appendChild(initLeftButtons())
 	myToolbar.appendChild(initLeftMiddleButtons())
 	myToolbar.appendChild(initRightMiddleButtons())
@@ -62,7 +61,7 @@ function initLeftButtons() {
 	var leftButtons = document.createElement("div")
 	leftButtons.id = "left-buttons"
 	leftButtons.innerHTML += "\
-			<div class='toolbar-selection' id='new-open-file' style='float:left;margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;'>\
+			<div class='toolbar-selection' id='new-open-file' style='margin:10px;padding:10px;background:#F0F0F0;margin-left:15px;user-select:none;'>\
 				<div id='open-local-file' class='fileinput fileinput-new' data-provides='fileinput' style='width:400px;margin-left:0px;margin-bottom:0px;'>\
 					<div id='chosen-file-label' style='margin-top:0px;margin-left:10px;'>\
 						<div id='taskboard-remote-storage' style='width:100%;height:40px;text-align:left;padding-top:7px;position:relative;'>\
