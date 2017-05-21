@@ -113,11 +113,9 @@
 }
 
 #right-buttons {
-	flex: 1 99 600px;
-	/*text-align:right;*/
-	left: calc(100vw - 400px);
-	width:400px;
-	min-width:400px;
+	left: calc(100vw - 360px);
+	width: 350px;
+	min-width: 350px;
 	position:absolute;
 	display:none;
 }
