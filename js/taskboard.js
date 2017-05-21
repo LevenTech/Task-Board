@@ -182,12 +182,7 @@ function initDialogKeys() {
 				$("#deleteDialog").dialog("close");
 			}
 		}
-		if ($('#aboutDialog').is(':visible')) {
-			if (key == 13 || key == 27) $('#aboutDialog').dialog("close")
-		}
-		if ($('#privacyDialog').is(':visible')) {
-			if (key == 13 || key == 27) $('#privacyDialog').dialog("close")
-		}
+		checkPageLinkDialogs(key);
 		e.stopPropagation();
 	});	
 }

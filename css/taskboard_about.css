@@ -2,7 +2,7 @@
 #page-links {
 	position:absolute;
 	top:0px;
-	left:calc(50vw - 175px);
+	left:calc(50vw - 200px);
 	background:darkgrey;
 	text-align:center;
 	margin-top:5px;
@@ -35,4 +35,9 @@
 
 .page-link:hover .tooltiptext {
     visibility: visible;
+}
+
+.thanks-logo {
+	height:80px;
+	margin:20px;
 }

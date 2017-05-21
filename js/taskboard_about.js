@@ -2,6 +2,7 @@
 function initPageLinks() {
 	initPrivacyDialog()
 	initAboutDialog()
+	initThanksDialog()
 	var pageLinks = getPageLinks()
 	document.getElementById("title-bar").append(pageLinks)
 }
@@ -20,14 +21,58 @@ function getPageLinks() {
 			<span class='tooltiptext'>opens new tab</span>License (GPLv3)\
 		</a> -\
 		<a class='page-link' id='privacy-page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
+		<a class='page-link' id='thanks-page-link' href='javascript:void(0)' onclick='showThanksDialog();'>Thanks</a> -\
 		<a class='page-link' href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>Feedback\
 		</a>"
 	return pageLinks;
 }
-		
+
+function checkPageLinkDialogs(key) {
+	if (key!==13 && key!==27) return;
+	$('#aboutDialog').dialog("close")
+	$('#privacyDialog').dialog("close")
+	$('#thanksDialog').dialog("close")
+}		
 		
 
+function initThanksDialog() {
+	var thanksDialog = document.createElement("div")
+	thanksDialog.id="thanksDialog"
+	thanksDialog.className = "my-dialog"
+	thanksDialog.style="text-align:center;"
+	thanksDialog.innerHTML += "\
+	<a id='first-thanks-link' href='http://5apps.com' target='_blank'><img class='thanks-logo' src='logos/5apps.svg' style='height:60px;' /></a>\
+	<a href='http://remotestorage.io' target='_blank'><img class='thanks-logo' src='logos/remotestorage.svg' /></a>\
+	<a href='http://jquery.com' target='_blank'><img class='thanks-logo' src='logos/jquery_logo.png' style='height:120px;' /></a>\
+	<a href='http://getbootstrap.com' target='_blank'><img class='thanks-logo' src='logos/bootstrap-logo.png' /></a>\
+	<a href='http://cdnjs.com/about' target='_blank'><img class='thanks-logo' src='logos/cdnjs.png' /></a>"
+	document.getElementById("myBody").append(thanksDialog)
+}
+
+
+function showThanksDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:400,
+        title: 'Thanks to These Organizations',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#thanksDialog").dialog(opt).dialog("close");
+			},
+		},
+		close: function(event,ui) {
+			$("#thanks-page-link").blur();
+		}
+    };
+	$("#thanksDialog").dialog(opt).dialog("open");
+	$("#first-thanks-link").blur();
+}
+		
+		
 function initAboutDialog() {
 	var aboutDialog = document.createElement("div")
 	aboutDialog.id="aboutDialog"
