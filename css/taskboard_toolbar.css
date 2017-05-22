@@ -2,6 +2,7 @@
 #remotestorage-widget {
 	top:-5px !important;
 	right:0px !important;
+	z-index:100 !important;
 }
 
 .file-button {

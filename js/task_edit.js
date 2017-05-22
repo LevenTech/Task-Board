@@ -210,7 +210,6 @@ function editTask(taskID,ev) {
 		open: function(event, ui) 
 		{ 
             $('#dialog-toolbar').prependTo('.ui-dialog-titlebar');
-			$('#dialog-toolbar').show();
 			$('.ui-widget-overlay').bind('click', function()
 			{ 
 				$("#editDialog").dialog('close'); 
@@ -224,7 +223,6 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
-			$('#dialog-toolbar').hide();
 		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
