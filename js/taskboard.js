@@ -775,8 +775,6 @@ function drop(ev) {
     var newRowName = currentRowName;
 	if(draggingNew==1) {
 		newTask(newRowName,"",1);
-		saveFileCookie();
-		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
@@ -787,8 +785,8 @@ function drop(ev) {
 				drawOutput(lines);
 			}
 		}
+		currentTask = ""
 	}
-	currentTask = ""
 	draggingNew = 0;
 }
 

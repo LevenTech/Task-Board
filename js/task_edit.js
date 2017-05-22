@@ -197,14 +197,6 @@ function editTask(taskID,ev) {
 			},
 			Cancel: function () {
 				$("#editDialog").dialog("close");
-				clearEditDialog();
-				if(makingNewTask==1) {
-					lines.splice(currentTask,1);
-					lastTaskID--;
-					makingNewTask = 0;
-					drawOutput(lines);
-				}
-				currentTask = "";
 			}
 		},	
 		open: function(event, ui) 
@@ -223,6 +215,7 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
+			clearEditDialog();
 		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)
