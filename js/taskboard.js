@@ -667,11 +667,14 @@ function highlightRow(ev) {
 		$(".misc-block").removeClass("hover-row")
 		$(".misc-block").addClass("normal-row")
 		var toHighlight = 1;
-		if (currentTask && draggingNew==0) {
-			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
-				toHighlight = 0;
-				currentRowName = ev.target.getAttribute("data-rowname")
+		if (draggingNew==0) {
+			if (currentTask) {
+				if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
+					toHighlight = 0;
+					currentRowName = ev.target.getAttribute("data-rowname")
+				}
 			}
+			else { toHighlight = 0; }
 		}
 		currentRowName = ev.target.getAttribute("data-rowname");
 		if (toHighlight) {
@@ -695,8 +698,11 @@ function highlightMisc(ev) {
     ev.preventDefault();
 	dragcounter++;
 	var toHighlight = 1;
-	if (currentTask && draggingNew==0) {
-		if (lines[currentTask][col_row]=="") toHighlight=0;
+	if (draggingNew == 0) {
+		if (currentTask) {
+			if (lines[currentTask][col_row]=="") toHighlight=0;
+		}
+		else { toHighlight = 0; }
 	}
 	if (toHighlight) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
@@ -774,12 +780,16 @@ function drop(ev) {
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
-			lines[taskID][col_row]=newRowName;
-			changeToUnsaved();
-			drawOutput(lines);
+		if (taskID>0) {
+			if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
+				lines[taskID][col_row]=newRowName;
+				changeToUnsaved();
+				drawOutput(lines);
+			}
 		}
 	}
+	currentTask = ""
+	draggingNew = 0;
 }
 
 function dropFinish(ev) {
@@ -807,7 +817,10 @@ function initNewRowDialog() {
 	
 function newRow(ev) {
     ev.preventDefault();
-	if (draggingNew==1) return;
+	if (currentTask<1 || draggingNew==1) {
+		draggingNew = 0;
+		return;
+	}
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
 	$("#newRowName").val("");
