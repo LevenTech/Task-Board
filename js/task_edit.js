@@ -176,7 +176,7 @@ function editTask(taskID,ev) {
 
 	if (lines[currentTask][col_complete]=="Yes") {
 		$("#edit-dialog-finish").addClass("active")
-		console.log("complete")
+		if (editDebug) console.log("complete")
 	}
 	else $("#edit-dialog-finish").removeClass("active")
 	
