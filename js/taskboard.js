@@ -248,6 +248,7 @@ function initTaskContextMenu(button) {
 			        visible: function(key, opt){        
 						if (!opt.$trigger) return false;
 						if (hasClass(opt.$trigger,"now-task")) return true;
+						if (hasClass(opt.$trigger,"past-task")) return true;
 						return false;
 					}
 				},
@@ -420,8 +421,8 @@ function completeTask(wasDropped) {
 	if (!lines[currentTask]) return;
 	$("#deleteDialog").dialog("close");
 
-	lines[currentTask][10]="Yes";
-	if (lines[currentTask][11].length>0) newTaskCopy();
+	lines[currentTask][col_complete]="Yes";
+	if (lines[currentTask][col_increment].length>0) newTaskCopy();
 	$("#completeDialog").dialog("close");
 	$("#editDialog").dialog("close");
 	makeFinishUnhighlighted();
@@ -896,18 +897,22 @@ function newTaskCopy() {
 		
 	if (startDate) {
 
-		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
-		newTask[col_startmonth] = new_startdate.getMonth()+1;
-		newTask[col_startday] = new_startdate.getDate();
-		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
 		if(dueDate) {
+			var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
 			var start_offset = dueDate.getTime() - startDate.getTime();
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
 			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
+		else {
+			var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
+		}
+
+		newTask[col_startmonth] = new_startdate.getMonth()+1;
+		newTask[col_startday] = new_startdate.getDate();
+		newTask[col_startyear] = new_startdate.getYear()+1900;
 	}
 	else if (dueDate) {
 		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);
