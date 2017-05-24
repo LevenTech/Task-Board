@@ -22,7 +22,7 @@ function getPageLinks() {
 		</a> -\
 		<a class='page-link' id='privacy-page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
 		<a class='page-link' id='thanks-page-link' href='javascript:void(0)' onclick='showThanksDialog();'>Thanks</a> -\
-		<a class='page-link' href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >\
+		<a class='page-link' href='http://www.leven.tech/suggestions/' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>Feedback\
 		</a>"
 	return pageLinks;
