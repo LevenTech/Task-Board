@@ -182,12 +182,7 @@ function initDialogKeys() {
 				$("#deleteDialog").dialog("close");
 			}
 		}
-		if ($('#aboutDialog').is(':visible')) {
-			if (key == 13 || key == 27) $('#aboutDialog').dialog("close")
-		}
-		if ($('#privacyDialog').is(':visible')) {
-			if (key == 13 || key == 27) $('#privacyDialog').dialog("close")
-		}
+		checkPageLinkDialogs(key);
 		e.stopPropagation();
 	});	
 }
@@ -253,6 +248,7 @@ function initTaskContextMenu(button) {
 			        visible: function(key, opt){        
 						if (!opt.$trigger) return false;
 						if (hasClass(opt.$trigger,"now-task")) return true;
+						if (hasClass(opt.$trigger,"past-task")) return true;
 						return false;
 					}
 				},
@@ -425,8 +421,8 @@ function completeTask(wasDropped) {
 	if (!lines[currentTask]) return;
 	$("#deleteDialog").dialog("close");
 
-	lines[currentTask][10]="Yes";
-	if (lines[currentTask][11].length>0) newTaskCopy();
+	lines[currentTask][col_complete]="Yes";
+	if (lines[currentTask][col_increment].length>0) newTaskCopy();
 	$("#completeDialog").dialog("close");
 	$("#editDialog").dialog("close");
 	makeFinishUnhighlighted();
@@ -672,11 +668,14 @@ function highlightRow(ev) {
 		$(".misc-block").removeClass("hover-row")
 		$(".misc-block").addClass("normal-row")
 		var toHighlight = 1;
-		if (currentTask && draggingNew==0) {
-			if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
-				toHighlight = 0;
-				currentRowName = ev.target.getAttribute("data-rowname")
+		if (draggingNew==0) {
+			if (currentTask) {
+				if (ev.target.getAttribute("data-rowname")==lines[currentTask][col_row].toUpperCase()) {
+					toHighlight = 0;
+					currentRowName = ev.target.getAttribute("data-rowname")
+				}
 			}
+			else { toHighlight = 0; }
 		}
 		currentRowName = ev.target.getAttribute("data-rowname");
 		if (toHighlight) {
@@ -700,8 +699,11 @@ function highlightMisc(ev) {
     ev.preventDefault();
 	dragcounter++;
 	var toHighlight = 1;
-	if (currentTask && draggingNew==0) {
-		if (lines[currentTask][col_row]=="") toHighlight=0;
+	if (draggingNew == 0) {
+		if (currentTask) {
+			if (lines[currentTask][col_row]=="") toHighlight=0;
+		}
+		else { toHighlight = 0; }
 	}
 	if (toHighlight) {
 		if (ev.target.className.substr(0,10)=="misc-block") {
@@ -774,17 +776,19 @@ function drop(ev) {
     var newRowName = currentRowName;
 	if(draggingNew==1) {
 		newTask(newRowName,"",1);
-		saveFileCookie();
-		drawOutput(lines);
 	}
     else {
 		var taskID = ev.dataTransfer.getData("text");
-		if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
-			lines[taskID][col_row]=newRowName;
-			changeToUnsaved();
-			drawOutput(lines);
+		if (taskID>0) {
+			if (lines[taskID][col_row].toUpperCase()!==newRowName.toUpperCase()) {
+				lines[taskID][col_row]=newRowName;
+				changeToUnsaved();
+				drawOutput(lines);
+			}
 		}
+		currentTask = ""
 	}
+	draggingNew = 0;
 }
 
 function dropFinish(ev) {
@@ -812,7 +816,10 @@ function initNewRowDialog() {
 	
 function newRow(ev) {
     ev.preventDefault();
-	if (draggingNew==1) return;
+	if (currentTask<1 || draggingNew==1) {
+		draggingNew = 0;
+		return;
+	}
     var taskID = ev.dataTransfer.getData("text");
 	currentTask = taskID;
 	$("#newRowName").val("");
@@ -890,18 +897,22 @@ function newTaskCopy() {
 		
 	if (startDate) {
 
-		var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
-		newTask[col_startmonth] = new_startdate.getMonth()+1;
-		newTask[col_startday] = new_startdate.getDate();
-		newTask[col_startyear] = new_startdate.getYear()+1900;
 		
 		if(dueDate) {
+			var new_startdate = new Date(startDate.getTime() + newTask[col_increment]*one_day);
 			var start_offset = dueDate.getTime() - startDate.getTime();
 			var new_duedate = new Date(new_startdate.getTime() + start_offset);
 			newTask[col_duemonth] = new_duedate.getMonth()+1;
 			newTask[col_dueday] = new_duedate.getDate();
 			newTask[col_dueyear] = new_duedate.getYear()+1900;
 		}
+		else {
+			var new_startdate = new Date(today.getTime() + newTask[col_increment]*one_day);
+		}
+
+		newTask[col_startmonth] = new_startdate.getMonth()+1;
+		newTask[col_startday] = new_startdate.getDate();
+		newTask[col_startyear] = new_startdate.getYear()+1900;
 	}
 	else if (dueDate) {
 		var new_duedate = new Date(today.getTime() + newTask[col_increment]*one_day);

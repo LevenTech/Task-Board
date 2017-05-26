@@ -176,7 +176,7 @@ function editTask(taskID,ev) {
 
 	if (lines[currentTask][col_complete]=="Yes") {
 		$("#edit-dialog-finish").addClass("active")
-		console.log("complete")
+		if (editDebug) console.log("complete")
 	}
 	else $("#edit-dialog-finish").removeClass("active")
 	
@@ -197,20 +197,11 @@ function editTask(taskID,ev) {
 			},
 			Cancel: function () {
 				$("#editDialog").dialog("close");
-				clearEditDialog();
-				if(makingNewTask==1) {
-					lines.splice(currentTask,1);
-					lastTaskID--;
-					makingNewTask = 0;
-					drawOutput(lines);
-				}
-				currentTask = "";
 			}
 		},	
 		open: function(event, ui) 
 		{ 
             $('#dialog-toolbar').prependTo('.ui-dialog-titlebar');
-			$('#dialog-toolbar').show();
 			$('.ui-widget-overlay').bind('click', function()
 			{ 
 				$("#editDialog").dialog('close'); 
@@ -224,7 +215,7 @@ function editTask(taskID,ev) {
 				drawOutput(lines);
 			}
 			currentTask = "";
-			$('#dialog-toolbar').hide();
+			clearEditDialog();
 		}
 	};
 	if (editDebug) console.log("editing taskBlockID="+taskBlockID)

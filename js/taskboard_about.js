@@ -2,6 +2,7 @@
 function initPageLinks() {
 	initPrivacyDialog()
 	initAboutDialog()
+	initThanksDialog()
 	var pageLinks = getPageLinks()
 	document.getElementById("title-bar").append(pageLinks)
 }
@@ -20,14 +21,60 @@ function getPageLinks() {
 			<span class='tooltiptext'>opens new tab</span>License (GPLv3)\
 		</a> -\
 		<a class='page-link' id='privacy-page-link' href='javascript:void(0)' onclick='showPrivacyDialog();'>Privacy</a> -\
-		<a class='page-link' href='http://www.leven.tech/suggestions/' style='color:white;' target='_blank' >\
+		<a class='page-link' id='thanks-page-link' href='javascript:void(0)' onclick='showThanksDialog();'>Thanks</a> -\
+		<a class='page-link' href='http://www.leven.tech/suggestions/' target='_blank' >\
 			<span class='tooltiptext'>opens new tab</span>Feedback\
 		</a>"
 	return pageLinks;
 }
-		
+
+function checkPageLinkDialogs(key) {
+	if (key!==13 && key!==27) return;
+	$('#aboutDialog').dialog("close")
+	$('#privacyDialog').dialog("close")
+	$('#thanksDialog').dialog("close")
+}		
 		
 
+function initThanksDialog() {
+	var thanksDialog = document.createElement("div")
+	thanksDialog.id="thanksDialog"
+	thanksDialog.className = "my-dialog"
+	thanksDialog.style="text-align:center;"
+	thanksDialog.innerHTML += "\
+	<a id='first-thanks-link' href='http://5apps.com' target='_blank'><img class='thanks-logo' src='logos/5apps.svg' style='height:60px;' /></a>\
+	<a href='http://remotestorage.io' target='_blank'><img class='thanks-logo' src='logos/remotestorage.svg' /></a>\
+	<a href='http://jquery.com' target='_blank'><img class='thanks-logo' src='logos/jquery_logo.png' style='height:120px;' /></a>\
+	<a href='http://getbootstrap.com' target='_blank'><img class='thanks-logo' src='logos/bootstrap-logo.png' /></a>\
+	<a href='http://cdnjs.com/about' target='_blank'><img class='thanks-logo' src='logos/cdnjs.png' /></a>\
+	<a href='http://github.com' target='_blank'><img class='thanks-logo' src='logos/github-logo.gif' /></a>\
+	<a href='http://deployhq.com/' target='_blank'><img class='thanks-logo' src='logos/deployhq.png' /></a>"
+	document.getElementById("myBody").append(thanksDialog)
+}
+
+
+function showThanksDialog() {
+	var opt = {
+        autoOpen: false,
+        modal: true,
+        width: 600,
+        height:500,
+        title: 'Thanks to These Organizations',
+		position: {my: "center center", at: "center center", of: window},
+		buttons: { 
+			OK: function() {
+				$("#thanksDialog").dialog(opt).dialog("close");
+			},
+		},
+		close: function(event,ui) {
+			$("#thanks-page-link").blur();
+		}
+    };
+	$("#thanksDialog").dialog(opt).dialog("open");
+	$("#first-thanks-link").blur();
+}
+		
+		
 function initAboutDialog() {
 	var aboutDialog = document.createElement("div")
 	aboutDialog.id="aboutDialog"
@@ -86,7 +133,7 @@ function initPrivacyDialog() {
 	privacyDialog.className = "my-dialog"
 	privacyDialog.innerHTML = "This application is <a id='unhosted-link' href='http://unhosted.org/' target='_blank' style='font-weight:bold;'>Unhosted</a>, meaning it doesn't store your data. While you use Task Board, all of your data remains in your control.<br/><br/>"
 	privacyDialog.innerHTML += "By default, your data is only stored locally on the device you're using. We use cookies to remember your board, which are stored by your web browser. If you choose to download your data to a file, you can choose where it goes.<br/><br/>"
-	privacyDialog.innerHTML += "If you choose to connect to <a href='https://remotestorage.io/' target='_blank' style='font-weight:bold;'>Remote Storage</a>, you will need to create a Remote Storage account through a provider like <a href='https://5apps.com/users/sign_up?site=deploy' target='_blank' style='font-weight:bold;'>5apps</a>. That way, your data remains yours."
+	privacyDialog.innerHTML += "If you choose to connect to <a href='https://remotestorage.io/' target='_blank' style='font-weight:bold;'>Remote Storage</a>, you will need to create a Remote Storage account through a provider like <a href='https://5apps.com/storage' target='_blank' style='font-weight:bold;'>5apps</a>. That way, your data remains yours."
 	document.getElementById("myBody").append(privacyDialog)
 }
 
