@@ -46,7 +46,9 @@ function initThanksDialog() {
 	<a href='http://remotestorage.io' target='_blank'><img class='thanks-logo' src='logos/remotestorage.svg' /></a>\
 	<a href='http://jquery.com' target='_blank'><img class='thanks-logo' src='logos/jquery_logo.png' style='height:120px;' /></a>\
 	<a href='http://getbootstrap.com' target='_blank'><img class='thanks-logo' src='logos/bootstrap-logo.png' /></a>\
-	<a href='http://cdnjs.com/about' target='_blank'><img class='thanks-logo' src='logos/cdnjs.png' /></a>"
+	<a href='http://cdnjs.com/about' target='_blank'><img class='thanks-logo' src='logos/cdnjs.png' /></a>\
+	<a href='http://github.com' target='_blank'><img class='thanks-logo' src='logos/github-logo.gif' /></a>\
+	<a href='http://deployhq.com/' target='_blank'><img class='thanks-logo' src='logos/deployhq.png' /></a>"
 	document.getElementById("myBody").append(thanksDialog)
 }
 
@@ -56,7 +58,7 @@ function showThanksDialog() {
         autoOpen: false,
         modal: true,
         width: 600,
-        height:400,
+        height:500,
         title: 'Thanks to These Organizations',
 		position: {my: "center center", at: "center center", of: window},
 		buttons: { 
